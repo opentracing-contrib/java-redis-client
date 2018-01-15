@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The OpenTracing Authors
+ * Copyright 2017-2018 The OpenTracing Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -13,11 +13,10 @@
  */
 package io.opentracing.contrib.redis.common;
 
-import io.opentracing.BaseSpan;
-import io.opentracing.NoopSpan;
 import io.opentracing.Span;
 import io.opentracing.Tracer;
 import io.opentracing.Tracer.SpanBuilder;
+import io.opentracing.noop.NoopSpan;
 import io.opentracing.tag.Tags;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -49,7 +48,7 @@ public class TracingHelper {
     if (traceWithActiveSpanOnly && tracer.activeSpan() == null) {
       return NoopSpan.INSTANCE;
     } else {
-      return builder(operationName).startManual();
+      return builder(operationName).start();
     }
   }
 
@@ -57,7 +56,7 @@ public class TracingHelper {
     if (traceWithActiveSpanOnly && tracer.activeSpan() == null) {
       return NoopSpan.INSTANCE;
     } else {
-      return builder(operationName).withTag("key", nullable(key)).startManual();
+      return builder(operationName).withTag("key", nullable(key)).start();
     }
   }
 
@@ -65,7 +64,7 @@ public class TracingHelper {
     if (traceWithActiveSpanOnly && tracer.activeSpan() == null) {
       return NoopSpan.INSTANCE;
     } else {
-      return builder(operationName).withTag("key", Arrays.toString(key)).startManual();
+      return builder(operationName).withTag("key", Arrays.toString(key)).start();
     }
   }
 
@@ -73,11 +72,11 @@ public class TracingHelper {
     if (traceWithActiveSpanOnly && tracer.activeSpan() == null) {
       return NoopSpan.INSTANCE;
     } else {
-      return builder(operationName).withTag("keys", Arrays.toString(keys)).startManual();
+      return builder(operationName).withTag("keys", Arrays.toString(keys)).start();
     }
   }
 
-  public static void onError(Throwable throwable, BaseSpan<?> span) {
+  public static void onError(Throwable throwable, Span span) {
     Tags.ERROR.set(span, Boolean.TRUE);
 
     if (throwable != null) {

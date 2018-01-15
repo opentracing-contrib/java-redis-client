@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The OpenTracing Authors
+ * Copyright 2017-2018 The OpenTracing Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -17,7 +17,7 @@ import static org.junit.Assert.assertEquals;
 
 import io.opentracing.mock.MockSpan;
 import io.opentracing.mock.MockTracer;
-import io.opentracing.util.ThreadLocalActiveSpanSource;
+import io.opentracing.util.ThreadLocalScopeManager;
 import java.util.List;
 import org.junit.After;
 import org.junit.Before;
@@ -27,7 +27,7 @@ import redis.embedded.RedisServer;
 
 public class TracingJedisTest {
 
-  private MockTracer mockTracer = new MockTracer(new ThreadLocalActiveSpanSource(),
+  private MockTracer mockTracer = new MockTracer(new ThreadLocalScopeManager(),
       MockTracer.Propagator.TEXT_MAP);
 
   private RedisServer redisServer;
