@@ -86,5 +86,5 @@ RedisAsyncCommands<String, String> commandsAsync = connection.async();
 
 [ci-img]: https://travis-ci.org/opentracing-contrib/java-redis-client.svg?branch=master
 [ci]: https://travis-ci.org/opentracing-contrib/java-redis-client
-[maven-img]: https://img.shields.io/maven-central/v/io.opentracing.contrib/opentracing-redis-client.svg
-[maven]: http://search.maven.org/#search%7Cga%7C1%7Copentracing-redis-client
+[maven-img]: https://img.shields.io/maven-central/v/io.opentracing.contrib/opentracing-redis-parent.svg
+[maven]: http://search.maven.org/#search%7Cga%7C1%7Copentracing-redis-parent
