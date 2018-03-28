@@ -14,7 +14,6 @@ public class TracingJedisPool extends JedisPool {
   private final Tracer tracer;
   private final boolean traceWithActiveSpanOnly;
 
-
   public TracingJedisPool(Tracer tracer, boolean traceWithActiveSpanOnly) {
     super();
     this.tracer = tracer;
