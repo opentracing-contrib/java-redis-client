@@ -64,6 +64,23 @@ String value = jc.get("foo");
 
 ```
 
+### Jedis Pool
+```java
+// Configure the pool
+JedisPoolConfig poolConfig = new JedisPoolConfig();
+poolConfig.setMaxIdle(10);
+poolConfig.setTestOnBorrow(false);
+
+// Create Tracing Jedis Pool
+JedisPool pool = new TracingJedisPool(poolConfig, "127.0.0.1", 6379, tracer, false);
+
+try (Jedis jedis = pool.getResource()) {
+    // jedis will be automatically closed and returned to the pool at the end of "try" block
+    jedis.set("foo", "bar");
+    String value = jedis.get("foo");
+}
+```
+
 ### Lettuce
 
 ```java
