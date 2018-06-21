@@ -31,16 +31,16 @@ public class TracingHelper {
   private final Tracer tracer;
   private final boolean traceWithActiveSpanOnly;
   private static final String COMPONENT_NAME = "java-redis";
-  private SpanPrefixProvider prefixedFullSpanName;
+  private PrefixedFullSpanName prefixedFullSpanName;
 
-  public TracingHelper(Tracer tracer, boolean traceWithActiveSpanOnly, SpanPrefixProvider prefixedFullSpanName) {
+  public TracingHelper(Tracer tracer, boolean traceWithActiveSpanOnly, PrefixedFullSpanName prefixedFullSpanName) {
     this.tracer = tracer;
     this.traceWithActiveSpanOnly = traceWithActiveSpanOnly;
     this.prefixedFullSpanName = prefixedFullSpanName;
   }
 
   private SpanBuilder builder(String operationName) {
-    return tracer.buildSpan(prefixedFullSpanName.prefixSpanName(operationName))
+    return tracer.buildSpan(prefixedFullSpanName.prefixSpanName.apply(prefixedFullSpanName.getPrefix(), operationName))
         .withTag(Tags.COMPONENT.getKey(), COMPONENT_NAME)
         .withTag(Tags.SPAN_KIND.getKey(), Tags.SPAN_KIND_CLIENT)
         .withTag(Tags.DB_TYPE.getKey(), "redis");

@@ -14,12 +14,12 @@ public class TracingHelperTest {
 
     Tracer mockTracer = new MockTracer();
     private MockSpan span;
-    private String prefix = "redis.";
     private String get = "get";
     private String set = "set";
     private String persist = "persist";
-    SpanPrefixProvider spanPrefixProvider = new PrefixedFullSpanName("redis");
-    TracingHelper helper = new TracingHelper(mockTracer, false, spanPrefixProvider);
+    PrefixedFullSpanName prefixedFullSpanName = new PrefixedFullSpanName("redis");
+    private String prefix = prefixedFullSpanName.getPrefix();
+    TracingHelper helper = new TracingHelper(mockTracer, false, prefixedFullSpanName);
 
     @Test
     public void testPrefix() {

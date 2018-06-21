@@ -1,14 +1,15 @@
 package io.opentracing.contrib.redis.common;
 
 
-public class PrefixedFullSpanName implements SpanPrefixProvider {
+import java.util.function.BiFunction;
+
+public class PrefixedFullSpanName {
     private String prefix;
 
-    public static class Builder implements SpanPrefixProvider.Builder {
+    public static class Builder {
 
-        @Override
-        public SpanPrefixProvider build() {return new PrefixedFullSpanName("redis");}
-        public SpanPrefixProvider build(String prefix) {return new PrefixedFullSpanName(prefix);}
+        public PrefixedFullSpanName build() {return new PrefixedFullSpanName("redis");}
+        public PrefixedFullSpanName build(String prefix) {return new PrefixedFullSpanName(prefix);}
     }
 
     PrefixedFullSpanName(String prefix) {
@@ -19,16 +20,13 @@ public class PrefixedFullSpanName implements SpanPrefixProvider {
         }
     }
 
-    @Override
-    public String prefixSpanName(String method) {
+    public BiFunction<String, String, String> prefixSpanName = (prefix, method) -> {
         if(method == null || method.equals("")) {
-            return this.prefix + "NONE";
+            return prefix + "NONE";
         } else {
-            return this.prefix + method;
-        }
-    }
+            return prefix + method;
+        }};
 
-    @Override
     public String getPrefix() {
         return prefix;
     }
