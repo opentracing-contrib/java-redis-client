@@ -27,11 +27,6 @@ public class PrefixedFullSpanName {
     }
 
     PrefixedFullSpanName(String prefix) {
-        System.out.println("MADE CUSTOM SPAN NAME");
-        System.out.println();
-        System.out.println();
-        System.out.println();
-
         if(prefix == null || prefix.equals("")) {
             this.prefix = "";
         } else {
