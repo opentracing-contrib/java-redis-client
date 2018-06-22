@@ -36,7 +36,7 @@ public class TracingHelper {
   public TracingHelper(Tracer tracer, boolean traceWithActiveSpanOnly) {
     this.tracer = tracer;
     this.traceWithActiveSpanOnly = traceWithActiveSpanOnly;
-    prefixedFullSpanName = new PrefixedFullSpanName("redis.");
+    prefixedFullSpanName = PrefixedFullSpanName.newBuilder().build();
 
   }
 
