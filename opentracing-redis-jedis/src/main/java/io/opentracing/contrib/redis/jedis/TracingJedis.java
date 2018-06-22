@@ -11,6 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package io.opentracing.contrib.redis.jedis;
 
 import static io.opentracing.contrib.redis.common.TracingHelper.nullable;
@@ -18,6 +19,7 @@ import static io.opentracing.contrib.redis.common.TracingHelper.onError;
 
 import io.opentracing.Span;
 import io.opentracing.Tracer;
+import io.opentracing.contrib.redis.common.PrefixedFullSpanName;
 import io.opentracing.contrib.redis.common.TracingHelper;
 import java.net.URI;
 import java.util.Arrays;
@@ -60,67 +62,83 @@ import redis.clients.util.Slowlog;
 public class TracingJedis extends Jedis {
 
   private final TracingHelper helper;
+  private PrefixedFullSpanName prefixedFullSpanName;
+  private String prefix = "Redis.";
 
+  public TracingJedis(Tracer tracer, boolean traceWithActiveSpanOnly, PrefixedFullSpanName prefixedFullSpanName) {
+    super();
+    this.prefixedFullSpanName = prefixedFullSpanName;
+    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly, this.prefixedFullSpanName);
+  }
 
   public TracingJedis(Tracer tracer, boolean traceWithActiveSpanOnly) {
     super();
-    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly);
+    this.prefixedFullSpanName = PrefixedFullSpanName.newBuilder().build();
+    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly, prefixedFullSpanName);
   }
 
   public TracingJedis(final String host, Tracer tracer, boolean traceWithActiveSpanOnly) {
     super(host);
-    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly);
+    this.prefixedFullSpanName = PrefixedFullSpanName.newBuilder().build(prefix);
+    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly, prefixedFullSpanName);
   }
 
   public TracingJedis(final String host, final int port, Tracer tracer,
       boolean traceWithActiveSpanOnly) {
     super(host, port);
-    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly);
+    this.prefixedFullSpanName = PrefixedFullSpanName.newBuilder().build(prefix);
+    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly, prefixedFullSpanName);
   }
 
   public TracingJedis(final String host, final int port, final boolean ssl,
       Tracer tracer, boolean traceWithActiveSpanOnly) {
     super(host, port, ssl);
-    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly);
+    this.prefixedFullSpanName = PrefixedFullSpanName.newBuilder().build(prefix);
+    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly, prefixedFullSpanName);
   }
 
   public TracingJedis(final String host, final int port, final boolean ssl,
       final SSLSocketFactory sslSocketFactory, final SSLParameters sslParameters,
       final HostnameVerifier hostnameVerifier, Tracer tracer, boolean traceWithActiveSpanOnly) {
     super(host, port, ssl, sslSocketFactory, sslParameters, hostnameVerifier);
-    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly);
+    this.prefixedFullSpanName = PrefixedFullSpanName.newBuilder().build(prefix);
+    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly, prefixedFullSpanName);
   }
 
   public TracingJedis(final String host, final int port, final int timeout,
       Tracer tracer, boolean traceWithActiveSpanOnly) {
     super(host, port, timeout);
-    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly);
+    this.prefixedFullSpanName = PrefixedFullSpanName.newBuilder().build(prefix);
+    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly, prefixedFullSpanName);
   }
 
   public TracingJedis(final String host, final int port, final int timeout, final boolean ssl,
       Tracer tracer, boolean traceWithActiveSpanOnly) {
     super(host, port, timeout, ssl);
-    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly);
+    this.prefixedFullSpanName = PrefixedFullSpanName.newBuilder().build(prefix);
+    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly, prefixedFullSpanName);
   }
 
   public TracingJedis(final String host, final int port, final int timeout, final boolean ssl,
       final SSLSocketFactory sslSocketFactory, final SSLParameters sslParameters,
       final HostnameVerifier hostnameVerifier, Tracer tracer, boolean traceWithActiveSpanOnly) {
     super(host, port, timeout, ssl, sslSocketFactory, sslParameters, hostnameVerifier);
-    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly);
+    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly, prefixedFullSpanName);
   }
 
   public TracingJedis(final String host, final int port, final int connectionTimeout,
       final int soTimeout, Tracer tracer, boolean traceWithActiveSpanOnly) {
     super(host, port, connectionTimeout, soTimeout);
-    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly);
+    this.prefixedFullSpanName = PrefixedFullSpanName.newBuilder().build(prefix);
+    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly, prefixedFullSpanName);
   }
 
   public TracingJedis(final String host, final int port, final int connectionTimeout,
       final int soTimeout,
       final boolean ssl, Tracer tracer, boolean traceWithActiveSpanOnly) {
     super(host, port, connectionTimeout, soTimeout, ssl);
-    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly);
+    this.prefixedFullSpanName = PrefixedFullSpanName.newBuilder().build(prefix);
+    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly, prefixedFullSpanName);
   }
 
   public TracingJedis(final String host, final int port, final int connectionTimeout,
@@ -129,54 +147,63 @@ public class TracingJedis extends Jedis {
       final HostnameVerifier hostnameVerifier, Tracer tracer, boolean traceWithActiveSpanOnly) {
     super(host, port, connectionTimeout, soTimeout, ssl, sslSocketFactory, sslParameters,
         hostnameVerifier);
-    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly);
+    this.prefixedFullSpanName = PrefixedFullSpanName.newBuilder().build(prefix);
+    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly, prefixedFullSpanName);
   }
 
   public TracingJedis(JedisShardInfo shardInfo, Tracer tracer, boolean traceWithActiveSpanOnly) {
     super(shardInfo);
-    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly);
+    this.prefixedFullSpanName = PrefixedFullSpanName.newBuilder().build(prefix);
+    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly, prefixedFullSpanName);
   }
 
   public TracingJedis(URI uri, Tracer tracer, boolean traceWithActiveSpanOnly) {
     super(uri);
-    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly);
+    this.prefixedFullSpanName = PrefixedFullSpanName.newBuilder().build(prefix);
+    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly, prefixedFullSpanName);
   }
 
   public TracingJedis(URI uri, final SSLSocketFactory sslSocketFactory,
       final SSLParameters sslParameters,
       final HostnameVerifier hostnameVerifier, Tracer tracer, boolean traceWithActiveSpanOnly) {
     super(uri, sslSocketFactory, sslParameters, hostnameVerifier);
-    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly);
+    this.prefixedFullSpanName = PrefixedFullSpanName.newBuilder().build(prefix);
+    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly, prefixedFullSpanName);
   }
 
   public TracingJedis(final URI uri, final int timeout, Tracer tracer,
       boolean traceWithActiveSpanOnly) {
     super(uri, timeout);
-    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly);
+    this.prefixedFullSpanName = PrefixedFullSpanName.newBuilder().build(prefix);
+    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly, prefixedFullSpanName);
   }
 
   public TracingJedis(final URI uri, final int timeout, final SSLSocketFactory sslSocketFactory,
       final SSLParameters sslParameters, final HostnameVerifier hostnameVerifier,
       Tracer tracer, boolean traceWithActiveSpanOnly) {
     super(uri, timeout, sslSocketFactory, sslParameters, hostnameVerifier);
-    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly);
+    this.prefixedFullSpanName = PrefixedFullSpanName.newBuilder().build(prefix);
+    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly, prefixedFullSpanName);
   }
 
   public TracingJedis(final URI uri, final int connectionTimeout, final int soTimeout,
       Tracer tracer, boolean traceWithActiveSpanOnly) {
     super(uri, connectionTimeout, soTimeout);
-    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly);
+    this.prefixedFullSpanName = PrefixedFullSpanName.newBuilder().build(prefix);
+    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly, prefixedFullSpanName);
   }
 
   public TracingJedis(final URI uri, final int connectionTimeout, final int soTimeout,
       final SSLSocketFactory sslSocketFactory, final SSLParameters sslParameters,
       final HostnameVerifier hostnameVerifier, Tracer tracer, boolean traceWithActiveSpanOnly) {
     super(uri, connectionTimeout, soTimeout, sslSocketFactory, sslParameters, hostnameVerifier);
-    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly);
+    this.prefixedFullSpanName = PrefixedFullSpanName.newBuilder().build(prefix);
+    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly, prefixedFullSpanName);
   }
 
   @Override
   public String set(String key, String value) {
+
     Span span = helper.buildSpan("set", key);
     span.setTag("value", value);
     try {
