@@ -58,7 +58,7 @@ public class TracingJedisCluster extends JedisCluster {
   public TracingJedisCluster(HostAndPort node, Tracer tracer, boolean traceWithActiveSpanOnly, PrefixedFullSpanName prefixedFullSpanName) {
     super(node);
     this.prefixedFullSpanName = prefixedFullSpanName;
-    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly, prefixedFullSpanName);
+    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly, this.prefixedFullSpanName);
   }
 
   public TracingJedisCluster(HostAndPort node, Tracer tracer, boolean traceWithActiveSpanOnly) {

@@ -33,6 +33,13 @@ public class TracingHelper {
   private static final String COMPONENT_NAME = "java-redis";
   private PrefixedFullSpanName prefixedFullSpanName;
 
+  public TracingHelper(Tracer tracer, boolean traceWithActiveSpanOnly) {
+    this.tracer = tracer;
+    this.traceWithActiveSpanOnly = traceWithActiveSpanOnly;
+    prefixedFullSpanName = new PrefixedFullSpanName("redis.");
+
+  }
+
   public TracingHelper(Tracer tracer, boolean traceWithActiveSpanOnly, PrefixedFullSpanName prefixedFullSpanName) {
     this.tracer = tracer;
     this.traceWithActiveSpanOnly = traceWithActiveSpanOnly;
