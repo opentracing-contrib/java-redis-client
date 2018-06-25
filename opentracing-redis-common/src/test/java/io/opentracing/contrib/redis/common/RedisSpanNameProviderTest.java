@@ -35,7 +35,6 @@ public class RedisSpanNameProviderTest {
 
   @Test
   public void testGetPrefix() {
-    //span = (MockSpan) (helper.buildSpan(get));
     actual = prefixSpanName.apply("get");
     assertEquals("redis.get", actual);
   }

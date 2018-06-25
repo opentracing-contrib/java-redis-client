@@ -33,7 +33,7 @@ public class TracingHelper {
   private static final String COMPONENT_NAME = "java-redis";
   private final Tracer tracer;
   private final boolean traceWithActiveSpanOnly;
-  private Function<String, String> spanNameProvider;
+  private final Function<String, String> spanNameProvider;
 
   public TracingHelper(Tracer tracer, boolean traceWithActiveSpanOnly) {
     this.tracer = tracer;
