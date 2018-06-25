@@ -15,10 +15,8 @@
 package io.opentracing.contrib.redis.common;
 
 import java.util.function.Function;
-
 import org.junit.Before;
 import org.junit.Test;
-
 import io.opentracing.Tracer;
 import io.opentracing.mock.MockSpan;
 import io.opentracing.mock.MockTracer;

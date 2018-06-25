@@ -13,21 +13,22 @@
  */
 package io.opentracing.contrib.redis.jedis;
 
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.function.Function;
-
-import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
+import static io.opentracing.contrib.redis.common.TracingHelper.nullable;
+import static io.opentracing.contrib.redis.common.TracingHelper.onError;
 
 import io.opentracing.Span;
 import io.opentracing.Tracer;
 import io.opentracing.contrib.redis.common.RedisSpanNameProvider;
 import io.opentracing.contrib.redis.common.TracingHelper;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.function.Function;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import redis.clients.jedis.BinaryClient.LIST_POSITION;
 import redis.clients.jedis.BinaryJedisPubSub;
 import redis.clients.jedis.BitOP;
@@ -49,9 +50,6 @@ import redis.clients.jedis.ZParams;
 import redis.clients.jedis.params.geo.GeoRadiusParam;
 import redis.clients.jedis.params.sortedset.ZAddParams;
 import redis.clients.jedis.params.sortedset.ZIncrByParams;
-
-import static io.opentracing.contrib.redis.common.TracingHelper.nullable;
-import static io.opentracing.contrib.redis.common.TracingHelper.onError;
 
 public class TracingJedisCluster extends JedisCluster {
 

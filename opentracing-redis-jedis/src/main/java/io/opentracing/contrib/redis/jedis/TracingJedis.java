@@ -11,25 +11,25 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package io.opentracing.contrib.redis.jedis;
 
-import java.net.URI;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.function.Function;
-
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.SSLParameters;
-import javax.net.ssl.SSLSocketFactory;
+import static io.opentracing.contrib.redis.common.TracingHelper.nullable;
+import static io.opentracing.contrib.redis.common.TracingHelper.onError;
 
 import io.opentracing.Span;
 import io.opentracing.Tracer;
 import io.opentracing.contrib.redis.common.RedisSpanNameProvider;
 import io.opentracing.contrib.redis.common.TracingHelper;
+import java.net.URI;
+import java.util.Arrays;
+import java.util.function.Function;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLParameters;
+import javax.net.ssl.SSLSocketFactory;
 import redis.clients.jedis.BinaryClient.LIST_POSITION;
 import redis.clients.jedis.BinaryJedisPubSub;
 import redis.clients.jedis.BitOP;
@@ -59,8 +59,7 @@ import redis.clients.jedis.params.sortedset.ZIncrByParams;
 import redis.clients.util.Pool;
 import redis.clients.util.Slowlog;
 
-import static io.opentracing.contrib.redis.common.TracingHelper.nullable;
-import static io.opentracing.contrib.redis.common.TracingHelper.onError;
+
 
 public class TracingJedis extends Jedis {
 
