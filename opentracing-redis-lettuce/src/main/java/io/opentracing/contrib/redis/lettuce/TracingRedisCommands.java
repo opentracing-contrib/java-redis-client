@@ -14,8 +14,14 @@
 package io.opentracing.contrib.redis.lettuce;
 
 
-import static io.opentracing.contrib.redis.common.TracingHelper.nullable;
-import static io.opentracing.contrib.redis.common.TracingHelper.onError;
+import java.time.Duration;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
 import io.lettuce.core.BitFieldArgs;
 import io.lettuce.core.GeoArgs;
@@ -57,14 +63,9 @@ import io.opentracing.Span;
 import io.opentracing.Tracer;
 import io.opentracing.contrib.redis.common.RedisSpanNameProvider;
 import io.opentracing.contrib.redis.common.TracingHelper;
-import java.time.Duration;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
+
+import static io.opentracing.contrib.redis.common.TracingHelper.nullable;
+import static io.opentracing.contrib.redis.common.TracingHelper.onError;
 
 public class TracingRedisCommands<K, V> implements RedisCommands<K, V> {
 

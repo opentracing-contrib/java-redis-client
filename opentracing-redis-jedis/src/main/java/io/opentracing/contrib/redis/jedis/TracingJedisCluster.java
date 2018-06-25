@@ -13,13 +13,6 @@
  */
 package io.opentracing.contrib.redis.jedis;
 
-import static io.opentracing.contrib.redis.common.TracingHelper.nullable;
-import static io.opentracing.contrib.redis.common.TracingHelper.onError;
-
-import io.opentracing.Span;
-import io.opentracing.Tracer;
-import io.opentracing.contrib.redis.common.RedisSpanNameProvider;
-import io.opentracing.contrib.redis.common.TracingHelper;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
@@ -30,6 +23,11 @@ import java.util.Set;
 import java.util.function.Function;
 
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
+
+import io.opentracing.Span;
+import io.opentracing.Tracer;
+import io.opentracing.contrib.redis.common.RedisSpanNameProvider;
+import io.opentracing.contrib.redis.common.TracingHelper;
 import redis.clients.jedis.BinaryClient.LIST_POSITION;
 import redis.clients.jedis.BinaryJedisPubSub;
 import redis.clients.jedis.BitOP;
@@ -51,6 +49,9 @@ import redis.clients.jedis.ZParams;
 import redis.clients.jedis.params.geo.GeoRadiusParam;
 import redis.clients.jedis.params.sortedset.ZAddParams;
 import redis.clients.jedis.params.sortedset.ZIncrByParams;
+
+import static io.opentracing.contrib.redis.common.TracingHelper.nullable;
+import static io.opentracing.contrib.redis.common.TracingHelper.onError;
 
 public class TracingJedisCluster extends JedisCluster {
 
@@ -160,6 +161,13 @@ public class TracingJedisCluster extends JedisCluster {
       GenericObjectPoolConfig poolConfig, Tracer tracer, boolean traceWithActiveSpanOnly) {
     super(jedisClusterNode, timeout, maxAttempts, poolConfig);
     this.redisSpanNameProvider = RedisSpanNameProvider.OPERATION_NAME;
+    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly, redisSpanNameProvider);
+  }
+
+  public TracingJedisCluster(Set<HostAndPort> jedisClusterNode, int connectionTimeout, int soTimeout, int maxAttempts,
+      GenericObjectPoolConfig poolConfig, Tracer tracer, boolean traceWithActiveSpanOnly, Function<String, String> customSpanNameProvider) {
+    super(jedisClusterNode, connectionTimeout, soTimeout, maxAttempts, poolConfig);
+    this.redisSpanNameProvider = customSpanNameProvider;
     this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly, redisSpanNameProvider);
   }
 

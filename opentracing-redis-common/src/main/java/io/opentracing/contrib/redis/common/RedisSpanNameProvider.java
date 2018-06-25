@@ -18,13 +18,13 @@ import java.util.function.Function;
 
 public class RedisSpanNameProvider {
 
-    public static Function<String, String> OPERATION_NAME = (operationName) -> ((operationName == null) ? "unknown" : operationName);
+  public static Function<String, String> OPERATION_NAME = (operationName) -> ((operationName == null) ? "unknown" : operationName);
 
 
-    public static Function<String, String> PREFIX_OPERATION_NAME(final String prefix) {
-        return (operationName) ->
-            ((prefix == null) ? "" : prefix)
-                    + ((operationName == null) ? "unknown" : operationName);
-    }
+  public static Function<String, String> PREFIX_OPERATION_NAME(final String prefix) {
+    return (operationName) ->
+        ((prefix == null) ? "" : prefix)
+            + ((operationName == null) ? "unknown" : operationName);
+  }
 
 }

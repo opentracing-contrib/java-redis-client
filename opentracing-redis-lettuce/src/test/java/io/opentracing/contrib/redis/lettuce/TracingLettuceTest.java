@@ -13,7 +13,12 @@
  */
 package io.opentracing.contrib.redis.lettuce;
 
-import static org.junit.Assert.assertEquals;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 import io.lettuce.core.RedisClient;
 import io.lettuce.core.api.StatefulRedisConnection;
@@ -22,12 +27,9 @@ import io.lettuce.core.api.sync.RedisCommands;
 import io.opentracing.mock.MockSpan;
 import io.opentracing.mock.MockTracer;
 import io.opentracing.util.ThreadLocalScopeManager;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
 import redis.embedded.RedisServer;
+
+import static org.junit.Assert.assertEquals;
 
 public class TracingLettuceTest {
 

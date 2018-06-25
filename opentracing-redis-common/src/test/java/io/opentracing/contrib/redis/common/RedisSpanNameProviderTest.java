@@ -19,38 +19,36 @@ import java.util.function.Function;
 import org.junit.Before;
 import org.junit.Test;
 
-import io.opentracing.Tracer;
-import io.opentracing.mock.MockSpan;
-import io.opentracing.mock.MockTracer;
-
 import static org.junit.Assert.assertEquals;
 
 
-public class TracingHelperTest {
+public class RedisSpanNameProviderTest {
 
-  Tracer mockTracer = new MockTracer();
-  private MockSpan span;
   private String prefix = "redis.";
+  String actual = "";
   Function<String, String> prefixSpanName;
-  TracingHelper helperWithProvider;
-  TracingHelper helperWithoutProvider;
 
   @Before
   public void setUp() {
     prefixSpanName = RedisSpanNameProvider.PREFIX_OPERATION_NAME(prefix);
-    helperWithProvider = new TracingHelper(mockTracer, false, prefixSpanName);
-    helperWithoutProvider = new TracingHelper(mockTracer, false);
   }
 
   @Test
-  public void testPrefix() {
-    span = (MockSpan) (helperWithProvider.buildSpan("get"));
-    assertEquals("redis.get", span.operationName());
+  public void testGetPrefix() {
+    //span = (MockSpan) (helper.buildSpan(get));
+    actual = prefixSpanName.apply("get");
+    assertEquals("redis.get", actual);
   }
 
   @Test
-  public void testDefault() {
-    span = (MockSpan) (helperWithoutProvider.buildSpan("get"));
-    assertEquals("get", span.operationName());
+  public void testSetPrefix() {
+    actual = prefixSpanName.apply("set");
+    assertEquals("redis.set", actual);
+  }
+
+  @Test
+  public void testPersistPrefix() {
+    actual = prefixSpanName.apply("persist");
+    assertEquals("redis.persist", actual);
   }
 }

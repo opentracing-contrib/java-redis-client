@@ -13,17 +13,19 @@
  */
 package io.opentracing.contrib.redis.jedis;
 
-import static org.junit.Assert.assertEquals;
+import java.util.List;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 import io.opentracing.mock.MockSpan;
 import io.opentracing.mock.MockTracer;
 import io.opentracing.util.ThreadLocalScopeManager;
-import java.util.List;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
 import redis.clients.jedis.Jedis;
 import redis.embedded.RedisServer;
+
+import static org.junit.Assert.assertEquals;
 
 public class TracingJedisTest {
 
