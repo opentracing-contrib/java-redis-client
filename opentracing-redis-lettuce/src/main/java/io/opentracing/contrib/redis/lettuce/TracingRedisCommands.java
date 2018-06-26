@@ -56,6 +56,7 @@ import io.lettuce.core.protocol.ProtocolKeyword;
 import io.opentracing.Span;
 import io.opentracing.Tracer;
 import io.opentracing.contrib.redis.common.TracingHelper;
+import io.opentracing.contrib.redis.common.RedisSpanNameProvider;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Date;
@@ -63,6 +64,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
 public class TracingRedisCommands<K, V> implements RedisCommands<K, V> {
 
@@ -70,6 +72,7 @@ public class TracingRedisCommands<K, V> implements RedisCommands<K, V> {
   private final Tracer tracer;
   private final boolean traceWithActiveSpanOnly;
   private final TracingHelper helper;
+  private Function<String, String> redisSpanNameProvider;
 
   /**
    * @param commands redis commands
@@ -82,7 +85,8 @@ public class TracingRedisCommands<K, V> implements RedisCommands<K, V> {
     this.commands = commands;
     this.tracer = tracer;
     this.traceWithActiveSpanOnly = traceWithActiveSpanOnly;
-    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly);
+    this.redisSpanNameProvider = RedisSpanNameProvider.OPERATION_NAME;
+    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly, redisSpanNameProvider);
   }
 
   @Override

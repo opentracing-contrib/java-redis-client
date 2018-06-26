@@ -24,5 +24,13 @@
 
   <artifactId>opentracing-redis-common</artifactId>
 
+  <dependencies>
+    <dependency>
+      <groupId>com.github.kstyrc</groupId>
+      <artifactId>embedded-redis</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
 
 </project>
