@@ -13,9 +13,6 @@
  */
 package io.opentracing.contrib.redis.lettuce;
 
-import java.time.Duration;
-import java.util.Collection;
-import java.util.concurrent.TimeUnit;
 
 import io.lettuce.core.ClientOptions;
 import io.lettuce.core.api.StatefulRedisConnection;
@@ -24,6 +21,9 @@ import io.lettuce.core.api.reactive.RedisReactiveCommands;
 import io.lettuce.core.api.sync.RedisCommands;
 import io.lettuce.core.protocol.RedisCommand;
 import io.opentracing.Tracer;
+import java.time.Duration;
+import java.util.Collection;
+import java.util.concurrent.TimeUnit;
 
 public class TracingStatefulRedisConnection<K, V> implements StatefulRedisConnection<K, V> {
 
