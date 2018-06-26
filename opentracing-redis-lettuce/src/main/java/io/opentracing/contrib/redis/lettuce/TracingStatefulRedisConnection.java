@@ -13,7 +13,6 @@
  */
 package io.opentracing.contrib.redis.lettuce;
 
-
 import io.lettuce.core.ClientOptions;
 import io.lettuce.core.api.StatefulRedisConnection;
 import io.lettuce.core.api.async.RedisAsyncCommands;
