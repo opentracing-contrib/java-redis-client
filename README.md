@@ -41,16 +41,6 @@ Tracer tracer = ...
 
 ```
 
-### Span Name
-By default, span names are set to the operation performed by the Jedis object. To customize the span name, provide a Function to the Jedis object that alters the span name. If a function is not provided, the span name will remain the default. Refer to the RedisSpanNameProvider class for a function that prefixes the operation name. 
-```java
-//Create Tracing Jedis with custom span name
-Jedis jedis = new TracingJedis(tracer, false, RedisSpanNameProvider.PREFIX_OPERATION_NAME("redis.");
-jedis.set("foo", "bar");
-//Span name is now set to "redis.set"
-
-```
-
 ### Jedis
 ```java
 
@@ -89,6 +79,16 @@ try (Jedis jedis = pool.getResource()) {
     jedis.set("foo", "bar");
     String value = jedis.get("foo");
 }
+```
+
+### Jedis Span Name
+By default, span names are set to the operation performed by the Jedis object. To customize the span name, provide a Function to the Jedis object that alters the span name. If a function is not provided, the span name will remain the default. Refer to the RedisSpanNameProvider class for a function that prefixes the operation name. 
+```java
+//Create Tracing Jedis with custom span name
+Jedis jedis = new TracingJedis(tracer, false, RedisSpanNameProvider.PREFIX_OPERATION_NAME("redis.");
+jedis.set("foo", "bar");
+//Span name is now set to "redis.set"
+
 ```
 
 ### Lettuce
