@@ -18,10 +18,12 @@ import static io.opentracing.contrib.redis.common.TracingHelper.onError;
 
 import io.opentracing.Span;
 import io.opentracing.Tracer;
+import io.opentracing.contrib.redis.common.RedisSpanNameProvider;
 import io.opentracing.contrib.redis.common.TracingHelper;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.function.Function;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -52,47 +54,61 @@ import redis.clients.jedis.params.sortedset.ZIncrByParams;
 public class TracingJedisCluster extends JedisCluster {
 
   private final TracingHelper helper;
+  private Function<String, String> redisSpanNameProvider;
+
+  public TracingJedisCluster(HostAndPort node, Tracer tracer, boolean traceWithActiveSpanOnly, Function<String, String> redisSpanNameProvider) {
+    super(node);
+    this.redisSpanNameProvider = redisSpanNameProvider;
+    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly, this.redisSpanNameProvider);
+  }
 
   public TracingJedisCluster(HostAndPort node, Tracer tracer, boolean traceWithActiveSpanOnly) {
     super(node);
-    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly);
+    this.redisSpanNameProvider = RedisSpanNameProvider.OPERATION_NAME;
+    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly, redisSpanNameProvider);
   }
 
   public TracingJedisCluster(HostAndPort node, int timeout, Tracer tracer,
       boolean traceWithActiveSpanOnly) {
     super(node, timeout);
-    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly);
+    this.redisSpanNameProvider = RedisSpanNameProvider.OPERATION_NAME;
+    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly, redisSpanNameProvider);
   }
 
   public TracingJedisCluster(HostAndPort node, int timeout, int maxAttempts, Tracer tracer,
       boolean traceWithActiveSpanOnly) {
     super(node, timeout, maxAttempts);
-    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly);
+    this.redisSpanNameProvider = RedisSpanNameProvider.OPERATION_NAME;
+    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly, redisSpanNameProvider);
   }
 
   public TracingJedisCluster(HostAndPort node, GenericObjectPoolConfig poolConfig, Tracer tracer,
       boolean traceWithActiveSpanOnly) {
     super(node, poolConfig);
-    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly);
+    this.redisSpanNameProvider = RedisSpanNameProvider.OPERATION_NAME;
+    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly, redisSpanNameProvider);
   }
 
   public TracingJedisCluster(HostAndPort node, int timeout, GenericObjectPoolConfig poolConfig,
       Tracer tracer, boolean traceWithActiveSpanOnly) {
     super(node, timeout, poolConfig);
-    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly);
+    this.redisSpanNameProvider = RedisSpanNameProvider.OPERATION_NAME;
+    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly, redisSpanNameProvider);
   }
 
   public TracingJedisCluster(HostAndPort node, int timeout, int maxAttempts,
       GenericObjectPoolConfig poolConfig, Tracer tracer, boolean traceWithActiveSpanOnly) {
     super(node, timeout, maxAttempts, poolConfig);
-    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly);
+    this.redisSpanNameProvider = RedisSpanNameProvider.OPERATION_NAME;
+    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly, redisSpanNameProvider);
   }
 
   public TracingJedisCluster(HostAndPort node, int connectionTimeout, int soTimeout,
       int maxAttempts,
       GenericObjectPoolConfig poolConfig, Tracer tracer, boolean traceWithActiveSpanOnly) {
     super(node, connectionTimeout, soTimeout, maxAttempts, poolConfig);
-    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly);
+    this.redisSpanNameProvider = RedisSpanNameProvider.OPERATION_NAME;
+    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly, redisSpanNameProvider);
   }
 
   public TracingJedisCluster(HostAndPort node, int connectionTimeout, int soTimeout,
@@ -100,43 +116,57 @@ public class TracingJedisCluster extends JedisCluster {
       String password, GenericObjectPoolConfig poolConfig, Tracer tracer,
       boolean traceWithActiveSpanOnly) {
     super(node, connectionTimeout, soTimeout, maxAttempts, password, poolConfig);
-    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly);
+    this.redisSpanNameProvider = RedisSpanNameProvider.OPERATION_NAME;
+    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly, redisSpanNameProvider);
   }
 
   public TracingJedisCluster(Set<HostAndPort> nodes, Tracer tracer,
       boolean traceWithActiveSpanOnly) {
     super(nodes);
-    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly);
+    this.redisSpanNameProvider = RedisSpanNameProvider.OPERATION_NAME;
+    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly, redisSpanNameProvider);
   }
 
   public TracingJedisCluster(Set<HostAndPort> nodes, int timeout, Tracer tracer,
       boolean traceWithActiveSpanOnly) {
     super(nodes, timeout);
-    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly);
+    this.redisSpanNameProvider = RedisSpanNameProvider.OPERATION_NAME;
+    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly, redisSpanNameProvider);
   }
 
   public TracingJedisCluster(Set<HostAndPort> nodes, int timeout, int maxAttempts, Tracer tracer,
       boolean traceWithActiveSpanOnly) {
     super(nodes, timeout, maxAttempts);
-    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly);
+    this.redisSpanNameProvider = RedisSpanNameProvider.OPERATION_NAME;
+    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly, redisSpanNameProvider);
   }
 
   public TracingJedisCluster(Set<HostAndPort> nodes, GenericObjectPoolConfig poolConfig,
       Tracer tracer, boolean traceWithActiveSpanOnly) {
     super(nodes, poolConfig);
-    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly);
+    this.redisSpanNameProvider = RedisSpanNameProvider.OPERATION_NAME;
+    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly, redisSpanNameProvider);
   }
 
   public TracingJedisCluster(Set<HostAndPort> nodes, int timeout,
       GenericObjectPoolConfig poolConfig, Tracer tracer, boolean traceWithActiveSpanOnly) {
     super(nodes, timeout, poolConfig);
-    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly);
+    this.redisSpanNameProvider = RedisSpanNameProvider.OPERATION_NAME;
+    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly, redisSpanNameProvider);
   }
 
   public TracingJedisCluster(Set<HostAndPort> jedisClusterNode, int timeout, int maxAttempts,
       GenericObjectPoolConfig poolConfig, Tracer tracer, boolean traceWithActiveSpanOnly) {
     super(jedisClusterNode, timeout, maxAttempts, poolConfig);
-    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly);
+    this.redisSpanNameProvider = RedisSpanNameProvider.OPERATION_NAME;
+    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly, redisSpanNameProvider);
+  }
+
+  public TracingJedisCluster(Set<HostAndPort> jedisClusterNode, int connectionTimeout, int soTimeout, int maxAttempts,
+      GenericObjectPoolConfig poolConfig, Tracer tracer, boolean traceWithActiveSpanOnly, Function<String, String> customSpanNameProvider) {
+    super(jedisClusterNode, connectionTimeout, soTimeout, maxAttempts, poolConfig);
+    this.redisSpanNameProvider = customSpanNameProvider;
+    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly, redisSpanNameProvider);
   }
 
   public TracingJedisCluster(Set<HostAndPort> jedisClusterNode, int connectionTimeout,
@@ -144,7 +174,8 @@ public class TracingJedisCluster extends JedisCluster {
       int maxAttempts, GenericObjectPoolConfig poolConfig, Tracer tracer,
       boolean traceWithActiveSpanOnly) {
     super(jedisClusterNode, connectionTimeout, soTimeout, maxAttempts, poolConfig);
-    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly);
+    this.redisSpanNameProvider = RedisSpanNameProvider.OPERATION_NAME;
+    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly, this.redisSpanNameProvider);
   }
 
   public TracingJedisCluster(Set<HostAndPort> jedisClusterNode, int connectionTimeout,
@@ -152,7 +183,8 @@ public class TracingJedisCluster extends JedisCluster {
       int maxAttempts, String password, GenericObjectPoolConfig poolConfig, Tracer tracer,
       boolean traceWithActiveSpanOnly) {
     super(jedisClusterNode, connectionTimeout, soTimeout, maxAttempts, password, poolConfig);
-    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly);
+    this.redisSpanNameProvider = RedisSpanNameProvider.OPERATION_NAME;
+    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly, this.redisSpanNameProvider);
   }
 
   @Override

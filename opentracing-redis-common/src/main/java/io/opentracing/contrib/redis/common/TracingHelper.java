@@ -25,20 +25,31 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.function.Function;
+
 
 public class TracingHelper {
 
+  private static final String COMPONENT_NAME = "java-redis";
   private final Tracer tracer;
   private final boolean traceWithActiveSpanOnly;
-  private static final String COMPONENT_NAME = "java-redis";
+  private final Function<String, String> spanNameProvider;
 
   public TracingHelper(Tracer tracer, boolean traceWithActiveSpanOnly) {
     this.tracer = tracer;
     this.traceWithActiveSpanOnly = traceWithActiveSpanOnly;
+    this.spanNameProvider = RedisSpanNameProvider.OPERATION_NAME;
   }
 
+  public TracingHelper(Tracer tracer, boolean traceWithActiveSpanOnly, Function<String, String> spanNameProvider) {
+    this.tracer = tracer;
+    this.traceWithActiveSpanOnly = traceWithActiveSpanOnly;
+    this.spanNameProvider = spanNameProvider;
+  }
+
+
   private SpanBuilder builder(String operationName) {
-    return tracer.buildSpan(operationName)
+    return tracer.buildSpan(this.spanNameProvider.apply(operationName))
         .withTag(Tags.COMPONENT.getKey(), COMPONENT_NAME)
         .withTag(Tags.SPAN_KIND.getKey(), Tags.SPAN_KIND_CLIENT)
         .withTag(Tags.DB_TYPE.getKey(), "redis");
