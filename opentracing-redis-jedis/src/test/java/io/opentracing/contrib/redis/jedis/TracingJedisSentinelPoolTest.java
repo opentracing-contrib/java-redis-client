@@ -1,3 +1,16 @@
+/*
+ * Copyright 2017-2018 The OpenTracing Authors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
+ */
 package io.opentracing.contrib.redis.jedis;
 
 import io.opentracing.mock.MockSpan;
@@ -8,6 +21,8 @@ import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
+import static org.mockito.Mockito.mock;
 
 import redis.clients.jedis.HostAndPort;
 import redis.clients.jedis.Jedis;
@@ -34,22 +49,17 @@ public class TracingJedisSentinelPoolTest {
   private Set<String> sentinels = new HashSet<String>();
   protected static TracingJedis sentinelJedis1;
   protected static TracingJedis sentinelJedis2;
-  HostAndPort sentinel1 = new HostAndPort("localhost", Protocol.DEFAULT_PORT);
-  HostAndPort sentinel2 = new HostAndPort("localhost", Protocol.DEFAULT_PORT+1);
-  HostAndPort master = new HostAndPort("localhost", Protocol.DEFAULT_PORT + 2);
+  HostAndPort sentinel1 = new HostAndPort("127.0.0.1", Protocol.DEFAULT_SENTINEL_PORT+1);
+  HostAndPort sentinel2 = new HostAndPort("127.0.0.1", Protocol.DEFAULT_SENTINEL_PORT+3);
 
 
   @Before
   public void before() throws Exception {
-    mockTracer.reset();
-
-    redisServer = RedisServer.builder().setting("bind 127.0.0.1").build();
-    redisServer.start();
+    System.out.println(sentinel1.toString());
     sentinels.add(sentinel1.toString());
     sentinels.add(sentinel2.toString());
-
-//    sentinelJedis1 = new TracingJedis(sentinel1.getHost(), sentinel1.getPort(), mockTracer, false);
-//    sentinelJedis2 = new TracingJedis(sentinel2.getHost(), sentinel2.getPort(), mockTracer, false);
+    redisServer = RedisServer.builder().setting("bind 127.0.0.1").build();
+    redisServer.start();
   }
 
   @After
