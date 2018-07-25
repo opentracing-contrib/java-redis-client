@@ -13,57 +13,55 @@
  */
 package io.opentracing.contrib.redis.jedis;
 
-import io.opentracing.mock.MockSpan;
-import io.opentracing.mock.MockTracer;
-import io.opentracing.util.ThreadLocalScopeManager;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.mockito.Mockito.mock;
-
-import redis.clients.jedis.HostAndPort;
+import io.opentracing.mock.MockSpan;
+import io.opentracing.mock.MockTracer;
+import io.opentracing.util.ThreadLocalScopeManager;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisSentinelPool;
 import redis.clients.jedis.Protocol;
+import redis.embedded.RedisSentinel;
 import redis.embedded.RedisServer;
-
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 
 public class TracingJedisSentinelPoolTest {
 
-  private MockTracer mockTracer = new MockTracer(new ThreadLocalScopeManager(),
-      MockTracer.Propagator.TEXT_MAP);
+  private MockTracer mockTracer = new MockTracer(new ThreadLocalScopeManager(), MockTracer.Propagator.TEXT_MAP);
 
   private RedisServer redisServer;
 
+  private RedisSentinel redisSentinel;
+
   private static final String MASTER_NAME = "mymaster";
 
-
-  private Set<String> sentinels = new HashSet<String>();
-  protected static TracingJedis sentinelJedis1;
-  protected static TracingJedis sentinelJedis2;
-  HostAndPort sentinel1 = new HostAndPort("127.0.0.1", Protocol.DEFAULT_SENTINEL_PORT+1);
-  HostAndPort sentinel2 = new HostAndPort("127.0.0.1", Protocol.DEFAULT_SENTINEL_PORT+3);
-
+  private Set<String> sentinels = new HashSet<String>() {{
+    add("127.0.0.1:" + (Protocol.DEFAULT_PORT + 1));
+  }};
 
   @Before
-  public void before() throws Exception {
-    System.out.println(sentinel1.toString());
-    sentinels.add(sentinel1.toString());
-    sentinels.add(sentinel2.toString());
-    redisServer = RedisServer.builder().setting("bind 127.0.0.1").build();
+  public void before() {
+    mockTracer.reset();
+
+    redisServer = RedisServer.builder().build();
     redisServer.start();
+    redisSentinel = RedisSentinel.builder().port(Protocol.DEFAULT_PORT + 1).build();
+    redisSentinel.start();
   }
 
   @After
   public void after() {
+    if (redisSentinel != null) {
+      redisSentinel.stop();
+    }
     if (redisServer != null) {
       redisServer.stop();
     }
@@ -84,7 +82,7 @@ public class TracingJedisSentinelPoolTest {
 
   @Test
   public void testClosingTracedJedisClosesUnderlyingJedis() {
-    JedisSentinelPool pool = new TracingJedisSentinelPool(mockTracer, false, "name", new HashSet<String>(), new GenericObjectPoolConfig());
+    JedisSentinelPool pool = new TracingJedisSentinelPool(mockTracer, false, MASTER_NAME, sentinels, new GenericObjectPoolConfig());
     Jedis resource = pool.getResource();
     assertEquals(1, pool.getNumActive());
 
