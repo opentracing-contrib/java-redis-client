@@ -19,7 +19,7 @@
   <groupId>io.opentracing.contrib</groupId>
   <artifactId>opentracing-redis-parent</artifactId>
   <packaging>pom</packaging>
-  <version>0.0.5-SNAPSHOT-an</version>
+  <version>0.0.5-SNAPSHOT</version>
 
   <modules>
     <module>opentracing-redis-lettuce</module>
@@ -121,7 +121,6 @@
       <version>4.12</version>
       <scope>test</scope>
     </dependency>
-
   </dependencies>
 
   <build>
