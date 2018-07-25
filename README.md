@@ -91,6 +91,18 @@ try (Jedis jedis = pool.getResource()) {
 }
 ```
 
+### Jedis Sentinel Pool
+```java
+// Create Tracing Jedis Sentinel Pool
+JedisSentinelPool pool = new TracingJedisSentinelPool(tracer, false, MASTER_NAME, sentinels, poolConfig);
+
+try (Jedis jedis = pool.getResource()) {
+// jedis will be automatically closed and returned to the pool at the end of "try" block
+   jedis.set("foo", "bar"));
+   String value = jedis.get("foo"));
+}
+```
+
 ### Jedis Span Name
 By default, span names are set to the operation performed by the Jedis object. To customize the span name, provide a Function to the Jedis object that alters the span name. If a function is not provided, the span name will remain the default. Refer to the RedisSpanNameProvider class for a function that prefixes the operation name. 
 ```java
