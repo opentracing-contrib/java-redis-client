@@ -20,6 +20,7 @@ import io.lettuce.core.api.reactive.RedisReactiveCommands;
 import io.lettuce.core.api.sync.RedisCommands;
 import io.lettuce.core.protocol.RedisCommand;
 import io.opentracing.Tracer;
+import io.opentracing.util.GlobalTracer;
 import java.time.Duration;
 import java.util.Collection;
 import java.util.concurrent.TimeUnit;
@@ -41,6 +42,14 @@ public class TracingStatefulRedisConnection<K, V> implements StatefulRedisConnec
     this.connection = connection;
     this.tracer = tracer;
     this.traceWithActiveSpanOnly = traceWithActiveSpanOnly;
+  }
+
+  /**
+   * GlobalTracer is used to get tracer
+   */
+  public TracingStatefulRedisConnection(StatefulRedisConnection<K, V> connection,
+      boolean traceWithActiveSpanOnly) {
+    this(connection, GlobalTracer.get(), traceWithActiveSpanOnly);
   }
 
   @Override
