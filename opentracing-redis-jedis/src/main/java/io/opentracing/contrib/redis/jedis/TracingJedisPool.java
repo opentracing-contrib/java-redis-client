@@ -13,17 +13,15 @@
  */
 package io.opentracing.contrib.redis.jedis;
 
+import io.opentracing.Tracer;
+import io.opentracing.contrib.redis.common.RedisSpanNameProvider;
+import io.opentracing.util.GlobalTracer;
 import java.net.URI;
 import java.util.function.Function;
-
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLParameters;
 import javax.net.ssl.SSLSocketFactory;
-
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
-
-import io.opentracing.Tracer;
-import io.opentracing.contrib.redis.common.RedisSpanNameProvider;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
@@ -39,11 +37,27 @@ public class TracingJedisPool extends JedisPool {
     spanNameProvider = RedisSpanNameProvider.OPERATION_NAME;
   }
 
-  public TracingJedisPool(Tracer tracer, boolean traceWithActiveSpanOnly, Function<String, String> spanNameProvider) {
+  /**
+   * GlobalTracer is used to get tracer
+   */
+  public TracingJedisPool(boolean traceWithActiveSpanOnly) {
+    this(GlobalTracer.get(), true);
+  }
+
+  public TracingJedisPool(Tracer tracer, boolean traceWithActiveSpanOnly,
+      Function<String, String> spanNameProvider) {
     super();
     this.tracer = tracer;
     this.traceWithActiveSpanOnly = traceWithActiveSpanOnly;
     this.spanNameProvider = spanNameProvider;
+  }
+
+  /**
+   * GlobalTracer is used to get tracer
+   */
+  public TracingJedisPool(boolean traceWithActiveSpanOnly,
+      Function<String, String> spanNameProvider) {
+    this(GlobalTracer.get(), traceWithActiveSpanOnly, spanNameProvider);
   }
 
   public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final String host,
@@ -54,11 +68,27 @@ public class TracingJedisPool extends JedisPool {
     spanNameProvider = RedisSpanNameProvider.OPERATION_NAME;
   }
 
-  public TracingJedisPool(final String host, final int port, Tracer tracer, boolean traceWithActiveSpanOnly) {
+  /**
+   * GlobalTracer is used to get tracer
+   */
+  public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final String host,
+      boolean traceWithActiveSpanOnly) {
+    this(poolConfig, host, GlobalTracer.get(), traceWithActiveSpanOnly);
+  }
+
+  public TracingJedisPool(final String host, final int port, Tracer tracer,
+      boolean traceWithActiveSpanOnly) {
     super(host, port);
     this.tracer = tracer;
     this.traceWithActiveSpanOnly = traceWithActiveSpanOnly;
     spanNameProvider = RedisSpanNameProvider.OPERATION_NAME;
+  }
+
+  /**
+   * GlobalTracer is used to get tracer
+   */
+  public TracingJedisPool(final String host, final int port, boolean traceWithActiveSpanOnly) {
+    this(host, port, GlobalTracer.get(), traceWithActiveSpanOnly);
   }
 
   public TracingJedisPool(final String host, Tracer tracer, boolean traceWithActiveSpanOnly) {
@@ -68,12 +98,30 @@ public class TracingJedisPool extends JedisPool {
     spanNameProvider = RedisSpanNameProvider.OPERATION_NAME;
   }
 
-  public TracingJedisPool(final String host, final SSLSocketFactory sslSocketFactory, final SSLParameters sslParameters,
+  /**
+   * GlobalTracer is used to get tracer
+   */
+  public TracingJedisPool(final String host, boolean traceWithActiveSpanOnly) {
+    this(host, GlobalTracer.get(), traceWithActiveSpanOnly);
+  }
+
+  public TracingJedisPool(final String host, final SSLSocketFactory sslSocketFactory,
+      final SSLParameters sslParameters,
       final HostnameVerifier hostnameVerifier, Tracer tracer, boolean traceWithActiveSpanOnly) {
     super(host, sslSocketFactory, sslParameters, hostnameVerifier);
     this.tracer = tracer;
     this.traceWithActiveSpanOnly = traceWithActiveSpanOnly;
     spanNameProvider = RedisSpanNameProvider.OPERATION_NAME;
+  }
+
+  /**
+   * GlobalTracer is used to get tracer
+   */
+  public TracingJedisPool(final String host, final SSLSocketFactory sslSocketFactory,
+      final SSLParameters sslParameters,
+      final HostnameVerifier hostnameVerifier, boolean traceWithActiveSpanOnly) {
+    this(host, sslSocketFactory, sslParameters, hostnameVerifier, GlobalTracer.get(),
+        traceWithActiveSpanOnly);
   }
 
   public TracingJedisPool(final URI uri, Tracer tracer, boolean traceWithActiveSpanOnly) {
@@ -83,7 +131,15 @@ public class TracingJedisPool extends JedisPool {
     spanNameProvider = RedisSpanNameProvider.OPERATION_NAME;
   }
 
-  public TracingJedisPool(final URI uri, final SSLSocketFactory sslSocketFactory, final SSLParameters sslParameters,
+  /**
+   * GlobalTracer is used to get tracer
+   */
+  public TracingJedisPool(final URI uri, boolean traceWithActiveSpanOnly) {
+    this(uri, GlobalTracer.get(), traceWithActiveSpanOnly);
+  }
+
+  public TracingJedisPool(final URI uri, final SSLSocketFactory sslSocketFactory,
+      final SSLParameters sslParameters,
       final HostnameVerifier hostnameVerifier, Tracer tracer, boolean traceWithActiveSpanOnly) {
     super(uri, sslSocketFactory, sslParameters, hostnameVerifier);
     this.tracer = tracer;
@@ -91,11 +147,30 @@ public class TracingJedisPool extends JedisPool {
     spanNameProvider = RedisSpanNameProvider.OPERATION_NAME;
   }
 
-  public TracingJedisPool(final URI uri, final int timeout, Tracer tracer, boolean traceWithActiveSpanOnly) {
+  /**
+   * GlobalTracer is used to get tracer
+   */
+  public TracingJedisPool(final URI uri, final SSLSocketFactory sslSocketFactory,
+      final SSLParameters sslParameters,
+      final HostnameVerifier hostnameVerifier, boolean traceWithActiveSpanOnly) {
+    this(uri, sslSocketFactory, sslParameters, hostnameVerifier, GlobalTracer.get(),
+        traceWithActiveSpanOnly);
+  }
+
+  public TracingJedisPool(final URI uri, final int timeout, Tracer tracer,
+      boolean traceWithActiveSpanOnly) {
     super(uri, timeout);
     this.tracer = tracer;
     this.traceWithActiveSpanOnly = traceWithActiveSpanOnly;
     spanNameProvider = RedisSpanNameProvider.OPERATION_NAME;
+  }
+
+  /**
+   * GlobalTracer is used to get tracer
+   */
+  public TracingJedisPool(final URI uri, final int timeout,
+      boolean traceWithActiveSpanOnly) {
+    this(uri, timeout, GlobalTracer.get(), traceWithActiveSpanOnly);
   }
 
   public TracingJedisPool(final URI uri, final int timeout, final SSLSocketFactory sslSocketFactory,
@@ -107,7 +182,19 @@ public class TracingJedisPool extends JedisPool {
     spanNameProvider = RedisSpanNameProvider.OPERATION_NAME;
   }
 
-  public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final String host, final int port,
+  /**
+   * GlobalTracer is used to get tracer
+   */
+  public TracingJedisPool(final URI uri, final int timeout, final SSLSocketFactory sslSocketFactory,
+      final SSLParameters sslParameters, final HostnameVerifier hostnameVerifier,
+      boolean traceWithActiveSpanOnly) {
+    this(uri, timeout, sslSocketFactory, sslParameters, hostnameVerifier, GlobalTracer.get(),
+        traceWithActiveSpanOnly);
+  }
+
+
+  public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final String host,
+      final int port,
       final int timeout, final String password,
       Tracer tracer, boolean traceWithActiveSpanOnly) {
     super(poolConfig, host, port, timeout, password);
@@ -116,7 +203,16 @@ public class TracingJedisPool extends JedisPool {
     spanNameProvider = RedisSpanNameProvider.OPERATION_NAME;
   }
 
-  public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final String host, final int port,
+  /**
+   * GlobalTracer is used to get tracer
+   */
+  public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final String host,
+      final int port, final int timeout, final String password, boolean traceWithActiveSpanOnly) {
+    this(poolConfig, host, port, timeout, password, GlobalTracer.get(), traceWithActiveSpanOnly);
+  }
+
+  public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final String host,
+      final int port,
       final int timeout, final String password, final boolean ssl,
       Tracer tracer, boolean traceWithActiveSpanOnly) {
     super(poolConfig, host, port, timeout, password, ssl);
@@ -125,25 +221,59 @@ public class TracingJedisPool extends JedisPool {
     spanNameProvider = RedisSpanNameProvider.OPERATION_NAME;
   }
 
-  public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final String host, final int port,
+  /**
+   * GlobalTracer is used to get tracer
+   */
+  public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final String host,
+      final int port,
+      final int timeout, final String password, final boolean ssl,
+      boolean traceWithActiveSpanOnly) {
+    this(poolConfig, host, port, timeout, password, ssl, GlobalTracer.get(),
+        traceWithActiveSpanOnly);
+  }
+
+  public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final String host,
+      final int port,
       final int timeout, final String password, final boolean ssl,
       final SSLSocketFactory sslSocketFactory, final SSLParameters sslParameters,
       final HostnameVerifier hostnameVerifier, Tracer tracer, boolean traceWithActiveSpanOnly) {
-    super(poolConfig, host, port, timeout, password, ssl, sslSocketFactory, sslParameters, hostnameVerifier);
+    super(poolConfig, host, port, timeout, password, ssl, sslSocketFactory, sslParameters,
+        hostnameVerifier);
     this.tracer = tracer;
     this.traceWithActiveSpanOnly = traceWithActiveSpanOnly;
     spanNameProvider = RedisSpanNameProvider.OPERATION_NAME;
   }
 
-  public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final String host, final int port,
-      Tracer tracer, boolean traceWithActiveSpanOnly) {
+  /**
+   * GlobalTracer is used to get tracer
+   */
+  public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final String host,
+      final int port,
+      final int timeout, final String password, final boolean ssl,
+      final SSLSocketFactory sslSocketFactory, final SSLParameters sslParameters,
+      final HostnameVerifier hostnameVerifier, boolean traceWithActiveSpanOnly) {
+    this(poolConfig, host, port, timeout, password, ssl, sslSocketFactory, sslParameters,
+        hostnameVerifier, GlobalTracer.get(), traceWithActiveSpanOnly);
+  }
+
+  public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final String host,
+      final int port, Tracer tracer, boolean traceWithActiveSpanOnly) {
     super(poolConfig, host, port);
     this.tracer = tracer;
     this.traceWithActiveSpanOnly = traceWithActiveSpanOnly;
     spanNameProvider = RedisSpanNameProvider.OPERATION_NAME;
   }
 
-  public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final String host, final int port, final boolean ssl,
+  /**
+   * GlobalTracer is used to get tracer
+   */
+  public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final String host,
+      final int port, boolean traceWithActiveSpanOnly) {
+    this(poolConfig, host, port, GlobalTracer.get(), traceWithActiveSpanOnly);
+  }
+
+  public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final String host,
+      final int port, final boolean ssl,
       Tracer tracer, boolean traceWithActiveSpanOnly) {
     super(poolConfig, host, port, ssl);
     this.tracer = tracer;
@@ -151,7 +281,18 @@ public class TracingJedisPool extends JedisPool {
     spanNameProvider = RedisSpanNameProvider.OPERATION_NAME;
   }
 
-  public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final String host, final int port, final boolean ssl,
+  /**
+   * GlobalTracer is used to get tracer
+   */
+  public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final String host,
+      final int port, final boolean ssl,
+      boolean traceWithActiveSpanOnly) {
+    this(poolConfig, host, port, ssl, GlobalTracer.get(), traceWithActiveSpanOnly);
+  }
+
+
+  public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final String host,
+      final int port, final boolean ssl,
       final SSLSocketFactory sslSocketFactory, final SSLParameters sslParameters,
       final HostnameVerifier hostnameVerifier, Tracer tracer, boolean traceWithActiveSpanOnly) {
     super(poolConfig, host, port, ssl, sslSocketFactory, sslParameters, hostnameVerifier);
@@ -160,7 +301,19 @@ public class TracingJedisPool extends JedisPool {
     spanNameProvider = RedisSpanNameProvider.OPERATION_NAME;
   }
 
-  public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final String host, final int port, final int timeout,
+  /**
+   * GlobalTracer is used to get tracer
+   */
+  public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final String host,
+      final int port, final boolean ssl,
+      final SSLSocketFactory sslSocketFactory, final SSLParameters sslParameters,
+      final HostnameVerifier hostnameVerifier, boolean traceWithActiveSpanOnly) {
+    this(poolConfig, host, port, ssl, sslSocketFactory, sslParameters, hostnameVerifier,
+        GlobalTracer.get(), traceWithActiveSpanOnly);
+  }
+
+  public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final String host,
+      final int port, final int timeout,
       Tracer tracer, boolean traceWithActiveSpanOnly) {
     super(poolConfig, host, port, timeout);
     this.tracer = tracer;
@@ -168,7 +321,17 @@ public class TracingJedisPool extends JedisPool {
     spanNameProvider = RedisSpanNameProvider.OPERATION_NAME;
   }
 
-  public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final String host, final int port, final int timeout,
+  /**
+   * GlobalTracer is used to get tracer
+   */
+  public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final String host,
+      final int port, final int timeout,
+      boolean traceWithActiveSpanOnly) {
+    this(poolConfig, host, port, timeout, GlobalTracer.get(), traceWithActiveSpanOnly);
+  }
+
+  public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final String host,
+      final int port, final int timeout,
       final boolean ssl, Tracer tracer, boolean traceWithActiveSpanOnly) {
     super(poolConfig, host, port, timeout, ssl);
     this.tracer = tracer;
@@ -176,7 +339,17 @@ public class TracingJedisPool extends JedisPool {
     spanNameProvider = RedisSpanNameProvider.OPERATION_NAME;
   }
 
-  public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final String host, final int port, final int timeout,
+  /**
+   * GlobalTracer is used to get tracer
+   */
+  public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final String host,
+      final int port, final int timeout,
+      final boolean ssl, boolean traceWithActiveSpanOnly) {
+    this(poolConfig, host, port, timeout, ssl, GlobalTracer.get(), traceWithActiveSpanOnly);
+  }
+
+  public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final String host,
+      final int port, final int timeout,
       final boolean ssl, final SSLSocketFactory sslSocketFactory, final SSLParameters sslParameters,
       final HostnameVerifier hostnameVerifier, Tracer tracer, boolean traceWithActiveSpanOnly) {
     super(poolConfig, host, port, timeout, ssl, sslSocketFactory, sslParameters, hostnameVerifier);
@@ -185,7 +358,19 @@ public class TracingJedisPool extends JedisPool {
     spanNameProvider = RedisSpanNameProvider.OPERATION_NAME;
   }
 
-  public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final String host, final int port, final int timeout,
+  /**
+   * GlobalTracer is used to get tracer
+   */
+  public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final String host,
+      final int port, final int timeout,
+      final boolean ssl, final SSLSocketFactory sslSocketFactory, final SSLParameters sslParameters,
+      final HostnameVerifier hostnameVerifier, boolean traceWithActiveSpanOnly) {
+    this(poolConfig, host, port, timeout, ssl, sslSocketFactory, sslParameters, hostnameVerifier,
+        GlobalTracer.get(), traceWithActiveSpanOnly);
+  }
+
+  public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final String host,
+      final int port, final int timeout,
       final String password, final int database, Tracer tracer, boolean traceWithActiveSpanOnly) {
     super(poolConfig, host, port, timeout, password, database);
     this.tracer = tracer;
@@ -193,7 +378,18 @@ public class TracingJedisPool extends JedisPool {
     spanNameProvider = RedisSpanNameProvider.OPERATION_NAME;
   }
 
-  public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final String host, final int port, final int timeout,
+  /**
+   * GlobalTracer is used to get tracer
+   */
+  public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final String host,
+      final int port, final int timeout,
+      final String password, final int database, boolean traceWithActiveSpanOnly) {
+    this(poolConfig, host, port, timeout, password, database, GlobalTracer.get(),
+        traceWithActiveSpanOnly);
+  }
+
+  public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final String host,
+      final int port, final int timeout,
       final String password, final int database, final boolean ssl,
       Tracer tracer, boolean traceWithActiveSpanOnly) {
     super(poolConfig, host, port, timeout, password, database, ssl);
@@ -202,31 +398,81 @@ public class TracingJedisPool extends JedisPool {
     spanNameProvider = RedisSpanNameProvider.OPERATION_NAME;
   }
 
-  public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final String host, final int port, final int timeout,
+  /**
+   * GlobalTracer is used to get tracer
+   */
+  public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final String host,
+      final int port, final int timeout,
+      final String password, final int database, final boolean ssl,
+      boolean traceWithActiveSpanOnly) {
+    this(poolConfig, host, port, timeout, password, database, ssl, GlobalTracer.get(),
+        traceWithActiveSpanOnly);
+  }
+
+  public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final String host,
+      final int port, final int timeout,
       final String password, final int database, final boolean ssl,
       final SSLSocketFactory sslSocketFactory, final SSLParameters sslParameters,
       final HostnameVerifier hostnameVerifier, Tracer tracer, boolean traceWithActiveSpanOnly) {
-    super(poolConfig, host, port, timeout, password, database, ssl, sslSocketFactory, sslParameters, hostnameVerifier);
+    super(poolConfig, host, port, timeout, password, database, ssl, sslSocketFactory, sslParameters,
+        hostnameVerifier);
     this.tracer = tracer;
     this.traceWithActiveSpanOnly = traceWithActiveSpanOnly;
     spanNameProvider = RedisSpanNameProvider.OPERATION_NAME;
   }
 
-  public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final String host, final int port, final int timeout,
+  /**
+   * GlobalTracer is used to get tracer
+   */
+  public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final String host,
+      final int port, final int timeout,
+      final String password, final int database, final boolean ssl,
+      final SSLSocketFactory sslSocketFactory, final SSLParameters sslParameters,
+      final HostnameVerifier hostnameVerifier, boolean traceWithActiveSpanOnly) {
+    this(poolConfig, host, port, timeout, password, database, ssl, sslSocketFactory, sslParameters,
+        hostnameVerifier, GlobalTracer.get(), traceWithActiveSpanOnly);
+  }
+
+  public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final String host,
+      final int port, final int timeout,
       final String password, final int database, final String clientName,
       Tracer tracer, boolean traceWithActiveSpanOnly) {
     this(poolConfig, host, port, timeout, timeout, password, database, clientName, false,
         null, null, null, tracer, traceWithActiveSpanOnly);
   }
 
-  public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final String host, final int port, final int timeout,
+  /**
+   * GlobalTracer is used to get tracer
+   */
+  public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final String host,
+      final int port, final int timeout,
+      final String password, final int database, final String clientName,
+      boolean traceWithActiveSpanOnly) {
+    this(poolConfig, host, port, timeout, password, database, clientName, GlobalTracer.get(),
+        traceWithActiveSpanOnly);
+  }
+
+  public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final String host,
+      final int port, final int timeout,
       final String password, final int database, final String clientName,
       Tracer tracer, boolean traceWithActiveSpanOnly, Function<String, String> customSpanName) {
     this(poolConfig, host, port, timeout, timeout, password, database, clientName, false,
         null, null, null, tracer, traceWithActiveSpanOnly, customSpanName);
   }
 
-  public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final String host, final int port, final int timeout,
+  /**
+   * GlobalTracer is used to get tracer
+   */
+  public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final String host,
+      final int port, final int timeout,
+      final String password, final int database, final String clientName,
+      boolean traceWithActiveSpanOnly, Function<String, String> customSpanName) {
+    this(poolConfig, host, port, timeout, password, database, clientName,
+        GlobalTracer.get(), traceWithActiveSpanOnly, customSpanName);
+  }
+
+  public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final String host,
+      final int port, final int timeout,
       final String password, final int database, final String clientName, final boolean ssl,
       Tracer tracer, boolean traceWithActiveSpanOnly) {
     super(poolConfig, host, port, timeout, password, database, clientName, ssl);
@@ -235,17 +481,43 @@ public class TracingJedisPool extends JedisPool {
     spanNameProvider = RedisSpanNameProvider.OPERATION_NAME;
   }
 
-  public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final String host, final int port, final int timeout,
+  /**
+   * GlobalTracer is used to get tracer
+   */
+  public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final String host,
+      final int port, final int timeout,
+      final String password, final int database, final String clientName, final boolean ssl,
+      boolean traceWithActiveSpanOnly) {
+    this(poolConfig, host, port, timeout, password, database, clientName, ssl, GlobalTracer.get(),
+        traceWithActiveSpanOnly);
+  }
+
+  public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final String host,
+      final int port, final int timeout,
       final String password, final int database, final String clientName, final boolean ssl,
       final SSLSocketFactory sslSocketFactory, final SSLParameters sslParameters,
       final HostnameVerifier hostnameVerifier, Tracer tracer, boolean traceWithActiveSpanOnly) {
-    super(poolConfig, host, port, timeout, password, database, clientName, ssl, sslSocketFactory, sslParameters, hostnameVerifier);
+    super(poolConfig, host, port, timeout, password, database, clientName, ssl, sslSocketFactory,
+        sslParameters, hostnameVerifier);
     this.tracer = tracer;
     this.traceWithActiveSpanOnly = traceWithActiveSpanOnly;
     spanNameProvider = RedisSpanNameProvider.OPERATION_NAME;
   }
 
-  public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final String host, final int port,
+  /**
+   * GlobalTracer is used to get tracer
+   */
+  public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final String host,
+      final int port, final int timeout,
+      final String password, final int database, final String clientName, final boolean ssl,
+      final SSLSocketFactory sslSocketFactory, final SSLParameters sslParameters,
+      final HostnameVerifier hostnameVerifier, boolean traceWithActiveSpanOnly) {
+    this(poolConfig, host, port, timeout, password, database, clientName, ssl, sslSocketFactory,
+        sslParameters, hostnameVerifier, GlobalTracer.get(), traceWithActiveSpanOnly);
+  }
+
+  public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final String host,
+      final int port,
       final int connectionTimeout, final int soTimeout, final String password, final int database,
       final String clientName, final boolean ssl, final SSLSocketFactory sslSocketFactory,
       final SSLParameters sslParameters, final HostnameVerifier hostnameVerifier,
@@ -258,7 +530,22 @@ public class TracingJedisPool extends JedisPool {
     this.spanNameProvider = RedisSpanNameProvider.OPERATION_NAME;
   }
 
-  public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final String host, final int port,
+  /**
+   * GlobalTracer is used to get tracer
+   */
+  public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final String host,
+      final int port,
+      final int connectionTimeout, final int soTimeout, final String password, final int database,
+      final String clientName, final boolean ssl, final SSLSocketFactory sslSocketFactory,
+      final SSLParameters sslParameters, final HostnameVerifier hostnameVerifier,
+      boolean traceWithActiveSpanOnly) {
+    this(poolConfig, host, port, connectionTimeout, soTimeout, password, database, clientName, ssl,
+        sslSocketFactory, sslParameters, hostnameVerifier, GlobalTracer.get(),
+        traceWithActiveSpanOnly);
+  }
+
+  public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final String host,
+      final int port,
       final int connectionTimeout, final int soTimeout, final String password, final int database,
       final String clientName, final boolean ssl, final SSLSocketFactory sslSocketFactory,
       final SSLParameters sslParameters, final HostnameVerifier hostnameVerifier,
@@ -271,31 +558,74 @@ public class TracingJedisPool extends JedisPool {
     this.spanNameProvider = customSpanName;
   }
 
+  /**
+   * GlobalTracer is used to get tracer
+   */
+  public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final String host,
+      final int port,
+      final int connectionTimeout, final int soTimeout, final String password, final int database,
+      final String clientName, final boolean ssl, final SSLSocketFactory sslSocketFactory,
+      final SSLParameters sslParameters, final HostnameVerifier hostnameVerifier,
+      boolean traceWithActiveSpanOnly, Function<String, String> customSpanName) {
+    this(poolConfig, host, port, connectionTimeout, soTimeout, password, database, clientName,
+        ssl, sslSocketFactory, sslParameters, hostnameVerifier, GlobalTracer.get(),
+        traceWithActiveSpanOnly, customSpanName);
+  }
+
   public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final URI uri,
       Tracer tracer, boolean traceWithActiveSpanOnly) {
     super(poolConfig, uri);
     this.tracer = tracer;
     this.traceWithActiveSpanOnly = traceWithActiveSpanOnly;
-
   }
 
-  public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final URI uri, final SSLSocketFactory sslSocketFactory,
+  /**
+   * GlobalTracer is used to get tracer
+   */
+  public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final URI uri,
+      boolean traceWithActiveSpanOnly) {
+    this(poolConfig, uri, GlobalTracer.get(), traceWithActiveSpanOnly);
+  }
+
+  public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final URI uri,
+      final SSLSocketFactory sslSocketFactory,
       final SSLParameters sslParameters, final HostnameVerifier hostnameVerifier,
       Tracer tracer, boolean traceWithActiveSpanOnly) {
     super(poolConfig, uri, sslSocketFactory, sslParameters, hostnameVerifier);
     this.tracer = tracer;
     this.traceWithActiveSpanOnly = traceWithActiveSpanOnly;
-
   }
 
-  public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final URI uri, final int timeout,
+  /**
+   * GlobalTracer is used to get tracer
+   */
+  public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final URI uri,
+      final SSLSocketFactory sslSocketFactory,
+      final SSLParameters sslParameters, final HostnameVerifier hostnameVerifier,
+      boolean traceWithActiveSpanOnly) {
+    this(poolConfig, uri, sslSocketFactory, sslParameters, hostnameVerifier,
+        GlobalTracer.get(), traceWithActiveSpanOnly);
+  }
+
+  public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final URI uri,
+      final int timeout,
       Tracer tracer, boolean traceWithActiveSpanOnly) {
     super(poolConfig, uri, timeout);
     this.tracer = tracer;
     this.traceWithActiveSpanOnly = traceWithActiveSpanOnly;
   }
 
-  public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final URI uri, final int timeout,
+  /**
+   * GlobalTracer is used to get tracer
+   */
+  public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final URI uri,
+      final int timeout,
+      boolean traceWithActiveSpanOnly) {
+    this(poolConfig, uri, timeout, GlobalTracer.get(), traceWithActiveSpanOnly);
+  }
+
+  public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final URI uri,
+      final int timeout,
       final SSLSocketFactory sslSocketFactory, final SSLParameters sslParameters,
       final HostnameVerifier hostnameVerifier, Tracer tracer, boolean traceWithActiveSpanOnly) {
     super(poolConfig, uri, timeout, sslSocketFactory, sslParameters, hostnameVerifier);
@@ -303,21 +633,56 @@ public class TracingJedisPool extends JedisPool {
     this.traceWithActiveSpanOnly = traceWithActiveSpanOnly;
   }
 
-  public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final URI uri, final int connectionTimeout,
+  /**
+   * GlobalTracer is used to get tracer
+   */
+  public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final URI uri,
+      final int timeout,
+      final SSLSocketFactory sslSocketFactory, final SSLParameters sslParameters,
+      final HostnameVerifier hostnameVerifier, boolean traceWithActiveSpanOnly) {
+    this(poolConfig, uri, timeout, sslSocketFactory, sslParameters, hostnameVerifier,
+        GlobalTracer.get(), traceWithActiveSpanOnly);
+  }
+
+  public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final URI uri,
+      final int connectionTimeout,
       final int soTimeout, Tracer tracer, boolean traceWithActiveSpanOnly) {
     super(poolConfig, uri, connectionTimeout, soTimeout);
     this.tracer = tracer;
     this.traceWithActiveSpanOnly = traceWithActiveSpanOnly;
-
   }
 
-  public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final URI uri, final int connectionTimeout,
-      final int soTimeout, final SSLSocketFactory sslSocketFactory, final SSLParameters sslParameters,
+  /**
+   * GlobalTracer is used to get tracer
+   */
+  public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final URI uri,
+      final int connectionTimeout,
+      final int soTimeout, boolean traceWithActiveSpanOnly) {
+    this(poolConfig, uri, connectionTimeout, soTimeout, GlobalTracer.get(),
+        traceWithActiveSpanOnly);
+  }
+
+  public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final URI uri,
+      final int connectionTimeout,
+      final int soTimeout, final SSLSocketFactory sslSocketFactory,
+      final SSLParameters sslParameters,
       final HostnameVerifier hostnameVerifier, Tracer tracer, boolean traceWithActiveSpanOnly) {
-    super(poolConfig, uri, connectionTimeout, soTimeout, sslSocketFactory, sslParameters, hostnameVerifier);
+    super(poolConfig, uri, connectionTimeout, soTimeout, sslSocketFactory, sslParameters,
+        hostnameVerifier);
     this.tracer = tracer;
     this.traceWithActiveSpanOnly = traceWithActiveSpanOnly;
+  }
 
+  /**
+   * GlobalTracer is used to get tracer
+   */
+  public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final URI uri,
+      final int connectionTimeout,
+      final int soTimeout, final SSLSocketFactory sslSocketFactory,
+      final SSLParameters sslParameters,
+      final HostnameVerifier hostnameVerifier, boolean traceWithActiveSpanOnly) {
+    this(poolConfig, uri, connectionTimeout, soTimeout, sslSocketFactory, sslParameters,
+        hostnameVerifier, GlobalTracer.get(), traceWithActiveSpanOnly);
   }
 
   @Override
