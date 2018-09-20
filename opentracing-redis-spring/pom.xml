@@ -22,7 +22,13 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>opentracing-redis-jedis</artifactId>
+  <artifactId>opentracing-redis-spring</artifactId>
+  <name>${project.groupId}:${project.artifactId}</name>
+  <description>OpenTracing Instrumentation for Spring Redis classes</description>
+
+  <properties>
+    <spring.data.redis.version>2.0.10.RELEASE</spring.data.redis.version>
+  </properties>
 
   <dependencies>
 
@@ -33,15 +39,30 @@
     </dependency>
 
     <dependency>
-      <groupId>redis.clients</groupId>
-      <artifactId>jedis</artifactId>
-      <version>2.9.0</version>
+      <groupId>org.springframework.data</groupId>
+      <artifactId>spring-data-redis</artifactId>
+      <version>${spring.data.redis.version}</version>
+      <optional>true</optional>
     </dependency>
 
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-test</artifactId>
+      <version>5.0.9.RELEASE</version>
+    </dependency>
+    <dependency>
+      <groupId>io.opentracing</groupId>
+      <artifactId>opentracing-util</artifactId>
+      <type>test-jar</type>
+    </dependency>
     <dependency>
       <groupId>com.github.kstyrc</groupId>
       <artifactId>embedded-redis</artifactId>
       <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-core</artifactId>
     </dependency>
   </dependencies>
 

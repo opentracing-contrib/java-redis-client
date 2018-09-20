@@ -31,7 +31,7 @@
     <dependency>
       <groupId>io.opentracing.contrib</groupId>
       <artifactId>opentracing-redis-common</artifactId>
-      <version>0.0.7-SNAPSHOT</version>
+      <version>${project.version}</version>
     </dependency>
 
     <dependency>
