@@ -17,7 +17,7 @@ pom.xml
 <dependency>
     <groupId>io.opentracing.contrib</groupId>
     <artifactId>opentracing-redis-jedis</artifactId>
-    <version>0.0.2</version>
+    <version>0.0.7</version>
 </dependency>
 ```
 
@@ -28,7 +28,18 @@ pom.xml
 <dependency>
     <groupId>io.opentracing.contrib</groupId>
     <artifactId>opentracing-redis-lettuce</artifactId>
-    <version>0.0.2</version>
+    <version>0.0.7</version>
+</dependency>
+```
+
+### Spring
+
+pom.xml
+```xml
+<dependency>
+    <groupId>io.opentracing.contrib</groupId>
+    <artifactId>opentracing-redis-spring</artifactId>
+    <version>0.0.7</version>
 </dependency>
 ```
 
@@ -124,6 +135,22 @@ RedisCommands<String, String> commands = connection.sync();
 RedisAsyncCommands<String, String> commandsAsync = connection.async();
 
 ```
+
+### Spring
+
+```java
+
+// Create tracing connection factory bean
+@Bean
+public RedisConnectionFactory redisConnectionFactory(Tracer tracer) {
+    MyRedisConnectionFactoryImplementation factory = ...
+    return new TracingRedisConnectionFactory(factory, false, tacer);
+    
+}
+```
+
+Note: if you use Lettuce/Jedis you could achieve the same result using the Lettuce/Jedis support when 
+configuring LettuceConnectionFactory/JedisConnectionFactory instead of using a wrapping TracingRedisConnectionFactory.
 
 ## License
 
