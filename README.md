@@ -17,7 +17,7 @@ pom.xml
 <dependency>
     <groupId>io.opentracing.contrib</groupId>
     <artifactId>opentracing-redis-jedis</artifactId>
-    <version>0.0.7</version>
+    <version>VERSION</version>
 </dependency>
 ```
 
@@ -28,7 +28,7 @@ pom.xml
 <dependency>
     <groupId>io.opentracing.contrib</groupId>
     <artifactId>opentracing-redis-lettuce</artifactId>
-    <version>0.0.7</version>
+    <version>VERSION</version>
 </dependency>
 ```
 
@@ -39,7 +39,7 @@ pom.xml
 <dependency>
     <groupId>io.opentracing.contrib</groupId>
     <artifactId>opentracing-redis-spring</artifactId>
-    <version>0.0.7</version>
+    <version>VERSION</version>
 </dependency>
 ```
 
