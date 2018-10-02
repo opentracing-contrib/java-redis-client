@@ -77,6 +77,7 @@ public class TracingRedisConnectionFactory implements RedisConnectionFactory,
       return new TracingReactiveRedisConnection((ReactiveRedisConnection) delegate,
           withActiveSpanOnly, tracer);
     }
+    // TODO: shouldn't we throw an exception?
     return null;
   }
 
@@ -85,6 +86,7 @@ public class TracingRedisConnectionFactory implements RedisConnectionFactory,
     if (delegate instanceof ReactiveRedisConnectionFactory) {
       return ((ReactiveRedisConnectionFactory) delegate).getReactiveClusterConnection();
     }
+    // TODO: shouldn't we throw an exception?
     return null;
   }
 }
