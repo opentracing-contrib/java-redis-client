@@ -20,6 +20,7 @@ import io.opentracing.noop.NoopScopeManager.NoopScope;
 import io.opentracing.tag.StringTag;
 import io.opentracing.tag.Tags;
 import io.opentracing.util.GlobalTracer;
+import java.util.function.Supplier;
 
 
 /**
@@ -34,6 +35,15 @@ class RedisTracingUtils {
 
   static final String COMPONENT_NAME = "java-redis";
   public static final StringTag COMMAND_TAG = new StringTag("command");
+  private static final String REDIS_COMMAND = "RedisCommand";
+
+  static <T> T doInScope(String command, Supplier<T> supplier, boolean withActiveSpanOnly,
+      Tracer tracer) {
+    try (Scope ignored =
+        RedisTracingUtils.buildScope(REDIS_COMMAND, command, withActiveSpanOnly, tracer)) {
+      return supplier.get();
+    }
+  }
 
   static Scope buildScope(String operationName, String command, boolean withActiveSpanOnly) {
     return buildScope(operationName, command, withActiveSpanOnly, null);

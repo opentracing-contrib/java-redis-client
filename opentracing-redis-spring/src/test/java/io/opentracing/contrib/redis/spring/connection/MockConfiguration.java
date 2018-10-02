@@ -49,8 +49,10 @@ public class MockConfiguration {
   @Bean
   public RedisConnectionFactory redisConnectionFactory() {
     RedisConnectionFactory factory = mock(RedisConnectionFactory.class);
-    when(factory.getConnection()).thenReturn(new TracingRedisConnection(mockRedisConnection(), false, mockTracer()));
-    when(factory.getClusterConnection()).thenReturn(new TracingRedisClusterConnection(mockRedisClusterConnection(), false, mockTracer()));
+    when(factory.getConnection())
+        .thenReturn(new TracingRedisConnection(mockRedisConnection(), false, mockTracer()));
+    when(factory.getClusterConnection()).thenReturn(
+        new TracingRedisClusterConnection(mockRedisClusterConnection(), false, mockTracer()));
     return factory;
   }
 

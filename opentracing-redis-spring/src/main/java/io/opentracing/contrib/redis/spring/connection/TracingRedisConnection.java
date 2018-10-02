@@ -13,7 +13,6 @@
  */
 package io.opentracing.contrib.redis.spring.connection;
 
-import io.opentracing.Scope;
 import io.opentracing.Tracer;
 import java.util.List;
 import java.util.Map;
@@ -59,7 +58,6 @@ import org.springframework.data.redis.core.types.RedisClientInfo;
  */
 public class TracingRedisConnection implements RedisConnection {
 
-  private static final String REDIS_COMMAND = "RedisCommand";
 
   private final RedisConnection connection;
   private final boolean withActiveSpanOnly;
@@ -72,14 +70,11 @@ public class TracingRedisConnection implements RedisConnection {
     this.tracer = tracer;
   }
 
-  protected <T> T doInScope(String command, Supplier<T> supplier) {
-    try (Scope ignored =
-        RedisTracingUtils.buildScope(REDIS_COMMAND, command, withActiveSpanOnly, tracer)) {
-      return supplier.get();
-    }
+  <T> T doInScope(String command, Supplier<T> supplier) {
+    return RedisTracingUtils.doInScope(command, supplier, withActiveSpanOnly, tracer);
   }
 
-  protected void doInScope(String command, Runnable action) {
+  void doInScope(String command, Runnable action) {
     doInScope(command, () -> {
       action.run();
       return null;
@@ -633,12 +628,14 @@ public class TracingRedisConnection implements RedisConnection {
 
   @Override
   public Set<Tuple> zRevRangeWithScores(byte[] key, long start, long end) {
-    return doInScope(RedisCommand.ZREVRANGE_WITHSCORES, () -> connection.zRevRangeWithScores(key, start, end));
+    return doInScope(RedisCommand.ZREVRANGE_WITHSCORES,
+        () -> connection.zRevRangeWithScores(key, start, end));
   }
 
   @Override
   public Set<Tuple> zRangeWithScores(byte[] key, long start, long end) {
-    return doInScope(RedisCommand.ZRANGE_WITHSCORES, () -> connection.zRangeWithScores(key, start, end));
+    return doInScope(RedisCommand.ZRANGE_WITHSCORES,
+        () -> connection.zRangeWithScores(key, start, end));
   }
 
   @Override
@@ -648,7 +645,8 @@ public class TracingRedisConnection implements RedisConnection {
 
   @Override
   public Set<byte[]> zRangeByScore(byte[] key, double min, double max, long offset, long count) {
-    return doInScope(RedisCommand.ZRANGEBYSCORE, () -> connection.zRangeByScore(key, min, max, offset, count));
+    return doInScope(RedisCommand.ZRANGEBYSCORE,
+        () -> connection.zRangeByScore(key, min, max, offset, count));
   }
 
   @Override
@@ -663,7 +661,8 @@ public class TracingRedisConnection implements RedisConnection {
 
   @Override
   public Set<byte[]> zRangeByScore(byte[] key, String min, String max, long offset, long count) {
-    return doInScope(RedisCommand.ZRANGEBYSCORE, () -> connection.zRangeByScore(key, min, max, offset, count));
+    return doInScope(RedisCommand.ZRANGEBYSCORE,
+        () -> connection.zRangeByScore(key, min, max, offset, count));
   }
 
   @Override
@@ -698,7 +697,8 @@ public class TracingRedisConnection implements RedisConnection {
 
   @Override
   public Set<byte[]> zRevRangeByScore(byte[] key, double min, double max) {
-    return doInScope(RedisCommand.ZREVRANGEBYSCORE, () -> connection.zRevRangeByScore(key, min, max));
+    return doInScope(RedisCommand.ZREVRANGEBYSCORE,
+        () -> connection.zRevRangeByScore(key, min, max));
   }
 
   @Override
@@ -714,7 +714,8 @@ public class TracingRedisConnection implements RedisConnection {
 
   @Override
   public Set<byte[]> zRevRangeByScore(byte[] key, Range range, Limit limit) {
-    return doInScope(RedisCommand.ZREVRANGEBYSCORE, () -> connection.zRevRangeByScore(key, range, limit));
+    return doInScope(RedisCommand.ZREVRANGEBYSCORE,
+        () -> connection.zRevRangeByScore(key, range, limit));
   }
 
   @Override
@@ -769,7 +770,8 @@ public class TracingRedisConnection implements RedisConnection {
 
   @Override
   public Long zRemRangeByScore(byte[] key, double min, double max) {
-    return doInScope(RedisCommand.ZREMRANGEBYSCORE, () -> connection.zRemRangeByScore(key, min, max));
+    return doInScope(RedisCommand.ZREMRANGEBYSCORE,
+        () -> connection.zRemRangeByScore(key, min, max));
   }
 
   @Override
@@ -784,7 +786,8 @@ public class TracingRedisConnection implements RedisConnection {
 
   @Override
   public Long zUnionStore(byte[] destKey, Aggregate aggregate, int[] weights, byte[]... sets) {
-    return doInScope(RedisCommand.ZUNIONSTORE, () -> connection.zUnionStore(destKey, aggregate, weights, sets));
+    return doInScope(RedisCommand.ZUNIONSTORE,
+        () -> connection.zUnionStore(destKey, aggregate, weights, sets));
   }
 
   @Override
@@ -794,7 +797,8 @@ public class TracingRedisConnection implements RedisConnection {
 
   @Override
   public Long zInterStore(byte[] destKey, Aggregate aggregate, int[] weights, byte[]... sets) {
-    return doInScope(RedisCommand.ZINTERSTORE, () -> connection.zInterStore(destKey, aggregate, weights, sets));
+    return doInScope(RedisCommand.ZINTERSTORE,
+        () -> connection.zInterStore(destKey, aggregate, weights, sets));
   }
 
   @Override
@@ -1060,7 +1064,8 @@ public class TracingRedisConnection implements RedisConnection {
   @Override
   public void migrate(byte[] key, RedisNode target, int dbIndex, MigrateOption option,
       long timeout) {
-    doInScope(RedisCommand.MIGRATE, () -> connection.migrate(key, target, dbIndex, option, timeout));
+    doInScope(RedisCommand.MIGRATE,
+        () -> connection.migrate(key, target, dbIndex, option, timeout));
   }
 
   @Override
@@ -1085,7 +1090,8 @@ public class TracingRedisConnection implements RedisConnection {
 
   @Override
   public <T> T eval(byte[] script, ReturnType returnType, int numKeys, byte[]... keysAndArgs) {
-    return doInScope(RedisCommand.EVAL, () -> connection.eval(script, returnType, numKeys, keysAndArgs));
+    return doInScope(RedisCommand.EVAL,
+        () -> connection.eval(script, returnType, numKeys, keysAndArgs));
   }
 
   @Override
@@ -1156,13 +1162,15 @@ public class TracingRedisConnection implements RedisConnection {
   @Override
   public GeoResults<GeoLocation<byte[]>> geoRadiusByMember(byte[] key, byte[] member,
       double radius) {
-    return doInScope(RedisCommand.GEORADIUSBYMEMBER, () -> connection.geoRadiusByMember(key, member, radius));
+    return doInScope(RedisCommand.GEORADIUSBYMEMBER,
+        () -> connection.geoRadiusByMember(key, member, radius));
   }
 
   @Override
   public GeoResults<GeoLocation<byte[]>> geoRadiusByMember(byte[] key, byte[] member,
       Distance radius) {
-    return doInScope(RedisCommand.GEORADIUSBYMEMBER, () -> connection.geoRadiusByMember(key, member, radius));
+    return doInScope(RedisCommand.GEORADIUSBYMEMBER,
+        () -> connection.geoRadiusByMember(key, member, radius));
   }
 
   @Override

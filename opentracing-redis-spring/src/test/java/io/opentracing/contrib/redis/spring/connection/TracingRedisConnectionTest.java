@@ -94,7 +94,8 @@ public class TracingRedisConnectionTest {
   public void invokingExecuteCreatesNewSpan() {
     commandCreatesNewSpan("custom command", () -> getConnection().execute("custom command"));
     verify(mockRedisConnection()).execute("custom command");
-    commandCreatesNewSpan("another command", () -> getConnection().execute("another command", "arg".getBytes()));
+    commandCreatesNewSpan("another command",
+        () -> getConnection().execute("another command", "arg".getBytes()));
     verify(mockRedisConnection()).execute("another command", "arg".getBytes());
   }
 
@@ -136,13 +137,15 @@ public class TracingRedisConnectionTest {
 
   @Test
   public void invokingRenameCreatesNewSpan() {
-    commandCreatesNewSpan(RedisCommand.RENAME, () -> getConnection().rename("oldName".getBytes(), "newName".getBytes()));
+    commandCreatesNewSpan(RedisCommand.RENAME,
+        () -> getConnection().rename("oldName".getBytes(), "newName".getBytes()));
     verify(mockRedisConnection()).rename("oldName".getBytes(), "newName".getBytes());
   }
 
   @Test
   public void invokingRenameNXCreatesNewSpan() {
-    commandCreatesNewSpan(RedisCommand.RENAMENX, () -> getConnection().renameNX("oldName".getBytes(), "newName".getBytes()));
+    commandCreatesNewSpan(RedisCommand.RENAMENX,
+        () -> getConnection().renameNX("oldName".getBytes(), "newName".getBytes()));
     verify(mockRedisConnection()).renameNX("oldName".getBytes(), "newName".getBytes());
   }
 
@@ -154,19 +157,22 @@ public class TracingRedisConnectionTest {
 
   @Test
   public void invokingPExpireCreatesNewSpan() {
-    commandCreatesNewSpan(RedisCommand.PEXPIRE, () -> getConnection().pExpire("key".getBytes(), 0L));
+    commandCreatesNewSpan(RedisCommand.PEXPIRE,
+        () -> getConnection().pExpire("key".getBytes(), 0L));
     verify(mockRedisConnection()).pExpire("key".getBytes(), 0L);
   }
 
   @Test
   public void invokingExpireAtCreatesNewSpan() {
-    commandCreatesNewSpan(RedisCommand.EXPIREAT, () -> getConnection().expireAt("key".getBytes(), 0L));
+    commandCreatesNewSpan(RedisCommand.EXPIREAT,
+        () -> getConnection().expireAt("key".getBytes(), 0L));
     verify(mockRedisConnection()).expireAt("key".getBytes(), 0L);
   }
 
   @Test
   public void invokingPExpireAtCreatesNewSpan() {
-    commandCreatesNewSpan(RedisCommand.PEXPIREAT, () -> getConnection().pExpireAt("key".getBytes(), 0L));
+    commandCreatesNewSpan(RedisCommand.PEXPIREAT,
+        () -> getConnection().pExpireAt("key".getBytes(), 0L));
     verify(mockRedisConnection()).pExpireAt("key".getBytes(), 0L);
   }
 
@@ -186,7 +192,8 @@ public class TracingRedisConnectionTest {
   public void invokingTtlCreatesNewSpan() {
     commandCreatesNewSpan(RedisCommand.TTL, () -> getConnection().ttl("key".getBytes()));
     verify(mockRedisConnection()).ttl("key".getBytes());
-    commandCreatesNewSpan(RedisCommand.TTL, () -> getConnection().ttl("key".getBytes(), TimeUnit.SECONDS));
+    commandCreatesNewSpan(RedisCommand.TTL,
+        () -> getConnection().ttl("key".getBytes(), TimeUnit.SECONDS));
     verify(mockRedisConnection()).ttl("key".getBytes(), TimeUnit.SECONDS);
   }
 
@@ -195,7 +202,8 @@ public class TracingRedisConnectionTest {
     commandCreatesNewSpan(RedisCommand.PTTL, () -> getConnection().pTtl("key".getBytes()));
     verify(mockRedisConnection()).pTtl("key".getBytes());
 
-    commandCreatesNewSpan(RedisCommand.PTTL, () -> getConnection().pTtl("key".getBytes(), TimeUnit.SECONDS));
+    commandCreatesNewSpan(RedisCommand.PTTL,
+        () -> getConnection().pTtl("key".getBytes(), TimeUnit.SECONDS));
     verify(mockRedisConnection()).pTtl("key".getBytes(), TimeUnit.SECONDS);
   }
 
@@ -205,7 +213,8 @@ public class TracingRedisConnectionTest {
     commandCreatesNewSpan(RedisCommand.SORT, () -> getConnection().sort("key".getBytes(), null));
     verify(mockRedisConnection()).sort("key".getBytes(), null);
 
-    commandCreatesNewSpan(RedisCommand.SORT, () -> getConnection().sort("key".getBytes(), null, "sortKey".getBytes()));
+    commandCreatesNewSpan(RedisCommand.SORT,
+        () -> getConnection().sort("key".getBytes(), null, "sortKey".getBytes()));
     verify(mockRedisConnection()).sort("key".getBytes(), null, "sortKey".getBytes());
   }
 
@@ -217,7 +226,8 @@ public class TracingRedisConnectionTest {
 
   @Test
   public void invokingRestoreCreatesNewSpan() {
-    commandCreatesNewSpan(RedisCommand.RESTORE, () -> getConnection().restore("key".getBytes(), 0L, "val".getBytes()));
+    commandCreatesNewSpan(RedisCommand.RESTORE,
+        () -> getConnection().restore("key".getBytes(), 0L, "val".getBytes()));
     verify(mockRedisConnection()).restore("key".getBytes(), 0L, "val".getBytes());
   }
 
@@ -229,7 +239,8 @@ public class TracingRedisConnectionTest {
 
   @Test
   public void invokingGetSetCreatesNewSpan() {
-    commandCreatesNewSpan(RedisCommand.GETSET, () -> getConnection().getSet("key".getBytes(), "val".getBytes()));
+    commandCreatesNewSpan(RedisCommand.GETSET,
+        () -> getConnection().getSet("key".getBytes(), "val".getBytes()));
     verify(mockRedisConnection()).getSet("key".getBytes(), "val".getBytes());
   }
 
@@ -241,18 +252,22 @@ public class TracingRedisConnectionTest {
 
   @Test
   public void invokingSetCreatesNewSpan() {
-    commandCreatesNewSpan(RedisCommand.SET, () -> getConnection().set("key".getBytes(), "val".getBytes()));
+    commandCreatesNewSpan(RedisCommand.SET,
+        () -> getConnection().set("key".getBytes(), "val".getBytes()));
     verify(mockRedisConnection()).set("key".getBytes(), "val".getBytes());
 
-    commandCreatesNewSpan(RedisCommand.SET, () -> getConnection().set("key".getBytes(), "val".getBytes(),
-        Expiration.persistent(), RedisStringCommands.SetOption.ifAbsent()));
-    verify(mockRedisConnection()).set(eq("key".getBytes()), eq("val".getBytes()), any(Expiration.class),
-        eq(RedisStringCommands.SetOption.ifAbsent()));
+    commandCreatesNewSpan(RedisCommand.SET,
+        () -> getConnection().set("key".getBytes(), "val".getBytes(),
+            Expiration.persistent(), RedisStringCommands.SetOption.ifAbsent()));
+    verify(mockRedisConnection())
+        .set(eq("key".getBytes()), eq("val".getBytes()), any(Expiration.class),
+            eq(RedisStringCommands.SetOption.ifAbsent()));
   }
 
   @Test
   public void invokingSetNXCreatesNewSpan() {
-    commandCreatesNewSpan(RedisCommand.SETNX, () -> getConnection().setNX("key".getBytes(), "val".getBytes()));
+    commandCreatesNewSpan(RedisCommand.SETNX,
+        () -> getConnection().setNX("key".getBytes(), "val".getBytes()));
     verify(mockRedisConnection()).setNX("key".getBytes(), "val".getBytes());
   }
 
@@ -311,19 +326,22 @@ public class TracingRedisConnectionTest {
 
   @Test
   public void invokingAppendCreatesNewSpan() {
-    commandCreatesNewSpan(RedisCommand.APPEND, () -> getConnection().append("key".getBytes(), "val".getBytes()));
+    commandCreatesNewSpan(RedisCommand.APPEND,
+        () -> getConnection().append("key".getBytes(), "val".getBytes()));
     verify(mockRedisConnection()).append("key".getBytes(), "val".getBytes());
   }
 
   @Test
   public void invokingGetRangeCreatesNewSpan() {
-    commandCreatesNewSpan(RedisCommand.GETRANGE, () -> getConnection().getRange("key".getBytes(), 0L, 0L));
+    commandCreatesNewSpan(RedisCommand.GETRANGE,
+        () -> getConnection().getRange("key".getBytes(), 0L, 0L));
     verify(mockRedisConnection()).getRange("key".getBytes(), 0L, 0L);
   }
 
   @Test
   public void invokingSetRangeCreatesNewSpan() {
-    commandCreatesNewSpan(RedisCommand.SETRANGE, () -> getConnection().setRange("key".getBytes(), "val".getBytes(), 0L));
+    commandCreatesNewSpan(RedisCommand.SETRANGE,
+        () -> getConnection().setRange("key".getBytes(), "val".getBytes(), 0L));
     verify(mockRedisConnection()).setRange("key".getBytes(), "val".getBytes(), 0L);
   }
 
@@ -335,7 +353,8 @@ public class TracingRedisConnectionTest {
 
   @Test
   public void invokingSetBitCreatesNewSpan() {
-    commandCreatesNewSpan(RedisCommand.SETBIT, () -> getConnection().setBit("key".getBytes(), 0L, false));
+    commandCreatesNewSpan(RedisCommand.SETBIT,
+        () -> getConnection().setBit("key".getBytes(), 0L, false));
     verify(mockRedisConnection()).setBit("key".getBytes(), 0L, false);
   }
 
@@ -344,14 +363,16 @@ public class TracingRedisConnectionTest {
     commandCreatesNewSpan(RedisCommand.BITCOUNT, () -> getConnection().bitCount("key".getBytes()));
     verify(mockRedisConnection()).bitCount("key".getBytes());
 
-    commandCreatesNewSpan(RedisCommand.BITCOUNT, () -> getConnection().bitCount("key".getBytes(), 0L, 0L));
+    commandCreatesNewSpan(RedisCommand.BITCOUNT,
+        () -> getConnection().bitCount("key".getBytes(), 0L, 0L));
     verify(mockRedisConnection()).bitCount("key".getBytes(), 0L, 0L);
   }
 
   @Test
   public void invokingBitOpCreatesNewSpan() {
-    commandCreatesNewSpan(RedisCommand.BITOP, () -> getConnection().bitOp(RedisStringCommands.BitOperation.OR,
-        "dst".getBytes(), "key".getBytes()));
+    commandCreatesNewSpan(RedisCommand.BITOP,
+        () -> getConnection().bitOp(RedisStringCommands.BitOperation.OR,
+            "dst".getBytes(), "key".getBytes()));
     verify(mockRedisConnection()).bitOp(RedisStringCommands.BitOperation.OR,
         "dst".getBytes(), "key".getBytes());
   }
@@ -364,25 +385,29 @@ public class TracingRedisConnectionTest {
 
   @Test
   public void invokingRPushCreatesNewSpan() {
-    commandCreatesNewSpan(RedisCommand.RPUSH, () -> getConnection().rPush("key".getBytes(), "val".getBytes()));
+    commandCreatesNewSpan(RedisCommand.RPUSH,
+        () -> getConnection().rPush("key".getBytes(), "val".getBytes()));
     verify(mockRedisConnection()).rPush("key".getBytes(), "val".getBytes());
   }
 
   @Test
   public void invokingLPushCreatesNewSpan() {
-    commandCreatesNewSpan(RedisCommand.LPUSH, () -> getConnection().lPush("key".getBytes(), "val".getBytes()));
+    commandCreatesNewSpan(RedisCommand.LPUSH,
+        () -> getConnection().lPush("key".getBytes(), "val".getBytes()));
     verify(mockRedisConnection()).lPush("key".getBytes(), "val".getBytes());
   }
 
   @Test
   public void invokingRPushXCreatesNewSpan() {
-    commandCreatesNewSpan(RedisCommand.RPUSHX, () -> getConnection().rPushX("key".getBytes(), "val".getBytes()));
+    commandCreatesNewSpan(RedisCommand.RPUSHX,
+        () -> getConnection().rPushX("key".getBytes(), "val".getBytes()));
     verify(mockRedisConnection()).rPushX("key".getBytes(), "val".getBytes());
   }
 
   @Test
   public void invokingLPushXCreatesNewSpan() {
-    commandCreatesNewSpan(RedisCommand.LPUSHX, () -> getConnection().lPushX("key".getBytes(), "val".getBytes()));
+    commandCreatesNewSpan(RedisCommand.LPUSHX,
+        () -> getConnection().lPushX("key".getBytes(), "val".getBytes()));
     verify(mockRedisConnection()).lPushX("key".getBytes(), "val".getBytes());
   }
 
@@ -394,13 +419,15 @@ public class TracingRedisConnectionTest {
 
   @Test
   public void invokingLRangeCreatesNewSpan() {
-    commandCreatesNewSpan(RedisCommand.LRANGE, () -> getConnection().lRange("key".getBytes(), 0L, 0L));
+    commandCreatesNewSpan(RedisCommand.LRANGE,
+        () -> getConnection().lRange("key".getBytes(), 0L, 0L));
     verify(mockRedisConnection()).lRange("key".getBytes(), 0L, 0L);
   }
 
   @Test
   public void invokingLTrimCreatesNewSpan() {
-    commandCreatesNewSpan(RedisCommand.LTRIM, () -> getConnection().lTrim("key".getBytes(), 0L, 0L));
+    commandCreatesNewSpan(RedisCommand.LTRIM,
+        () -> getConnection().lTrim("key".getBytes(), 0L, 0L));
     verify(mockRedisConnection()).lTrim("key".getBytes(), 0L, 0L);
   }
 
@@ -420,13 +447,15 @@ public class TracingRedisConnectionTest {
 
   @Test
   public void invokingLSetCreatesNewSpan() {
-    commandCreatesNewSpan(RedisCommand.LSET, () -> getConnection().lSet("key".getBytes(), 0L, "val".getBytes()));
+    commandCreatesNewSpan(RedisCommand.LSET,
+        () -> getConnection().lSet("key".getBytes(), 0L, "val".getBytes()));
     verify(mockRedisConnection()).lSet("key".getBytes(), 0L, "val".getBytes());
   }
 
   @Test
   public void invokingLRemCreatesNewSpan() {
-    commandCreatesNewSpan(RedisCommand.LREM, () -> getConnection().lRem("key".getBytes(), 0L, "val".getBytes()));
+    commandCreatesNewSpan(RedisCommand.LREM,
+        () -> getConnection().lRem("key".getBytes(), 0L, "val".getBytes()));
     verify(mockRedisConnection()).lRem("key".getBytes(), 0L, "val".getBytes());
   }
 
@@ -456,25 +485,29 @@ public class TracingRedisConnectionTest {
 
   @Test
   public void invokingRPopLPushCreatesNewSpan() {
-    commandCreatesNewSpan(RedisCommand.RPOPLPUSH, () -> getConnection().rPopLPush("src".getBytes(), "dst".getBytes()));
+    commandCreatesNewSpan(RedisCommand.RPOPLPUSH,
+        () -> getConnection().rPopLPush("src".getBytes(), "dst".getBytes()));
     verify(mockRedisConnection()).rPopLPush("src".getBytes(), "dst".getBytes());
   }
 
   @Test
   public void invokingBRPopLPushCreatesNewSpan() {
-    commandCreatesNewSpan(RedisCommand.BRPOPLPUSH, () -> getConnection().bRPopLPush(0, "src".getBytes(), "dst".getBytes()));
+    commandCreatesNewSpan(RedisCommand.BRPOPLPUSH,
+        () -> getConnection().bRPopLPush(0, "src".getBytes(), "dst".getBytes()));
     verify(mockRedisConnection()).bRPopLPush(0, "src".getBytes(), "dst".getBytes());
   }
 
   @Test
   public void invokingSAddCreatesNewSpan() {
-    commandCreatesNewSpan(RedisCommand.SADD, () -> getConnection().sAdd("key".getBytes(), "val".getBytes()));
+    commandCreatesNewSpan(RedisCommand.SADD,
+        () -> getConnection().sAdd("key".getBytes(), "val".getBytes()));
     verify(mockRedisConnection()).sAdd("key".getBytes(), "val".getBytes());
   }
 
   @Test
   public void invokingSRemCreatesNewSpan() {
-    commandCreatesNewSpan(RedisCommand.SREM, () -> getConnection().sRem("key".getBytes(), "val".getBytes()));
+    commandCreatesNewSpan(RedisCommand.SREM,
+        () -> getConnection().sRem("key".getBytes(), "val".getBytes()));
     verify(mockRedisConnection()).sRem("key".getBytes(), "val".getBytes());
   }
 
@@ -489,8 +522,9 @@ public class TracingRedisConnectionTest {
 
   @Test
   public void invokingSMoveCreatesNewSpan() {
-    commandCreatesNewSpan(RedisCommand.SMOVE, () -> getConnection().sMove("src".getBytes(), "dst".getBytes(),
-        "val".getBytes()));
+    commandCreatesNewSpan(RedisCommand.SMOVE,
+        () -> getConnection().sMove("src".getBytes(), "dst".getBytes(),
+            "val".getBytes()));
     verify(mockRedisConnection()).sMove("src".getBytes(), "dst".getBytes(), "val".getBytes());
   }
 
@@ -502,7 +536,8 @@ public class TracingRedisConnectionTest {
 
   @Test
   public void invokingSIsMemberCreatesNewSpan() {
-    commandCreatesNewSpan(RedisCommand.SISMEMBER, () -> getConnection().sIsMember("key".getBytes(), "val".getBytes()));
+    commandCreatesNewSpan(RedisCommand.SISMEMBER,
+        () -> getConnection().sIsMember("key".getBytes(), "val".getBytes()));
     verify(mockRedisConnection()).sIsMember("key".getBytes(), "val".getBytes());
   }
 
@@ -514,8 +549,9 @@ public class TracingRedisConnectionTest {
 
   @Test
   public void invokingSInterStoreCreatesNewSpan() {
-    commandCreatesNewSpan(RedisCommand.SINTERSTORE, () -> getConnection().sInterStore("dst".getBytes(),
-        "key".getBytes()));
+    commandCreatesNewSpan(RedisCommand.SINTERSTORE,
+        () -> getConnection().sInterStore("dst".getBytes(),
+            "key".getBytes()));
     verify(mockRedisConnection()).sInterStore("dst".getBytes(), "key".getBytes());
   }
 
@@ -527,8 +563,9 @@ public class TracingRedisConnectionTest {
 
   @Test
   public void invokingSUnionStoreCreatesNewSpan() {
-    commandCreatesNewSpan(RedisCommand.SUNIONSTORE, () -> getConnection().sUnionStore("dst".getBytes(),
-        "key".getBytes()));
+    commandCreatesNewSpan(RedisCommand.SUNIONSTORE,
+        () -> getConnection().sUnionStore("dst".getBytes(),
+            "key".getBytes()));
     verify(mockRedisConnection()).sUnionStore("dst".getBytes(), "key".getBytes());
   }
 
@@ -540,7 +577,8 @@ public class TracingRedisConnectionTest {
 
   @Test
   public void invokingSDiffStoreCreatesNewSpan() {
-    commandCreatesNewSpan(RedisCommand.SDIFFSTORE, () -> getConnection().sDiffStore("dst".getBytes(), "key".getBytes()));
+    commandCreatesNewSpan(RedisCommand.SDIFFSTORE,
+        () -> getConnection().sDiffStore("dst".getBytes(), "key".getBytes()));
     verify(mockRedisConnection()).sDiffStore("dst".getBytes(), "key".getBytes());
   }
 
@@ -552,22 +590,26 @@ public class TracingRedisConnectionTest {
 
   @Test
   public void invokingSRandMemberCreatesNewSpan() {
-    commandCreatesNewSpan(RedisCommand.SRANDMEMBER, () -> getConnection().sRandMember("key".getBytes()));
+    commandCreatesNewSpan(RedisCommand.SRANDMEMBER,
+        () -> getConnection().sRandMember("key".getBytes()));
     verify(mockRedisConnection()).sRandMember("key".getBytes());
 
-    commandCreatesNewSpan(RedisCommand.SRANDMEMBER, () -> getConnection().sRandMember("key".getBytes(), 0L));
+    commandCreatesNewSpan(RedisCommand.SRANDMEMBER,
+        () -> getConnection().sRandMember("key".getBytes(), 0L));
     verify(mockRedisConnection()).sRandMember("key".getBytes(), 0L);
   }
 
   @Test
   public void invokingSScanCreatesNewSpan() {
-    commandCreatesNewSpan(RedisCommand.SSCAN, () -> getConnection().sScan("key".getBytes(), ScanOptions.NONE));
+    commandCreatesNewSpan(RedisCommand.SSCAN,
+        () -> getConnection().sScan("key".getBytes(), ScanOptions.NONE));
     verify(mockRedisConnection()).sScan("key".getBytes(), ScanOptions.NONE);
   }
 
   @Test
   public void invokingZAddCreatesNewSpan() {
-    commandCreatesNewSpan(RedisCommand.ZADD, () -> getConnection().zAdd("key".getBytes(), 0D, "val".getBytes()));
+    commandCreatesNewSpan(RedisCommand.ZADD,
+        () -> getConnection().zAdd("key".getBytes(), 0D, "val".getBytes()));
     verify(mockRedisConnection()).zAdd("key".getBytes(), 0D, "val".getBytes());
 
     commandCreatesNewSpan(RedisCommand.ZADD, () -> getConnection().zAdd("key".getBytes(), null));
@@ -576,87 +618,105 @@ public class TracingRedisConnectionTest {
 
   @Test
   public void invokingZRemCreatesNewSpan() {
-    commandCreatesNewSpan(RedisCommand.ZREM, () -> getConnection().zRem("key".getBytes(), "val".getBytes()));
+    commandCreatesNewSpan(RedisCommand.ZREM,
+        () -> getConnection().zRem("key".getBytes(), "val".getBytes()));
     verify(mockRedisConnection()).zRem("key".getBytes(), "val".getBytes());
   }
 
   @Test
   public void invokingZIncrByCreatesNewSpan() {
-    commandCreatesNewSpan(RedisCommand.ZINCRBY, () -> getConnection().zIncrBy("key".getBytes(), 0D, "val".getBytes()));
+    commandCreatesNewSpan(RedisCommand.ZINCRBY,
+        () -> getConnection().zIncrBy("key".getBytes(), 0D, "val".getBytes()));
     verify(mockRedisConnection()).zIncrBy("key".getBytes(), 0D, "val".getBytes());
   }
 
   @Test
   public void invokingZRankCreatesNewSpan() {
-    commandCreatesNewSpan(RedisCommand.ZRANK, () -> getConnection().zRank("key".getBytes(), "val".getBytes()));
+    commandCreatesNewSpan(RedisCommand.ZRANK,
+        () -> getConnection().zRank("key".getBytes(), "val".getBytes()));
     verify(mockRedisConnection()).zRank("key".getBytes(), "val".getBytes());
   }
 
   @Test
   public void invokingZRevRankCreatesNewSpan() {
-    commandCreatesNewSpan(RedisCommand.ZREVRANK, () -> getConnection().zRevRank("key".getBytes(), "val".getBytes()));
+    commandCreatesNewSpan(RedisCommand.ZREVRANK,
+        () -> getConnection().zRevRank("key".getBytes(), "val".getBytes()));
     verify(mockRedisConnection()).zRevRank("key".getBytes(), "val".getBytes());
   }
 
   @Test
   public void invokingZRangeCreatesNewSpan() {
-    commandCreatesNewSpan(RedisCommand.ZRANGE, () -> getConnection().zRange("key".getBytes(), 0L, 0L));
+    commandCreatesNewSpan(RedisCommand.ZRANGE,
+        () -> getConnection().zRange("key".getBytes(), 0L, 0L));
     verify(mockRedisConnection()).zRange("key".getBytes(), 0L, 0L);
   }
 
   @Test
   public void invokingZRevRangeCreatesNewSpan() {
-    commandCreatesNewSpan(RedisCommand.ZREVRANGE, () -> getConnection().zRevRange("key".getBytes(), 0L, 0L));
+    commandCreatesNewSpan(RedisCommand.ZREVRANGE,
+        () -> getConnection().zRevRange("key".getBytes(), 0L, 0L));
     verify(mockRedisConnection()).zRevRange("key".getBytes(), 0L, 0L);
   }
 
   @Test
   public void invokingZRevRangeWithScoresCreatesNewSpan() {
-    commandCreatesNewSpan(RedisCommand.ZREVRANGE_WITHSCORES, () -> getConnection().zRevRangeWithScores("key".getBytes(),
-        0L, 0L));
+    commandCreatesNewSpan(RedisCommand.ZREVRANGE_WITHSCORES,
+        () -> getConnection().zRevRangeWithScores("key".getBytes(),
+            0L, 0L));
     verify(mockRedisConnection()).zRevRangeWithScores("key".getBytes(), 0L, 0L);
   }
 
   @Test
   public void invokingZRangeWithScoresCreatesNewSpan() {
-    commandCreatesNewSpan(RedisCommand.ZRANGE_WITHSCORES, () -> getConnection().zRangeWithScores("key".getBytes(), 0L,
-        0L));
+    commandCreatesNewSpan(RedisCommand.ZRANGE_WITHSCORES,
+        () -> getConnection().zRangeWithScores("key".getBytes(), 0L,
+            0L));
     verify(mockRedisConnection()).zRangeWithScores("key".getBytes(), 0L, 0L);
 
-    commandCreatesNewSpan(RedisCommand.ZRANGEBYSCORE, () -> getConnection().zRangeByScore("key".getBytes(), 0D,
-        0D));
+    commandCreatesNewSpan(RedisCommand.ZRANGEBYSCORE,
+        () -> getConnection().zRangeByScore("key".getBytes(), 0D,
+            0D));
     verify(mockRedisConnection()).zRangeByScore("key".getBytes(), 0D, 0D);
   }
 
   @Test
   public void invokingZRangeByScoreCreatesNewSpan() {
-    commandCreatesNewSpan(RedisCommand.ZRANGEBYSCORE, () -> getConnection().zRangeByScore("key".getBytes(), 0D, 0D, 0L,
-        0L));
+    commandCreatesNewSpan(RedisCommand.ZRANGEBYSCORE,
+        () -> getConnection().zRangeByScore("key".getBytes(), 0D, 0D, 0L,
+            0L));
     verify(mockRedisConnection()).zRangeByScore("key".getBytes(), 0D, 0D, 0L, 0L);
 
-    commandCreatesNewSpan(RedisCommand.ZRANGEBYSCORE, () -> getConnection().zRangeByScore("key".getBytes(),
-        "min", "max"));
+    commandCreatesNewSpan(RedisCommand.ZRANGEBYSCORE,
+        () -> getConnection().zRangeByScore("key".getBytes(),
+            "min", "max"));
     verify(mockRedisConnection()).zRangeByScore("key".getBytes(), "min", "max");
 
-    commandCreatesNewSpan(RedisCommand.ZRANGEBYSCORE, () -> getConnection().zRangeByScore("key".getBytes(),
-        RedisZSetCommands.Range.range()));
-    verify(mockRedisConnection()).zRangeByScore(eq("key".getBytes()), any(RedisZSetCommands.Range.class));
+    commandCreatesNewSpan(RedisCommand.ZRANGEBYSCORE,
+        () -> getConnection().zRangeByScore("key".getBytes(),
+            RedisZSetCommands.Range.range()));
+    verify(mockRedisConnection())
+        .zRangeByScore(eq("key".getBytes()), any(RedisZSetCommands.Range.class));
 
-    commandCreatesNewSpan(RedisCommand.ZRANGEBYSCORE, () -> getConnection().zRangeByScore("key".getBytes(),
-        "min", "max", 0L, 0L));
+    commandCreatesNewSpan(RedisCommand.ZRANGEBYSCORE,
+        () -> getConnection().zRangeByScore("key".getBytes(),
+            "min", "max", 0L, 0L));
     verify(mockRedisConnection()).zRangeByScore("key".getBytes(), "min", "max", 0L, 0L);
 
-    commandCreatesNewSpan(RedisCommand.ZRANGEBYSCORE, () -> getConnection().zRangeByScore("key".getBytes(),
-        RedisZSetCommands.Range.range(), RedisZSetCommands.Limit.limit()));
-    verify(mockRedisConnection()).zRangeByScore(eq("key".getBytes()), any(RedisZSetCommands.Range.class),
-        any(RedisZSetCommands.Limit.class));
+    commandCreatesNewSpan(RedisCommand.ZRANGEBYSCORE,
+        () -> getConnection().zRangeByScore("key".getBytes(),
+            RedisZSetCommands.Range.range(), RedisZSetCommands.Limit.limit()));
+    verify(mockRedisConnection())
+        .zRangeByScore(eq("key".getBytes()), any(RedisZSetCommands.Range.class),
+            any(RedisZSetCommands.Limit.class));
   }
 
   @Test
   public void invokingZRangeByScoreWithScoresCreatesNewSpan() {
     commandCreatesNewSpan(RedisCommand.ZRANGEBYSCORE_WITHSCORES,
-        () -> getConnection().zRangeByScoreWithScores("key".getBytes(), RedisZSetCommands.Range.range()));
-    verify(mockRedisConnection()).zRangeByScoreWithScores(eq("key".getBytes()), any(RedisZSetCommands.Range.class));
+        () -> getConnection()
+            .zRangeByScoreWithScores("key".getBytes(), RedisZSetCommands.Range.range()));
+    verify(mockRedisConnection())
+        .zRangeByScoreWithScores(eq("key".getBytes()), any(RedisZSetCommands.Range.class));
 
     commandCreatesNewSpan(RedisCommand.ZRANGEBYSCORE_WITHSCORES,
         () -> getConnection().zRangeByScoreWithScores("key".getBytes(), 0D, 0D));
@@ -667,10 +727,12 @@ public class TracingRedisConnectionTest {
     verify(mockRedisConnection()).zRangeByScoreWithScores("key".getBytes(), 0D, 0D, 0L, 0L);
 
     commandCreatesNewSpan(RedisCommand.ZRANGEBYSCORE_WITHSCORES,
-        () -> getConnection().zRangeByScoreWithScores("key".getBytes(), RedisZSetCommands.Range.range(),
-            RedisZSetCommands.Limit.limit()));
-    verify(mockRedisConnection()).zRangeByScoreWithScores(eq("key".getBytes()), any(RedisZSetCommands.Range.class),
-        any(RedisZSetCommands.Limit.class));
+        () -> getConnection()
+            .zRangeByScoreWithScores("key".getBytes(), RedisZSetCommands.Range.range(),
+                RedisZSetCommands.Limit.limit()));
+    verify(mockRedisConnection())
+        .zRangeByScoreWithScores(eq("key".getBytes()), any(RedisZSetCommands.Range.class),
+            any(RedisZSetCommands.Limit.class));
   }
 
   @Test
@@ -679,9 +741,11 @@ public class TracingRedisConnectionTest {
         () -> getConnection().zRevRangeByScore("key".getBytes(), 0D, 0D));
     verify(mockRedisConnection()).zRevRangeByScore("key".getBytes(), 0D, 0D);
 
-    commandCreatesNewSpan(RedisCommand.ZREVRANGEBYSCORE, () -> getConnection().zRevRangeByScore("key".getBytes(),
-        RedisZSetCommands.Range.range()));
-    verify(mockRedisConnection()).zRevRangeByScore(eq("key".getBytes()), any(RedisZSetCommands.Range.class));
+    commandCreatesNewSpan(RedisCommand.ZREVRANGEBYSCORE,
+        () -> getConnection().zRevRangeByScore("key".getBytes(),
+            RedisZSetCommands.Range.range()));
+    verify(mockRedisConnection())
+        .zRevRangeByScore(eq("key".getBytes()), any(RedisZSetCommands.Range.class));
 
     commandCreatesNewSpan(RedisCommand.ZREVRANGEBYSCORE,
         () -> getConnection().zRevRangeByScore("key".getBytes(), 0D, 0D, 0L, 0L));
@@ -690,8 +754,9 @@ public class TracingRedisConnectionTest {
     commandCreatesNewSpan(RedisCommand.ZREVRANGEBYSCORE,
         () -> getConnection().zRevRangeByScore("key".getBytes(), RedisZSetCommands.Range.range(),
             RedisZSetCommands.Limit.limit()));
-    verify(mockRedisConnection()).zRevRangeByScore(eq("key".getBytes()), any(RedisZSetCommands.Range.class),
-        any(RedisZSetCommands.Limit.class));
+    verify(mockRedisConnection())
+        .zRevRangeByScore(eq("key".getBytes()), any(RedisZSetCommands.Range.class),
+            any(RedisZSetCommands.Limit.class));
   }
 
   @Test
@@ -711,15 +776,18 @@ public class TracingRedisConnectionTest {
         any(RedisZSetCommands.Range.class));
 
     commandCreatesNewSpan(RedisCommand.ZREVRANGEBYSCORE_WITHSCORES,
-        () -> getConnection().zRevRangeByScoreWithScores("key".getBytes(), RedisZSetCommands.Range.range(),
-            RedisZSetCommands.Limit.limit()));
-    verify(mockRedisConnection()).zRevRangeByScoreWithScores(eq("key".getBytes()), any(RedisZSetCommands.Range.class),
-        any(RedisZSetCommands.Limit.class));
+        () -> getConnection()
+            .zRevRangeByScoreWithScores("key".getBytes(), RedisZSetCommands.Range.range(),
+                RedisZSetCommands.Limit.limit()));
+    verify(mockRedisConnection())
+        .zRevRangeByScoreWithScores(eq("key".getBytes()), any(RedisZSetCommands.Range.class),
+            any(RedisZSetCommands.Limit.class));
   }
 
   @Test
   public void invokingZCountCreatesNewSpan() {
-    commandCreatesNewSpan(RedisCommand.ZCOUNT, () -> getConnection().zCount("key".getBytes(), 0D, 0D));
+    commandCreatesNewSpan(RedisCommand.ZCOUNT,
+        () -> getConnection().zCount("key".getBytes(), 0D, 0D));
     verify(mockRedisConnection()).zCount("key".getBytes(), 0D, 0D);
 
     commandCreatesNewSpan(RedisCommand.ZCOUNT, () -> getConnection().zCount("key".getBytes(),
@@ -735,13 +803,15 @@ public class TracingRedisConnectionTest {
 
   @Test
   public void invokingZScoreCreatesNewSpan() {
-    commandCreatesNewSpan(RedisCommand.ZSCORE, () -> getConnection().zScore("key".getBytes(), "val".getBytes()));
+    commandCreatesNewSpan(RedisCommand.ZSCORE,
+        () -> getConnection().zScore("key".getBytes(), "val".getBytes()));
     verify(mockRedisConnection()).zScore("key".getBytes(), "val".getBytes());
   }
 
   @Test
   public void invokingZRemRangeCreatesNewSpan() {
-    commandCreatesNewSpan(RedisCommand.ZREMRANGE, () -> getConnection().zRemRange("key".getBytes(), 0L, 0L));
+    commandCreatesNewSpan(RedisCommand.ZREMRANGE,
+        () -> getConnection().zRemRange("key".getBytes(), 0L, 0L));
     verify(mockRedisConnection()).zRemRange("key".getBytes(), 0L, 0L);
   }
 
@@ -751,21 +821,26 @@ public class TracingRedisConnectionTest {
         () -> getConnection().zRemRangeByScore("key".getBytes(), 0D, 0D));
     verify(mockRedisConnection()).zRemRangeByScore("key".getBytes(), 0D, 0D);
 
-    commandCreatesNewSpan(RedisCommand.ZREMRANGEBYSCORE, () -> getConnection().zRemRangeByScore("key".getBytes(),
-        RedisZSetCommands.Range.range()));
-    verify(mockRedisConnection()).zRemRangeByScore(eq("key".getBytes()), any(RedisZSetCommands.Range.class));
+    commandCreatesNewSpan(RedisCommand.ZREMRANGEBYSCORE,
+        () -> getConnection().zRemRangeByScore("key".getBytes(),
+            RedisZSetCommands.Range.range()));
+    verify(mockRedisConnection())
+        .zRemRangeByScore(eq("key".getBytes()), any(RedisZSetCommands.Range.class));
   }
 
   @Test
   public void invokingZUnionStoreCreatesNewSpan() {
-    commandCreatesNewSpan(RedisCommand.ZUNIONSTORE, () -> getConnection().zUnionStore("dst".getBytes(),
-        "set".getBytes()));
+    commandCreatesNewSpan(RedisCommand.ZUNIONSTORE,
+        () -> getConnection().zUnionStore("dst".getBytes(),
+            "set".getBytes()));
     verify(mockRedisConnection()).zUnionStore("dst".getBytes(), "set".getBytes());
 
-    commandCreatesNewSpan(RedisCommand.ZUNIONSTORE, () -> getConnection().zUnionStore("dst".getBytes(),
-        RedisZSetCommands.Aggregate.SUM, new int[]{0}, "set".getBytes()));
-    verify(mockRedisConnection()).zUnionStore("dst".getBytes(), RedisZSetCommands.Aggregate.SUM, new int[]{0},
-        "set".getBytes());
+    commandCreatesNewSpan(RedisCommand.ZUNIONSTORE,
+        () -> getConnection().zUnionStore("dst".getBytes(),
+            RedisZSetCommands.Aggregate.SUM, new int[]{0}, "set".getBytes()));
+    verify(mockRedisConnection())
+        .zUnionStore("dst".getBytes(), RedisZSetCommands.Aggregate.SUM, new int[]{0},
+            "set".getBytes());
   }
 
   @Test
@@ -774,37 +849,46 @@ public class TracingRedisConnectionTest {
         () -> getConnection().zInterStore("dst".getBytes(), "set".getBytes()));
     verify(mockRedisConnection()).zInterStore("dst".getBytes(), "set".getBytes());
 
-    commandCreatesNewSpan(RedisCommand.ZINTERSTORE, () -> getConnection().zInterStore("dst".getBytes(),
-        RedisZSetCommands.Aggregate.SUM, new int[]{0}, "set".getBytes()));
-    verify(mockRedisConnection()).zInterStore("dst".getBytes(), RedisZSetCommands.Aggregate.SUM, new int[]{0},
-        "set".getBytes());
+    commandCreatesNewSpan(RedisCommand.ZINTERSTORE,
+        () -> getConnection().zInterStore("dst".getBytes(),
+            RedisZSetCommands.Aggregate.SUM, new int[]{0}, "set".getBytes()));
+    verify(mockRedisConnection())
+        .zInterStore("dst".getBytes(), RedisZSetCommands.Aggregate.SUM, new int[]{0},
+            "set".getBytes());
   }
 
   @Test
   public void invokingZScanCreatesNewSpan() {
-    commandCreatesNewSpan(RedisCommand.ZSCAN, () -> getConnection().zScan("key".getBytes(), ScanOptions.NONE));
+    commandCreatesNewSpan(RedisCommand.ZSCAN,
+        () -> getConnection().zScan("key".getBytes(), ScanOptions.NONE));
     verify(mockRedisConnection()).zScan("key".getBytes(), ScanOptions.NONE);
   }
 
   @Test
   public void invokingZRangeByLexCreatesNewSpan() {
-    commandCreatesNewSpan(RedisCommand.ZRANGEBYLEX, () -> getConnection().zRangeByLex("key".getBytes()));
+    commandCreatesNewSpan(RedisCommand.ZRANGEBYLEX,
+        () -> getConnection().zRangeByLex("key".getBytes()));
     verify(mockRedisConnection()).zRangeByLex("key".getBytes());
 
-    commandCreatesNewSpan(RedisCommand.ZRANGEBYLEX, () -> getConnection().zRangeByLex("key".getBytes(),
-        RedisZSetCommands.Range.range()));
-    verify(mockRedisConnection()).zRangeByLex(eq("key".getBytes()), any(RedisZSetCommands.Range.class));
+    commandCreatesNewSpan(RedisCommand.ZRANGEBYLEX,
+        () -> getConnection().zRangeByLex("key".getBytes(),
+            RedisZSetCommands.Range.range()));
+    verify(mockRedisConnection())
+        .zRangeByLex(eq("key".getBytes()), any(RedisZSetCommands.Range.class));
 
-    commandCreatesNewSpan(RedisCommand.ZRANGEBYLEX, () -> getConnection().zRangeByLex("key".getBytes(),
-        RedisZSetCommands.Range.range(), RedisZSetCommands.Limit.limit()));
-    verify(mockRedisConnection()).zRangeByLex(eq("key".getBytes()), any(RedisZSetCommands.Range.class),
-        any(RedisZSetCommands.Limit.class));
+    commandCreatesNewSpan(RedisCommand.ZRANGEBYLEX,
+        () -> getConnection().zRangeByLex("key".getBytes(),
+            RedisZSetCommands.Range.range(), RedisZSetCommands.Limit.limit()));
+    verify(mockRedisConnection())
+        .zRangeByLex(eq("key".getBytes()), any(RedisZSetCommands.Range.class),
+            any(RedisZSetCommands.Limit.class));
   }
 
   @Test
   public void invokingHSetCreatesNewSpan() {
-    commandCreatesNewSpan(RedisCommand.HSET, () -> getConnection().hSet("key".getBytes(), "field".getBytes(),
-        "val".getBytes()));
+    commandCreatesNewSpan(RedisCommand.HSET,
+        () -> getConnection().hSet("key".getBytes(), "field".getBytes(),
+            "val".getBytes()));
     verify(mockRedisConnection()).hSet("key".getBytes(), "field".getBytes(), "val".getBytes());
   }
 
@@ -817,13 +901,15 @@ public class TracingRedisConnectionTest {
 
   @Test
   public void invokingHGetCreatesNewSpan() {
-    commandCreatesNewSpan(RedisCommand.HGET, () -> getConnection().hGet("key".getBytes(), "field".getBytes()));
+    commandCreatesNewSpan(RedisCommand.HGET,
+        () -> getConnection().hGet("key".getBytes(), "field".getBytes()));
     verify(mockRedisConnection()).hGet("key".getBytes(), "field".getBytes());
   }
 
   @Test
   public void invokingHMGetCreatesNewSpan() {
-    commandCreatesNewSpan(RedisCommand.HMGET, () -> getConnection().hMGet("key".getBytes(), "field".getBytes()));
+    commandCreatesNewSpan(RedisCommand.HMGET,
+        () -> getConnection().hMGet("key".getBytes(), "field".getBytes()));
     verify(mockRedisConnection()).hMGet("key".getBytes(), "field".getBytes());
   }
 
@@ -846,13 +932,15 @@ public class TracingRedisConnectionTest {
 
   @Test
   public void invokingHExistsCreatesNewSpan() {
-    commandCreatesNewSpan(RedisCommand.HEXISTS, () -> getConnection().hExists("key".getBytes(), "field".getBytes()));
+    commandCreatesNewSpan(RedisCommand.HEXISTS,
+        () -> getConnection().hExists("key".getBytes(), "field".getBytes()));
     verify(mockRedisConnection()).hExists("key".getBytes(), "field".getBytes());
   }
 
   @Test
   public void invokingHDelCreatesNewSpan() {
-    commandCreatesNewSpan(RedisCommand.HDEL, () -> getConnection().hDel("key".getBytes(), "field".getBytes()));
+    commandCreatesNewSpan(RedisCommand.HDEL,
+        () -> getConnection().hDel("key".getBytes(), "field".getBytes()));
     verify(mockRedisConnection()).hDel("key".getBytes(), "field".getBytes());
   }
 
@@ -882,7 +970,8 @@ public class TracingRedisConnectionTest {
 
   @Test
   public void invokingHScanCreatesNewSpan() {
-    commandCreatesNewSpan(RedisCommand.HSCAN, () -> getConnection().hScan("key".getBytes(), ScanOptions.NONE));
+    commandCreatesNewSpan(RedisCommand.HSCAN,
+        () -> getConnection().hScan("key".getBytes(), ScanOptions.NONE));
     verify(mockRedisConnection()).hScan("key".getBytes(), ScanOptions.NONE);
   }
 
@@ -925,13 +1014,15 @@ public class TracingRedisConnectionTest {
 
   @Test
   public void invokingSubscribeCreatesNewSpan() {
-    commandCreatesNewSpan(RedisCommand.SUBSCRIBE, () -> getConnection().subscribe(null, "channel".getBytes()));
+    commandCreatesNewSpan(RedisCommand.SUBSCRIBE,
+        () -> getConnection().subscribe(null, "channel".getBytes()));
     verify(mockRedisConnection()).subscribe(null, "channel".getBytes());
   }
 
   @Test
   public void invokingPpSubscribeCreatesNewSpan() {
-    commandCreatesNewSpan(RedisCommand.PSUBSCRIBE, () -> getConnection().pSubscribe(null, "pattern".getBytes()));
+    commandCreatesNewSpan(RedisCommand.PSUBSCRIBE,
+        () -> getConnection().pSubscribe(null, "pattern".getBytes()));
     verify(mockRedisConnection()).pSubscribe(null, "pattern".getBytes());
   }
 
@@ -1052,7 +1143,8 @@ public class TracingRedisConnectionTest {
 
   @Test
   public void invokingSetClientNameCreatesNewSpan() {
-    commandCreatesNewSpan(RedisCommand.CLIENT_SETNAME, () -> getConnection().setClientName("name".getBytes()));
+    commandCreatesNewSpan(RedisCommand.CLIENT_SETNAME,
+        () -> getConnection().setClientName("name".getBytes()));
     verify(mockRedisConnection()).setClientName("name".getBytes());
   }
 
@@ -1082,13 +1174,17 @@ public class TracingRedisConnectionTest {
 
   @Test
   public void invokingMigrateCreatesNewSpan() {
-    commandCreatesNewSpan(RedisCommand.MIGRATE, () -> getConnection().migrate("key".getBytes(), null, 0,
-        RedisServerCommands.MigrateOption.REPLACE));
-    verify(mockRedisConnection()).migrate("key".getBytes(), null, 0, RedisServerCommands.MigrateOption.REPLACE);
+    commandCreatesNewSpan(RedisCommand.MIGRATE,
+        () -> getConnection().migrate("key".getBytes(), null, 0,
+            RedisServerCommands.MigrateOption.REPLACE));
+    verify(mockRedisConnection())
+        .migrate("key".getBytes(), null, 0, RedisServerCommands.MigrateOption.REPLACE);
 
-    commandCreatesNewSpan(RedisCommand.MIGRATE, () -> getConnection().migrate("key".getBytes(), null, 0,
-        RedisServerCommands.MigrateOption.REPLACE, 0L));
-    verify(mockRedisConnection()).migrate("key".getBytes(), null, 0, RedisServerCommands.MigrateOption.REPLACE, 0L);
+    commandCreatesNewSpan(RedisCommand.MIGRATE,
+        () -> getConnection().migrate("key".getBytes(), null, 0,
+            RedisServerCommands.MigrateOption.REPLACE, 0L));
+    verify(mockRedisConnection())
+        .migrate("key".getBytes(), null, 0, RedisServerCommands.MigrateOption.REPLACE, 0L);
   }
 
   @Test
@@ -1105,33 +1201,40 @@ public class TracingRedisConnectionTest {
 
   @Test
   public void invokingScriptLoadCreatesNewSpan() {
-    commandCreatesNewSpan(RedisCommand.SCRIPT_LOAD, () -> getConnection().scriptLoad("script".getBytes()));
+    commandCreatesNewSpan(RedisCommand.SCRIPT_LOAD,
+        () -> getConnection().scriptLoad("script".getBytes()));
     verify(mockRedisConnection()).scriptLoad("script".getBytes());
   }
 
   @Test
   public void invokingScriptExistsCreatesNewSpan() {
-    commandCreatesNewSpan(RedisCommand.SCRIPT_EXISTS, () -> getConnection().scriptExists("scriptSha"));
+    commandCreatesNewSpan(RedisCommand.SCRIPT_EXISTS,
+        () -> getConnection().scriptExists("scriptSha"));
     verify(mockRedisConnection()).scriptExists("scriptSha");
   }
 
   @Test
   public void invokingEvalCreatesNewSpan() {
-    commandCreatesNewSpan(RedisCommand.EVAL, () -> getConnection().eval("script".getBytes(), ReturnType.MULTI,
-        1, "keysAndArgs".getBytes()));
-    verify(mockRedisConnection()).eval("script".getBytes(), ReturnType.MULTI, 1, "keysAndArgs".getBytes());
+    commandCreatesNewSpan(RedisCommand.EVAL,
+        () -> getConnection().eval("script".getBytes(), ReturnType.MULTI,
+            1, "keysAndArgs".getBytes()));
+    verify(mockRedisConnection())
+        .eval("script".getBytes(), ReturnType.MULTI, 1, "keysAndArgs".getBytes());
   }
 
   @Test
   public void invokingEvalShaCreatesNewSpan() {
     commandCreatesNewSpan(RedisCommand.EVALSHA,
-        () -> getConnection().evalSha("scriptSha", ReturnType.BOOLEAN, 1, "keysAndArgs".getBytes()));
-    verify(mockRedisConnection()).evalSha("scriptSha", ReturnType.BOOLEAN, 1, "keysAndArgs".getBytes());
+        () -> getConnection()
+            .evalSha("scriptSha", ReturnType.BOOLEAN, 1, "keysAndArgs".getBytes()));
+    verify(mockRedisConnection())
+        .evalSha("scriptSha", ReturnType.BOOLEAN, 1, "keysAndArgs".getBytes());
 
     commandCreatesNewSpan(RedisCommand.EVALSHA,
         () -> getConnection().evalSha("scriptSha".getBytes(), ReturnType.BOOLEAN, 1,
             "keysAndArgs".getBytes()));
-    verify(mockRedisConnection()).evalSha("scriptSha".getBytes(), ReturnType.BOOLEAN, 1, "keysAndArgs".getBytes());
+    verify(mockRedisConnection())
+        .evalSha("scriptSha".getBytes(), ReturnType.BOOLEAN, 1, "keysAndArgs".getBytes());
   }
 
   @Test
@@ -1142,47 +1245,56 @@ public class TracingRedisConnectionTest {
 
     commandCreatesNewSpan(RedisCommand.GEOADD, () -> getConnection().geoAdd("key".getBytes(),
         (RedisGeoCommands.GeoLocation<byte[]>) null));
-    verify(mockRedisConnection()).geoAdd("key".getBytes(), (RedisGeoCommands.GeoLocation<byte[]>) null);
+    verify(mockRedisConnection())
+        .geoAdd("key".getBytes(), (RedisGeoCommands.GeoLocation<byte[]>) null);
 
-    commandCreatesNewSpan(RedisCommand.GEOADD, () -> getConnection().geoAdd("key".getBytes(), (Map<byte[],
-        Point>) null));
+    commandCreatesNewSpan(RedisCommand.GEOADD,
+        () -> getConnection().geoAdd("key".getBytes(), (Map<byte[],
+            Point>) null));
     verify(mockRedisConnection()).geoAdd("key".getBytes(), (Map<byte[], Point>) null);
 
     commandCreatesNewSpan(RedisCommand.GEOADD, () -> getConnection().geoAdd("key".getBytes(),
         (Iterable<RedisGeoCommands.GeoLocation<byte[]>>) null));
-    verify(mockRedisConnection()).geoAdd("key".getBytes(), (Iterable<RedisGeoCommands.GeoLocation<byte[]>>) null);
+    verify(mockRedisConnection())
+        .geoAdd("key".getBytes(), (Iterable<RedisGeoCommands.GeoLocation<byte[]>>) null);
   }
 
   @Test
   public void invokingGeoDistCreatesNewSpan() {
     commandCreatesNewSpan(RedisCommand.GEODIST, () -> getConnection().geoDist("key".getBytes(),
         "member1".getBytes(), "member2".getBytes()));
-    verify(mockRedisConnection()).geoDist("key".getBytes(), "member1".getBytes(), "member2".getBytes());
+    verify(mockRedisConnection())
+        .geoDist("key".getBytes(), "member1".getBytes(), "member2".getBytes());
 
     commandCreatesNewSpan(RedisCommand.GEODIST, () -> getConnection().geoDist("key".getBytes(),
         "member1".getBytes(), "member2".getBytes(), null));
-    verify(mockRedisConnection()).geoDist("key".getBytes(), "member1".getBytes(), "member2".getBytes(), null);
+    verify(mockRedisConnection())
+        .geoDist("key".getBytes(), "member1".getBytes(), "member2".getBytes(), null);
   }
 
   @Test
   public void invokingGeoHashCreatesNewSpan() {
-    commandCreatesNewSpan(RedisCommand.GEOHASH, () -> getConnection().geoHash("key".getBytes(), "member".getBytes()));
+    commandCreatesNewSpan(RedisCommand.GEOHASH,
+        () -> getConnection().geoHash("key".getBytes(), "member".getBytes()));
     verify(mockRedisConnection()).geoHash("key".getBytes(), "member".getBytes());
   }
 
   @Test
   public void invokingGeoPosCreatesNewSpan() {
-    commandCreatesNewSpan(RedisCommand.GEOPOS, () -> getConnection().geoPos("key".getBytes(), "member".getBytes()));
+    commandCreatesNewSpan(RedisCommand.GEOPOS,
+        () -> getConnection().geoPos("key".getBytes(), "member".getBytes()));
     verify(mockRedisConnection()).geoPos("key".getBytes(), "member".getBytes());
   }
 
   @Test
   public void invokingGeoRadiusCreatesNewSpan() {
-    commandCreatesNewSpan(RedisCommand.GEORADIUS, () -> getConnection().geoRadius("key".getBytes(), null));
+    commandCreatesNewSpan(RedisCommand.GEORADIUS,
+        () -> getConnection().geoRadius("key".getBytes(), null));
     verify(mockRedisConnection()).geoRadius("key".getBytes(), null);
 
-    commandCreatesNewSpan(RedisCommand.GEORADIUS, () -> getConnection().geoRadius("key".getBytes(), null,
-        RedisGeoCommands.GeoRadiusCommandArgs.newGeoRadiusArgs()));
+    commandCreatesNewSpan(RedisCommand.GEORADIUS,
+        () -> getConnection().geoRadius("key".getBytes(), null,
+            RedisGeoCommands.GeoRadiusCommandArgs.newGeoRadiusArgs()));
     verify(mockRedisConnection()).geoRadius(eq("key".getBytes()), isNull(),
         any(RedisGeoCommands.GeoRadiusCommandArgs.class));
   }
@@ -1198,9 +1310,11 @@ public class TracingRedisConnectionTest {
     verify(mockRedisConnection()).geoRadiusByMember("key".getBytes(), "member".getBytes(), null);
 
     commandCreatesNewSpan(RedisCommand.GEORADIUSBYMEMBER,
-        () -> getConnection().geoRadiusByMember("key".getBytes(), "member".getBytes(), null, RedisGeoCommands.GeoRadiusCommandArgs.newGeoRadiusArgs()));
-    verify(mockRedisConnection()).geoRadiusByMember(eq("key".getBytes()), eq("member".getBytes()), isNull(),
-        any(RedisGeoCommands.GeoRadiusCommandArgs.class));
+        () -> getConnection().geoRadiusByMember("key".getBytes(), "member".getBytes(), null,
+            RedisGeoCommands.GeoRadiusCommandArgs.newGeoRadiusArgs()));
+    verify(mockRedisConnection())
+        .geoRadiusByMember(eq("key".getBytes()), eq("member".getBytes()), isNull(),
+            any(RedisGeoCommands.GeoRadiusCommandArgs.class));
   }
 
   @Test
@@ -1212,7 +1326,8 @@ public class TracingRedisConnectionTest {
 
   @Test
   public void invokingPfAddCreatesNewSpan() {
-    commandCreatesNewSpan(RedisCommand.PFADD, () -> getConnection().pfAdd("key".getBytes(), "val".getBytes()));
+    commandCreatesNewSpan(RedisCommand.PFADD,
+        () -> getConnection().pfAdd("key".getBytes(), "val".getBytes()));
     verify(mockRedisConnection()).pfAdd("key".getBytes(), "val".getBytes());
   }
 
@@ -1224,7 +1339,8 @@ public class TracingRedisConnectionTest {
 
   @Test
   public void invokingPfMergeCreatesNewSpan() {
-    commandCreatesNewSpan(RedisCommand.PFMERGE, () -> getConnection().pfMerge("dst".getBytes(), "src".getBytes()));
+    commandCreatesNewSpan(RedisCommand.PFMERGE,
+        () -> getConnection().pfMerge("dst".getBytes(), "src".getBytes()));
     verify(mockRedisConnection()).pfMerge("dst".getBytes(), "src".getBytes());
   }
 

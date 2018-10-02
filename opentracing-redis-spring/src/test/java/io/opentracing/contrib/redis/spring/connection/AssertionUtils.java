@@ -13,15 +13,14 @@
  */
 package io.opentracing.contrib.redis.spring.connection;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import io.opentracing.Scope;
 import io.opentracing.mock.MockSpan;
 import io.opentracing.mock.MockTracer;
 import io.opentracing.tag.Tags;
-
 import java.util.Optional;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 /**
  * @author Daniel del Castillo
@@ -55,7 +54,8 @@ final class AssertionUtils {
         .filter((s) -> "java-redis".equals(s.tags().get(Tags.COMPONENT.getKey()))).findFirst();
 
     Optional<MockSpan> parentSpan =
-        tracer.finishedSpans().stream().filter((s) -> "parent".equals(s.operationName())).findFirst();
+        tracer.finishedSpans().stream().filter((s) -> "parent".equals(s.operationName()))
+            .findFirst();
 
     assertTrue(redisSpan.isPresent());
     assertTrue(parentSpan.isPresent());
@@ -64,6 +64,7 @@ final class AssertionUtils {
     assertEquals(redisSpan.get().parentId(), parentSpan.get().context().spanId());
   }
 
-  private AssertionUtils() {}
+  private AssertionUtils() {
+  }
 
 }
