@@ -13,8 +13,9 @@
  */
 package io.opentracing.contrib.redis.spring.processor;
 
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
+import io.opentracing.contrib.redis.spring.connection.TracingRedisConnectionFactory;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,14 +30,10 @@ import org.springframework.test.context.junit4.SpringRunner;
 public class RedisConnectionFactoryBeanPostProcessorTest {
 
   @Autowired
-  private RedisConnectionFactoryBeanPostProcessor redisConnectionFactoryBeanPostProcessor;
-
-  @Autowired
   private RedisConnectionFactory redisConnectionFactory;
 
   @Test
   public void test() {
-    assertNotNull(redisConnectionFactory);
-
+    assertTrue(redisConnectionFactory instanceof TracingRedisConnectionFactory);
   }
 }
