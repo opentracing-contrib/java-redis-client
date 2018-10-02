@@ -254,6 +254,7 @@ final class RedisCommand {
   static final String XREADGROUP = "XREADGROUP";
   static final String XPENDING = "XPENDING";
 
-  private RedisCommand() {}
+  private RedisCommand() {
+  }
 
 }

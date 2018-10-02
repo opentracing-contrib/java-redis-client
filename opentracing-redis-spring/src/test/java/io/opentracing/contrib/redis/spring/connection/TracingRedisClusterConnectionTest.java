@@ -86,31 +86,36 @@ public class TracingRedisClusterConnectionTest extends TracingRedisConnectionTes
 
   @Test
   public void invokingClusterGetSlaves() {
-    commandCreatesNewSpan(RedisCommand.CLUSTER_SLAVES, () -> getConnection().clusterGetSlaves(mockRedisClusterNode));
+    commandCreatesNewSpan(RedisCommand.CLUSTER_SLAVES,
+        () -> getConnection().clusterGetSlaves(mockRedisClusterNode));
     verify(mockRedisConnection()).clusterGetSlaves(mockRedisClusterNode);
   }
 
   @Test
   public void invokingClusterGetMasterSlaveMap() {
-    commandCreatesNewSpan(RedisCommand.CLUSTER_MASTER_SLAVE_MAP, () -> getConnection().clusterGetMasterSlaveMap());
+    commandCreatesNewSpan(RedisCommand.CLUSTER_MASTER_SLAVE_MAP,
+        () -> getConnection().clusterGetMasterSlaveMap());
     verify(mockRedisConnection()).clusterGetMasterSlaveMap();
   }
 
   @Test
   public void invokingClusterGetSlotForKey() {
-    commandCreatesNewSpan(RedisCommand.CLUSTER_KEYSLOT, () -> getConnection().clusterGetSlotForKey("key".getBytes()));
+    commandCreatesNewSpan(RedisCommand.CLUSTER_KEYSLOT,
+        () -> getConnection().clusterGetSlotForKey("key".getBytes()));
     verify(mockRedisConnection()).clusterGetSlotForKey("key".getBytes());
   }
 
   @Test
   public void invokingClusterGetNodeForSlot() {
-    commandCreatesNewSpan(RedisCommand.CLUSTER_NODE_FOR_SLOT, () -> getConnection().clusterGetNodeForSlot(0));
+    commandCreatesNewSpan(RedisCommand.CLUSTER_NODE_FOR_SLOT,
+        () -> getConnection().clusterGetNodeForSlot(0));
     verify(mockRedisConnection()).clusterGetNodeForSlot(0);
   }
 
   @Test
   public void invokingClusterGetNodeForKey() {
-    commandCreatesNewSpan(RedisCommand.CLUSTER_NODE_FOR_KEY, () -> getConnection().clusterGetNodeForKey("key".getBytes()));
+    commandCreatesNewSpan(RedisCommand.CLUSTER_NODE_FOR_KEY,
+        () -> getConnection().clusterGetNodeForKey("key".getBytes()));
     verify(mockRedisConnection()).clusterGetNodeForKey("key".getBytes());
   }
 
@@ -122,7 +127,8 @@ public class TracingRedisClusterConnectionTest extends TracingRedisConnectionTes
 
   @Test
   public void invokingClusterAddSlots() {
-    commandCreatesNewSpan(RedisCommand.CLUSTER_ADDSLOTS, () -> getConnection().clusterAddSlots(mockRedisClusterNode, 0));
+    commandCreatesNewSpan(RedisCommand.CLUSTER_ADDSLOTS,
+        () -> getConnection().clusterAddSlots(mockRedisClusterNode, 0));
     verify(mockRedisClusterConnection).clusterAddSlots(mockRedisClusterNode, 0);
 
     RedisClusterNode.SlotRange range = RedisClusterNode.SlotRange.empty();
@@ -133,13 +139,15 @@ public class TracingRedisClusterConnectionTest extends TracingRedisConnectionTes
 
   @Test
   public void invokingClusterCountKeysInSlot() {
-    commandCreatesNewSpan(RedisCommand.CLUSTER_COUNTKEYSINSLOT, () -> getConnection().clusterCountKeysInSlot(0));
+    commandCreatesNewSpan(RedisCommand.CLUSTER_COUNTKEYSINSLOT,
+        () -> getConnection().clusterCountKeysInSlot(0));
     verify(mockRedisConnection()).clusterCountKeysInSlot(0);
   }
 
   @Test
   public void invokingClusterDeleteSlots() {
-    commandCreatesNewSpan(RedisCommand.CLUSTER_DELSLOTS, () -> getConnection().clusterDeleteSlots(mockRedisClusterNode, 0));
+    commandCreatesNewSpan(RedisCommand.CLUSTER_DELSLOTS,
+        () -> getConnection().clusterDeleteSlots(mockRedisClusterNode, 0));
     verify(mockRedisConnection()).clusterDeleteSlots(mockRedisClusterNode, 0);
   }
 
@@ -153,21 +161,25 @@ public class TracingRedisClusterConnectionTest extends TracingRedisConnectionTes
 
   @Test
   public void invokingClusterForget() {
-    commandCreatesNewSpan(RedisCommand.CLUSTER_FORGET, () -> getConnection().clusterForget(mockRedisClusterNode));
+    commandCreatesNewSpan(RedisCommand.CLUSTER_FORGET,
+        () -> getConnection().clusterForget(mockRedisClusterNode));
     verify(mockRedisConnection()).clusterForget(mockRedisClusterNode);
   }
 
   @Test
   public void invokingClusterMeet() {
-    commandCreatesNewSpan(RedisCommand.CLUSTER_MEET, () -> getConnection().clusterMeet(mockRedisClusterNode));
+    commandCreatesNewSpan(RedisCommand.CLUSTER_MEET,
+        () -> getConnection().clusterMeet(mockRedisClusterNode));
     verify(mockRedisConnection()).clusterMeet(mockRedisClusterNode);
   }
 
   @Test
   public void invokingClusterSetSlot() {
-    commandCreatesNewSpan(RedisCommand.CLUSTER_SETSLOT, () -> getConnection().clusterSetSlot(mockRedisClusterNode, 0,
-        RedisClusterCommands.AddSlots.MIGRATING));
-    verify(mockRedisConnection()).clusterSetSlot(mockRedisClusterNode, 0, RedisClusterCommands.AddSlots.MIGRATING);
+    commandCreatesNewSpan(RedisCommand.CLUSTER_SETSLOT,
+        () -> getConnection().clusterSetSlot(mockRedisClusterNode, 0,
+            RedisClusterCommands.AddSlots.MIGRATING));
+    verify(mockRedisConnection())
+        .clusterSetSlot(mockRedisClusterNode, 0, RedisClusterCommands.AddSlots.MIGRATING);
   }
 
   @Test
@@ -180,8 +192,9 @@ public class TracingRedisClusterConnectionTest extends TracingRedisConnectionTes
   @Test
   public void invokingClusterReplicate() {
     RedisClusterNode slaveClusterNode = mock(RedisClusterNode.class);
-    commandCreatesNewSpan(RedisCommand.CLUSTER_REPLICATE, () -> getConnection().clusterReplicate(mockRedisClusterNode,
-        slaveClusterNode));
+    commandCreatesNewSpan(RedisCommand.CLUSTER_REPLICATE,
+        () -> getConnection().clusterReplicate(mockRedisClusterNode,
+            slaveClusterNode));
     verify(mockRedisConnection()).clusterReplicate(mockRedisClusterNode, slaveClusterNode);
   }
 
@@ -193,7 +206,8 @@ public class TracingRedisClusterConnectionTest extends TracingRedisConnectionTes
 
   @Test
   public void invokingBgReWriteAof() {
-    commandCreatesNewSpan(RedisCommand.BGREWRITEAOF, () -> getConnection().bgReWriteAof(mockRedisClusterNode));
+    commandCreatesNewSpan(RedisCommand.BGREWRITEAOF,
+        () -> getConnection().bgReWriteAof(mockRedisClusterNode));
     verify(mockRedisConnection()).bgReWriteAof(mockRedisClusterNode);
   }
 
@@ -205,7 +219,8 @@ public class TracingRedisClusterConnectionTest extends TracingRedisConnectionTes
 
   @Test
   public void invokingLastSave() {
-    commandCreatesNewSpan(RedisCommand.LASTSAVE, () -> getConnection().lastSave(mockRedisClusterNode));
+    commandCreatesNewSpan(RedisCommand.LASTSAVE,
+        () -> getConnection().lastSave(mockRedisClusterNode));
     verify(mockRedisConnection()).lastSave(mockRedisClusterNode);
   }
 
@@ -223,13 +238,15 @@ public class TracingRedisClusterConnectionTest extends TracingRedisConnectionTes
 
   @Test
   public void invokingFlushDb() {
-    commandCreatesNewSpan(RedisCommand.FLUSHDB, () -> getConnection().flushDb(mockRedisClusterNode));
+    commandCreatesNewSpan(RedisCommand.FLUSHDB,
+        () -> getConnection().flushDb(mockRedisClusterNode));
     verify(mockRedisConnection()).flushDb(mockRedisClusterNode);
   }
 
   @Test
   public void invokingFlushAll() {
-    commandCreatesNewSpan(RedisCommand.FLUSHALL, () -> getConnection().flushAll(mockRedisClusterNode));
+    commandCreatesNewSpan(RedisCommand.FLUSHALL,
+        () -> getConnection().flushAll(mockRedisClusterNode));
     verify(mockRedisConnection()).flushAll(mockRedisClusterNode);
   }
 
@@ -238,43 +255,50 @@ public class TracingRedisClusterConnectionTest extends TracingRedisConnectionTes
     commandCreatesNewSpan(RedisCommand.INFO, () -> getConnection().info(mockRedisClusterNode));
     verify(mockRedisConnection()).info(mockRedisClusterNode);
 
-    commandCreatesNewSpan(RedisCommand.INFO, () -> getConnection().info(mockRedisClusterNode, "section"));
+    commandCreatesNewSpan(RedisCommand.INFO,
+        () -> getConnection().info(mockRedisClusterNode, "section"));
     verify(mockRedisConnection()).info(mockRedisClusterNode, "section");
   }
 
   @Test
   public void invokingKeys() {
-    commandCreatesNewSpan(RedisCommand.KEYS, () -> getConnection().keys(mockRedisClusterNode, "pattern".getBytes()));
+    commandCreatesNewSpan(RedisCommand.KEYS,
+        () -> getConnection().keys(mockRedisClusterNode, "pattern".getBytes()));
     verify(mockRedisConnection()).keys(mockRedisClusterNode, "pattern".getBytes());
   }
 
   @Test
   public void invokingRandomKey() {
-    commandCreatesNewSpan(RedisCommand.RANDOMKEY, () -> getConnection().randomKey(mockRedisClusterNode));
+    commandCreatesNewSpan(RedisCommand.RANDOMKEY,
+        () -> getConnection().randomKey(mockRedisClusterNode));
     verify(mockRedisConnection()).randomKey(mockRedisClusterNode);
   }
 
   @Test
   public void invokingShutdown() {
-    commandCreatesNewSpan(RedisCommand.SHUTDOWN, () -> getConnection().shutdown(mockRedisClusterNode));
+    commandCreatesNewSpan(RedisCommand.SHUTDOWN,
+        () -> getConnection().shutdown(mockRedisClusterNode));
     verify(mockRedisConnection()).shutdown(mockRedisClusterNode);
   }
 
   @Test
   public void invokingGetConfig() {
-    commandCreatesNewSpan(RedisCommand.CONFIG_GET, () -> getConnection().getConfig(mockRedisClusterNode, "pattern"));
+    commandCreatesNewSpan(RedisCommand.CONFIG_GET,
+        () -> getConnection().getConfig(mockRedisClusterNode, "pattern"));
     verify(mockRedisConnection()).getConfig(mockRedisClusterNode, "pattern");
   }
 
   @Test
   public void invokingSetConfig() {
-    commandCreatesNewSpan(RedisCommand.CONFIG_SET, () -> getConnection().setConfig(mockRedisClusterNode, "param", "val"));
+    commandCreatesNewSpan(RedisCommand.CONFIG_SET,
+        () -> getConnection().setConfig(mockRedisClusterNode, "param", "val"));
     verify(mockRedisConnection()).setConfig(mockRedisClusterNode, "param", "val");
   }
 
   @Test
   public void invokingResetConfigStats() {
-    commandCreatesNewSpan(RedisCommand.CONFIG_RESETSTAT, () -> getConnection().resetConfigStats(mockRedisClusterNode));
+    commandCreatesNewSpan(RedisCommand.CONFIG_RESETSTAT,
+        () -> getConnection().resetConfigStats(mockRedisClusterNode));
     verify(mockRedisConnection()).resetConfigStats(mockRedisClusterNode);
   }
 
@@ -286,7 +310,8 @@ public class TracingRedisClusterConnectionTest extends TracingRedisConnectionTes
 
   @Test
   public void invokingGetClientList() {
-    commandCreatesNewSpan(RedisCommand.CLIENT_LIST, () -> getConnection().getClientList(mockRedisClusterNode));
+    commandCreatesNewSpan(RedisCommand.CLIENT_LIST,
+        () -> getConnection().getClientList(mockRedisClusterNode));
     verify(mockRedisConnection()).getClientList(mockRedisClusterNode);
   }
 

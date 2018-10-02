@@ -36,8 +36,10 @@ import org.springframework.data.redis.connection.RedisSentinelConnection;
 @RunWith(MockitoJUnitRunner.class)
 public class TracingRedisConnectionFactoryTest {
 
-  private @Mock Tracer tracer;
-  private @Mock RedisConnectionFactory delegate;
+  private @Mock
+  Tracer tracer;
+  private @Mock
+  RedisConnectionFactory delegate;
 
   private TracingRedisConnectionFactory connectionFactory;
 
@@ -68,11 +70,11 @@ public class TracingRedisConnectionFactoryTest {
 
   @Test
   public void delegatesCallToGetSentinelConnection() {
-      RedisSentinelConnection sentinelConnection = mock(RedisSentinelConnection.class);
-      when(connectionFactory.getSentinelConnection()).thenReturn(sentinelConnection);
-      RedisSentinelConnection connection = connectionFactory.getSentinelConnection();
-      verify(delegate).getSentinelConnection();
-      assertEquals(sentinelConnection, connection);
+    RedisSentinelConnection sentinelConnection = mock(RedisSentinelConnection.class);
+    when(connectionFactory.getSentinelConnection()).thenReturn(sentinelConnection);
+    RedisSentinelConnection connection = connectionFactory.getSentinelConnection();
+    verify(delegate).getSentinelConnection();
+    assertEquals(sentinelConnection, connection);
   }
 
   @Test

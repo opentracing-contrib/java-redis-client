@@ -15,6 +15,9 @@ package io.opentracing.contrib.redis.spring.connection;
 
 import io.opentracing.Tracer;
 import org.springframework.dao.DataAccessException;
+import org.springframework.data.redis.connection.ReactiveRedisClusterConnection;
+import org.springframework.data.redis.connection.ReactiveRedisConnection;
+import org.springframework.data.redis.connection.ReactiveRedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisClusterConnection;
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -28,41 +31,60 @@ import org.springframework.data.redis.connection.RedisSentinelConnection;
  *
  * @author Daniel del Castillo
  */
-public class TracingRedisConnectionFactory implements RedisConnectionFactory {
+public class TracingRedisConnectionFactory implements RedisConnectionFactory,
+    ReactiveRedisConnectionFactory {
 
-    private final RedisConnectionFactory delegate;
-    private final boolean withActiveSpanOnly;
-    private final Tracer tracer;
+  private final RedisConnectionFactory delegate;
+  private final boolean withActiveSpanOnly;
+  private final Tracer tracer;
 
-    public TracingRedisConnectionFactory(RedisConnectionFactory delegate, boolean withActiveSpanOnly, Tracer tracer) {
-        this.delegate = delegate;
-        this.withActiveSpanOnly = withActiveSpanOnly;
-        this.tracer = tracer;
+  public TracingRedisConnectionFactory(RedisConnectionFactory delegate, boolean withActiveSpanOnly,
+      Tracer tracer) {
+    this.delegate = delegate;
+    this.withActiveSpanOnly = withActiveSpanOnly;
+    this.tracer = tracer;
+  }
+
+  @Override
+  public RedisConnection getConnection() {
+    return new TracingRedisConnection(delegate.getConnection(), withActiveSpanOnly, tracer);
+  }
+
+  @Override
+  public RedisClusterConnection getClusterConnection() {
+    return new TracingRedisClusterConnection(delegate.getClusterConnection(), withActiveSpanOnly,
+        tracer);
+  }
+
+  @Override
+  public boolean getConvertPipelineAndTxResults() {
+    return delegate.getConvertPipelineAndTxResults();
+  }
+
+  @Override
+  public RedisSentinelConnection getSentinelConnection() {
+    return delegate.getSentinelConnection();
+  }
+
+  @Override
+  public DataAccessException translateExceptionIfPossible(RuntimeException e) {
+    return delegate.translateExceptionIfPossible(e);
+  }
+
+  @Override
+  public ReactiveRedisConnection getReactiveConnection() {
+    if (delegate instanceof ReactiveRedisConnectionFactory) {
+      return new TracingReactiveRedisConnection((ReactiveRedisConnection) delegate,
+          withActiveSpanOnly, tracer);
     }
+    return null;
+  }
 
-    @Override
-    public RedisConnection getConnection() {
-        return new TracingRedisConnection(delegate.getConnection(), withActiveSpanOnly, tracer);
+  @Override
+  public ReactiveRedisClusterConnection getReactiveClusterConnection() {
+    if (delegate instanceof ReactiveRedisConnectionFactory) {
+      return ((ReactiveRedisConnectionFactory) delegate).getReactiveClusterConnection();
     }
-
-    @Override
-    public RedisClusterConnection getClusterConnection() {
-        return new TracingRedisClusterConnection(delegate.getClusterConnection(), withActiveSpanOnly, tracer);
-    }
-
-    @Override
-    public boolean getConvertPipelineAndTxResults() {
-        return delegate.getConvertPipelineAndTxResults();
-    }
-
-    @Override
-    public RedisSentinelConnection getSentinelConnection() {
-        return delegate.getSentinelConnection();
-    }
-
-    @Override
-    public DataAccessException translateExceptionIfPossible(RuntimeException e) {
-        return delegate.translateExceptionIfPossible(e);
-    }
-
+    return null;
+  }
 }
