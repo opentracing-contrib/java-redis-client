@@ -14,11 +14,14 @@
 package io.opentracing.contrib.redis.lettuce;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
 
 import io.lettuce.core.RedisClient;
 import io.lettuce.core.api.StatefulRedisConnection;
 import io.lettuce.core.api.async.RedisAsyncCommands;
 import io.lettuce.core.api.sync.RedisCommands;
+import io.opentracing.Scope;
+import io.opentracing.Span;
 import io.opentracing.mock.MockSpan;
 import io.opentracing.mock.MockTracer;
 import io.opentracing.util.ThreadLocalScopeManager;
@@ -87,6 +90,32 @@ public class TracingLettuceTest {
 
     client.shutdown();
 
+    List<MockSpan> spans = mockTracer.finishedSpans();
+    assertEquals(2, spans.size());
+  }
+
+  @Test
+  public void async_continue_span() throws Exception {
+    try (Scope scope = mockTracer.buildSpan("test").startActive(true)){
+      Span activeSpan = mockTracer.activeSpan();
+
+      RedisClient client = RedisClient.create("redis://localhost");
+
+      StatefulRedisConnection<String, String> connection =
+              new TracingStatefulRedisConnection<>(client.connect(), mockTracer, false);
+
+      RedisAsyncCommands<String, String> commands = connection.async();
+
+      assertEquals("OK",
+              commands.set("key2", "value2").toCompletableFuture().thenApply(s -> {
+                assertSame(activeSpan,mockTracer.activeSpan());
+                return s;
+              }).get(15, TimeUnit.SECONDS));
+
+      connection.close();
+
+      client.shutdown();
+    }
     List<MockSpan> spans = mockTracer.finishedSpans();
     assertEquals(2, spans.size());
   }
