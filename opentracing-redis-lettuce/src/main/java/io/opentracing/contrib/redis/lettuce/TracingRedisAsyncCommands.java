@@ -56,8 +56,8 @@ import io.lettuce.core.protocol.ProtocolKeyword;
 import io.opentracing.Scope;
 import io.opentracing.Span;
 import io.opentracing.Tracer;
-import io.opentracing.contrib.redis.common.TracingHelper;
 import io.opentracing.contrib.redis.common.RedisSpanNameProvider;
+import io.opentracing.contrib.redis.common.TracingHelper;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Date;
@@ -673,7 +673,7 @@ public class TracingRedisAsyncCommands<K, V> implements RedisAsyncCommands<K, V>
   @Override
   public RedisFuture<V> get(K key) {
     Span span = helper.buildSpan("get", key);
-    return prepareRedisFuture(prepareRedisFuture(commands.get(key), span), span);
+    return prepareRedisFuture(commands.get(key), span);
   }
 
   @Override
@@ -745,7 +745,7 @@ public class TracingRedisAsyncCommands<K, V> implements RedisAsyncCommands<K, V>
   @Override
   public RedisFuture<String> set(K key, V value) {
     Span span = helper.buildSpan("set", key);
-    return prepareRedisFuture(prepareRedisFuture(commands.set(key, value), span), span);
+    return prepareRedisFuture(commands.set(key, value), span);
   }
 
   @Override
@@ -1934,7 +1934,8 @@ public class TracingRedisAsyncCommands<K, V> implements RedisAsyncCommands<K, V>
     Span span = helper.buildSpan("zrevrangebyscoreWithScores", key);
     span.setTag("range", nullable(range));
     span.setTag("limit", nullable(limit));
-    return prepareRedisFuture(commands.zrevrangebyscoreWithScores(channel, key, range, limit), span);
+    return prepareRedisFuture(commands.zrevrangebyscoreWithScores(channel, key, range, limit),
+        span);
   }
 
   @Override
@@ -2844,7 +2845,7 @@ public class TracingRedisAsyncCommands<K, V> implements RedisAsyncCommands<K, V>
   }
 
   protected <V> RedisFuture<V> prepareRedisFuture(RedisFuture<V> future, Span span) {
-    return continueScopeSpan(setCompleteAction(future,span));
+    return continueScopeSpan(setCompleteAction(future, span));
   }
 
   protected <V> RedisFuture<V> setCompleteAction(RedisFuture<V> future, Span span) {
@@ -2858,11 +2859,11 @@ public class TracingRedisAsyncCommands<K, V> implements RedisAsyncCommands<K, V>
     return future;
   }
 
-  protected <T> RedisFuture<T> continueScopeSpan(RedisFuture<T> redisFuture){
+  protected <T> RedisFuture<T> continueScopeSpan(RedisFuture<T> redisFuture) {
     Span span = tracer.activeSpan();
     CompletableRedisFuture<T> customRedisFuture = new CompletableRedisFuture<>(redisFuture);
     redisFuture.whenComplete((v, throwable) -> {
-      try (Scope ignored = tracer.scopeManager().activate(span,false)) {
+      try (Scope ignored = tracer.scopeManager().activate(span, false)) {
         if (throwable != null) {
           customRedisFuture.completeExceptionally(throwable);
         } else {

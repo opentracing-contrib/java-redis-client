@@ -13,29 +13,28 @@
  */
 package io.opentracing.contrib.redis.jedis;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
 
 import io.opentracing.mock.MockSpan;
 import io.opentracing.mock.MockTracer;
 import io.opentracing.util.ThreadLocalScopeManager;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisSentinelPool;
 import redis.clients.jedis.Protocol;
 import redis.embedded.RedisSentinel;
 import redis.embedded.RedisServer;
 
-import static org.junit.Assert.assertEquals;
-
 public class TracingJedisSentinelPoolTest {
 
-  private MockTracer mockTracer = new MockTracer(new ThreadLocalScopeManager(), MockTracer.Propagator.TEXT_MAP);
+  private MockTracer mockTracer = new MockTracer(new ThreadLocalScopeManager(),
+      MockTracer.Propagator.TEXT_MAP);
 
   private RedisServer redisServer;
 
@@ -69,7 +68,8 @@ public class TracingJedisSentinelPoolTest {
 
   @Test
   public void testSentinelPoolReturnsTracedJedis() {
-    JedisSentinelPool pool = new TracingJedisSentinelPool(mockTracer, false, MASTER_NAME, sentinels, new GenericObjectPoolConfig());
+    JedisSentinelPool pool = new TracingJedisSentinelPool(mockTracer, false, MASTER_NAME, sentinels,
+        new GenericObjectPoolConfig());
     Jedis jedis = pool.getResource();
     assertEquals("OK", jedis.set("key", "value"));
     assertEquals("value", jedis.get("key"));
@@ -82,7 +82,8 @@ public class TracingJedisSentinelPoolTest {
 
   @Test
   public void testClosingTracedJedisClosesUnderlyingJedis() {
-    JedisSentinelPool pool = new TracingJedisSentinelPool(mockTracer, false, MASTER_NAME, sentinels, new GenericObjectPoolConfig());
+    JedisSentinelPool pool = new TracingJedisSentinelPool(mockTracer, false, MASTER_NAME, sentinels,
+        new GenericObjectPoolConfig());
     Jedis resource = pool.getResource();
     assertEquals(1, pool.getNumActive());
 

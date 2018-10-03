@@ -14,19 +14,18 @@
 
 package io.opentracing.contrib.redis.common;
 
-import java.util.function.Function;
+import static org.junit.Assert.assertEquals;
 
+import java.util.function.Function;
 import org.junit.Before;
 import org.junit.Test;
-
-import static org.junit.Assert.assertEquals;
 
 
 public class RedisSpanNameProviderTest {
 
   private String prefix = "redis.";
-  String actual = "";
-  Function<String, String> prefixSpanName;
+  private String actual = "";
+  private Function<String, String> prefixSpanName;
 
   @Before
   public void setUp() {

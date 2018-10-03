@@ -22,11 +22,11 @@ import io.opentracing.contrib.redis.common.RedisSpanNameProvider;
 import io.opentracing.contrib.redis.common.TracingHelper;
 import java.net.URI;
 import java.util.Arrays;
-import java.util.function.Function;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.function.Function;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLParameters;
 import javax.net.ssl.SSLSocketFactory;
@@ -60,13 +60,13 @@ import redis.clients.util.Pool;
 import redis.clients.util.Slowlog;
 
 
-
 public class TracingJedis extends Jedis {
 
   private final TracingHelper helper;
   private Function<String, String> redisSpanNameProvider;
 
-  public TracingJedis(Tracer tracer, boolean traceWithActiveSpanOnly, Function<String, String> redisSpanNameProvider) {
+  public TracingJedis(Tracer tracer, boolean traceWithActiveSpanOnly,
+      Function<String, String> redisSpanNameProvider) {
     super();
     this.redisSpanNameProvider = redisSpanNameProvider;
     this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly, this.redisSpanNameProvider);

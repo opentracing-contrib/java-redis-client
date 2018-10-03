@@ -23,11 +23,11 @@ import io.opentracing.contrib.redis.common.TracingHelper;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.function.Function;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.function.Function;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import redis.clients.jedis.BinaryClient.LIST_POSITION;
 import redis.clients.jedis.BinaryJedisPubSub;
@@ -56,7 +56,8 @@ public class TracingJedisCluster extends JedisCluster {
   private final TracingHelper helper;
   private Function<String, String> redisSpanNameProvider;
 
-  public TracingJedisCluster(HostAndPort node, Tracer tracer, boolean traceWithActiveSpanOnly, Function<String, String> redisSpanNameProvider) {
+  public TracingJedisCluster(HostAndPort node, Tracer tracer, boolean traceWithActiveSpanOnly,
+      Function<String, String> redisSpanNameProvider) {
     super(node);
     this.redisSpanNameProvider = redisSpanNameProvider;
     this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly, this.redisSpanNameProvider);
@@ -162,8 +163,10 @@ public class TracingJedisCluster extends JedisCluster {
     this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly, redisSpanNameProvider);
   }
 
-  public TracingJedisCluster(Set<HostAndPort> jedisClusterNode, int connectionTimeout, int soTimeout, int maxAttempts,
-      GenericObjectPoolConfig poolConfig, Tracer tracer, boolean traceWithActiveSpanOnly, Function<String, String> customSpanNameProvider) {
+  public TracingJedisCluster(Set<HostAndPort> jedisClusterNode, int connectionTimeout,
+      int soTimeout, int maxAttempts,
+      GenericObjectPoolConfig poolConfig, Tracer tracer, boolean traceWithActiveSpanOnly,
+      Function<String, String> customSpanNameProvider) {
     super(jedisClusterNode, connectionTimeout, soTimeout, maxAttempts, poolConfig);
     this.redisSpanNameProvider = customSpanNameProvider;
     this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly, redisSpanNameProvider);

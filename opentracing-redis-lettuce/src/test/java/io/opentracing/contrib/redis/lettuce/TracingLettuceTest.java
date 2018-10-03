@@ -96,21 +96,21 @@ public class TracingLettuceTest {
 
   @Test
   public void async_continue_span() throws Exception {
-    try (Scope scope = mockTracer.buildSpan("test").startActive(true)){
+    try (Scope scope = mockTracer.buildSpan("test").startActive(true)) {
       Span activeSpan = mockTracer.activeSpan();
 
       RedisClient client = RedisClient.create("redis://localhost");
 
       StatefulRedisConnection<String, String> connection =
-              new TracingStatefulRedisConnection<>(client.connect(), mockTracer, false);
+          new TracingStatefulRedisConnection<>(client.connect(), mockTracer, false);
 
       RedisAsyncCommands<String, String> commands = connection.async();
 
       assertEquals("OK",
-              commands.set("key2", "value2").toCompletableFuture().thenApply(s -> {
-                assertSame(activeSpan,mockTracer.activeSpan());
-                return s;
-              }).get(15, TimeUnit.SECONDS));
+          commands.set("key2", "value2").toCompletableFuture().thenApply(s -> {
+            assertSame(activeSpan, mockTracer.activeSpan());
+            return s;
+          }).get(15, TimeUnit.SECONDS));
 
       connection.close();
 

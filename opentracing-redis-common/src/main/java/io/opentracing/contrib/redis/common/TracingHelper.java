@@ -41,7 +41,8 @@ public class TracingHelper {
     this.spanNameProvider = RedisSpanNameProvider.OPERATION_NAME;
   }
 
-  public TracingHelper(Tracer tracer, boolean traceWithActiveSpanOnly, Function<String, String> spanNameProvider) {
+  public TracingHelper(Tracer tracer, boolean traceWithActiveSpanOnly,
+      Function<String, String> spanNameProvider) {
     this.tracer = tracer;
     this.traceWithActiveSpanOnly = traceWithActiveSpanOnly;
     this.spanNameProvider = spanNameProvider;

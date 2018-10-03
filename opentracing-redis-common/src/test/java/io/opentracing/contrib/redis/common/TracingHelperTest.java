@@ -14,24 +14,24 @@
 
 package io.opentracing.contrib.redis.common;
 
-import java.util.function.Function;
-import org.junit.Before;
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
 import io.opentracing.Tracer;
 import io.opentracing.mock.MockSpan;
 import io.opentracing.mock.MockTracer;
-
-import static org.junit.Assert.assertEquals;
+import java.util.function.Function;
+import org.junit.Before;
+import org.junit.Test;
 
 
 public class TracingHelperTest {
 
-  Tracer mockTracer = new MockTracer();
+  private Tracer mockTracer = new MockTracer();
   private MockSpan span;
   private String prefix = "redis.";
-  Function<String, String> prefixSpanName;
-  TracingHelper helperWithProvider;
-  TracingHelper helperWithoutProvider;
+  private Function<String, String> prefixSpanName;
+  private TracingHelper helperWithProvider;
+  private TracingHelper helperWithoutProvider;
 
   @Before
   public void setUp() {
