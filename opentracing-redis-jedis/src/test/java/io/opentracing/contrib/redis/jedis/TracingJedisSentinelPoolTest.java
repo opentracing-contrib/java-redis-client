@@ -75,6 +75,7 @@ public class TracingJedisSentinelPoolTest {
     assertEquals("value", jedis.get("key"));
 
     jedis.close();
+    pool.destroy();
 
     List<MockSpan> spans = mockTracer.finishedSpans();
     assertEquals(2, spans.size());
@@ -96,5 +97,7 @@ public class TracingJedisSentinelPoolTest {
     assertEquals(1, pool.getNumActive());
     assertEquals(0, pool.getNumIdle());
     nextResource.close();
+
+    pool.destroy();
   }
 }
