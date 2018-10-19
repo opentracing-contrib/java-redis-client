@@ -30,7 +30,7 @@ import java.util.function.Function;
 
 public class TracingHelper {
 
-  private static final String COMPONENT_NAME = "java-redis";
+  public static final String COMPONENT_NAME = "java-redis";
   private final Tracer tracer;
   private final boolean traceWithActiveSpanOnly;
   private final Function<String, String> spanNameProvider;

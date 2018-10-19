@@ -16,6 +16,7 @@ package io.opentracing.contrib.redis.spring.connection;
 import io.opentracing.Scope;
 import io.opentracing.Span;
 import io.opentracing.Tracer;
+import io.opentracing.contrib.redis.common.TracingHelper;
 import io.opentracing.noop.NoopScopeManager.NoopScope;
 import io.opentracing.tag.StringTag;
 import io.opentracing.tag.Tags;
@@ -33,30 +34,31 @@ import java.util.function.Supplier;
  */
 class RedisTracingUtils {
 
-  static final String COMPONENT_NAME = "java-redis";
-  public static final StringTag COMMAND_TAG = new StringTag("command");
+  private static final StringTag COMMAND_TAG = new StringTag("command");
   private static final String REDIS_COMMAND = "RedisCommand";
 
   static <T> T doInScope(String command, Supplier<T> supplier, boolean withActiveSpanOnly,
       Tracer tracer) {
-    try (Scope ignored =
-        RedisTracingUtils.buildScope(REDIS_COMMAND, command, withActiveSpanOnly, tracer)) {
+    Scope scope =
+        RedisTracingUtils.buildScope(command, withActiveSpanOnly, tracer);
+    try {
       return supplier.get();
+    } catch (Exception e) {
+      TracingHelper.onError(e, scope.span());
+      throw e;
+    } finally {
+      scope.close();
     }
   }
 
-  static Scope buildScope(String operationName, String command, boolean withActiveSpanOnly) {
-    return buildScope(operationName, command, withActiveSpanOnly, null);
-  }
-
-  static Scope buildScope(String operationName, String command, boolean withActiveSpanOnly,
+  private static Scope buildScope(String command, boolean withActiveSpanOnly,
       Tracer tracer) {
-    Tracer currentTracer = getNullsafeTracer(tracer);
+    Tracer currentTracer = getNullSafeTracer(tracer);
     if (withActiveSpanOnly && currentTracer.activeSpan() == null) {
       return NoopScope.INSTANCE;
     }
 
-    Tracer.SpanBuilder spanBuilder = currentTracer.buildSpan(operationName)
+    Tracer.SpanBuilder spanBuilder = currentTracer.buildSpan(RedisTracingUtils.REDIS_COMMAND)
         .withTag(Tags.SPAN_KIND.getKey(), Tags.SPAN_KIND_CLIENT);
 
     Scope scope = spanBuilder.startActive(true);
@@ -65,7 +67,7 @@ class RedisTracingUtils {
     return scope;
   }
 
-  private static Tracer getNullsafeTracer(final Tracer tracer) {
+  private static Tracer getNullSafeTracer(final Tracer tracer) {
     if (tracer == null) {
       return GlobalTracer.get();
     }
@@ -73,7 +75,7 @@ class RedisTracingUtils {
   }
 
   private static void decorate(Span span, String command) {
-    Tags.COMPONENT.set(span, COMPONENT_NAME);
+    Tags.COMPONENT.set(span, TracingHelper.COMPONENT_NAME);
     COMMAND_TAG.set(span, command);
   }
 
