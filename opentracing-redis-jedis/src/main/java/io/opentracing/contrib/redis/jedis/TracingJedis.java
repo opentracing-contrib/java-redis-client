@@ -207,14 +207,7 @@ public class TracingJedis extends Jedis {
   public String set(String key, String value) {
     Span span = helper.buildSpan("set", key);
     span.setTag("value", value);
-    try {
-      return super.set(key, value);
-    } catch (Exception e) {
-      onError(e, span);
-      throw e;
-    } finally {
-      span.finish();
-    }
+    return TracingHelper.doInScope(span, () -> super.set(key, value));
   }
 
   @Override
@@ -237,14 +230,7 @@ public class TracingJedis extends Jedis {
   @Override
   public String get(String key) {
     Span span = helper.buildSpan("get", key);
-    try {
-      return super.get(key);
-    } catch (Exception e) {
-      onError(e, span);
-      throw e;
-    } finally {
-      span.finish();
-    }
+    return TracingHelper.doInScope(span, () -> super.get(key));
   }
 
   @Override
@@ -6139,41 +6125,20 @@ public class TracingJedis extends Jedis {
   @Override
   public Long slowlogLen() {
     Span span = helper.buildSpan("slowlogLen");
-    try {
-      return super.slowlogLen();
-    } catch (Exception e) {
-      onError(e, span);
-      throw e;
-    } finally {
-      span.finish();
-    }
+    return TracingHelper.doInScope(span, super::slowlogLen);
   }
 
   @Override
   public List<byte[]> slowlogGetBinary() {
     Span span = helper.buildSpan("slowlogGetBinary");
-    try {
-      return super.slowlogGetBinary();
-    } catch (Exception e) {
-      onError(e, span);
-      throw e;
-    } finally {
-      span.finish();
-    }
+    return TracingHelper.doInScope(span, super::slowlogGetBinary);
   }
 
   @Override
   public List<byte[]> slowlogGetBinary(long entries) {
     Span span = helper.buildSpan("slowlogGetBinary");
     span.setTag("entries", entries);
-    try {
-      return super.slowlogGetBinary(entries);
-    } catch (Exception e) {
-      onError(e, span);
-      throw e;
-    } finally {
-      span.finish();
-    }
+    return TracingHelper.doInScope(span, () -> super.slowlogGetBinary(entries));
   }
 
   @Override

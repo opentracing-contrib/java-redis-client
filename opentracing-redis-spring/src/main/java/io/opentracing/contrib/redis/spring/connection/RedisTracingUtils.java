@@ -13,6 +13,8 @@
  */
 package io.opentracing.contrib.redis.spring.connection;
 
+import static io.opentracing.contrib.redis.common.TracingHelper.getNullSafeTracer;
+
 import io.opentracing.Scope;
 import io.opentracing.Span;
 import io.opentracing.Tracer;
@@ -20,7 +22,6 @@ import io.opentracing.contrib.redis.common.TracingHelper;
 import io.opentracing.noop.NoopScopeManager.NoopScope;
 import io.opentracing.tag.StringTag;
 import io.opentracing.tag.Tags;
-import io.opentracing.util.GlobalTracer;
 import java.util.function.Supplier;
 
 
@@ -65,13 +66,6 @@ class RedisTracingUtils {
     decorate(scope.span(), command);
 
     return scope;
-  }
-
-  private static Tracer getNullSafeTracer(final Tracer tracer) {
-    if (tracer == null) {
-      return GlobalTracer.get();
-    }
-    return tracer;
   }
 
   private static void decorate(Span span, String command) {

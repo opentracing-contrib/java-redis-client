@@ -178,7 +178,8 @@ public class TracingRedisConnection implements RedisConnection {
 
   @Override
   public RedisSentinelConnection getSentinelConnection() {
-    return connection.getSentinelConnection();
+    return new TracingRedisSentinelConnection(connection.getSentinelConnection(),
+        withActiveSpanOnly, tracer);
   }
 
   @Override

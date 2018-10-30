@@ -13,11 +13,13 @@
  */
 package io.opentracing.contrib.redis.common;
 
+import io.opentracing.Scope;
 import io.opentracing.Span;
 import io.opentracing.Tracer;
 import io.opentracing.Tracer.SpanBuilder;
 import io.opentracing.noop.NoopSpan;
 import io.opentracing.tag.Tags;
+import io.opentracing.util.GlobalTracer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -26,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 
 public class TracingHelper {
@@ -48,43 +51,54 @@ public class TracingHelper {
     this.spanNameProvider = spanNameProvider;
   }
 
-
-  private SpanBuilder builder(String operationName) {
-    return tracer.buildSpan(this.spanNameProvider.apply(operationName))
+  private static SpanBuilder builder(String operationName, Tracer tracer,
+      Function<String, String> spanNameProvider) {
+    return getNullSafeTracer(tracer).buildSpan(spanNameProvider.apply(operationName))
         .withTag(Tags.COMPONENT.getKey(), COMPONENT_NAME)
         .withTag(Tags.SPAN_KIND.getKey(), Tags.SPAN_KIND_CLIENT)
         .withTag(Tags.DB_TYPE.getKey(), "redis");
   }
 
-  public Span buildSpan(String operationName) {
-    if (traceWithActiveSpanOnly && tracer.activeSpan() == null) {
+  public static Span buildSpan(String operationName, boolean traceWithActiveSpanOnly,
+      Tracer tracer) {
+    if (traceWithActiveSpanOnly && getNullSafeTracer(tracer).activeSpan() == null) {
       return NoopSpan.INSTANCE;
     } else {
-      return builder(operationName).start();
+      return builder(operationName, tracer, RedisSpanNameProvider.OPERATION_NAME).start();
+    }
+  }
+
+  public Span buildSpan(String operationName) {
+    if (traceWithActiveSpanOnly && getNullSafeTracer(tracer).activeSpan() == null) {
+      return NoopSpan.INSTANCE;
+    } else {
+      return builder(operationName, tracer, spanNameProvider).start();
     }
   }
 
   public Span buildSpan(String operationName, Object key) {
-    if (traceWithActiveSpanOnly && tracer.activeSpan() == null) {
+    if (traceWithActiveSpanOnly && getNullSafeTracer(tracer).activeSpan() == null) {
       return NoopSpan.INSTANCE;
     } else {
-      return builder(operationName).withTag("key", nullable(key)).start();
+      return builder(operationName, tracer, spanNameProvider).withTag("key", nullable(key)).start();
     }
   }
 
   public Span buildSpan(String operationName, byte[] key) {
-    if (traceWithActiveSpanOnly && tracer.activeSpan() == null) {
+    if (traceWithActiveSpanOnly && getNullSafeTracer(tracer).activeSpan() == null) {
       return NoopSpan.INSTANCE;
     } else {
-      return builder(operationName).withTag("key", Arrays.toString(key)).start();
+      return builder(operationName, tracer, spanNameProvider).withTag("key", Arrays.toString(key))
+          .start();
     }
   }
 
   public Span buildSpan(String operationName, Object[] keys) {
-    if (traceWithActiveSpanOnly && tracer.activeSpan() == null) {
+    if (traceWithActiveSpanOnly && getNullSafeTracer(tracer).activeSpan() == null) {
       return NoopSpan.INSTANCE;
     } else {
-      return builder(operationName).withTag("keys", Arrays.toString(keys)).start();
+      return builder(operationName, tracer, spanNameProvider).withTag("keys", Arrays.toString(keys))
+          .start();
     }
   }
 
@@ -175,5 +189,57 @@ public class TracingHelper {
     }
 
     return "{" + String.join(", ", list) + "}";
+  }
+
+  public static Tracer getNullSafeTracer(final Tracer tracer) {
+    if (tracer == null) {
+      return GlobalTracer.get();
+    }
+    return tracer;
+  }
+
+  public static <T extends Exception> void doInScopeExceptionally(String operationName,
+      ThrowingAction<T> action,
+      boolean traceWithActiveSpanOnly, Tracer tracer)
+      throws T {
+    Span span = buildSpan(operationName, traceWithActiveSpanOnly, tracer);
+    try (Scope ignore = GlobalTracer.get().scopeManager().activate(span, false)) {
+      action.execute();
+    } catch (Exception e) {
+      onError(e, span);
+      throw e;
+    } finally {
+      span.finish();
+    }
+  }
+
+  public static void doInScope(String operationName, Runnable action,
+      boolean traceWithActiveSpanOnly, Tracer tracer) {
+    Span span = buildSpan(operationName, traceWithActiveSpanOnly, tracer);
+    try (Scope ignore = GlobalTracer.get().scopeManager().activate(span, false)) {
+      action.run();
+    } catch (Exception e) {
+      onError(e, span);
+      throw e;
+    } finally {
+      span.finish();
+    }
+  }
+
+  public static <T> T doInScope(String operationName, Supplier<T> action,
+      boolean traceWithActiveSpanOnly, Tracer tracer) {
+    Span span = buildSpan(operationName, traceWithActiveSpanOnly, tracer);
+    return doInScope(span, action);
+  }
+
+  public static <T> T doInScope(Span span, Supplier<T> action) {
+    try (Scope ignore = GlobalTracer.get().scopeManager().activate(span, false)) {
+      return action.get();
+    } catch (Exception e) {
+      onError(e, span);
+      throw e;
+    } finally {
+      span.finish();
+    }
   }
 }
