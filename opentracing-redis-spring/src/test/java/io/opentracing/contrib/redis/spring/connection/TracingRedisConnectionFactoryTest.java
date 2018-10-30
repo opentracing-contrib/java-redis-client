@@ -13,11 +13,9 @@
  */
 package io.opentracing.contrib.redis.spring.connection;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import io.opentracing.Tracer;
 import org.junit.Before;
@@ -70,11 +68,9 @@ public class TracingRedisConnectionFactoryTest {
 
   @Test
   public void delegatesCallToGetSentinelConnection() {
-    RedisSentinelConnection sentinelConnection = mock(RedisSentinelConnection.class);
-    when(connectionFactory.getSentinelConnection()).thenReturn(sentinelConnection);
     RedisSentinelConnection connection = connectionFactory.getSentinelConnection();
     verify(delegate).getSentinelConnection();
-    assertEquals(sentinelConnection, connection);
+    assertTrue(connection instanceof TracingRedisSentinelConnection);
   }
 
   @Test

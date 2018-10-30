@@ -63,7 +63,8 @@ public class TracingRedisConnectionFactory implements RedisConnectionFactory,
 
   @Override
   public RedisSentinelConnection getSentinelConnection() {
-    return delegate.getSentinelConnection();
+    return new TracingRedisSentinelConnection(delegate.getSentinelConnection(), withActiveSpanOnly,
+        tracer);
   }
 
   @Override
