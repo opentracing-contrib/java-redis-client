@@ -15,7 +15,6 @@ package io.opentracing.contrib.redis.jedis;
 
 import io.opentracing.Tracer;
 import io.opentracing.contrib.redis.common.RedisSpanNameProvider;
-import io.opentracing.util.GlobalTracer;
 import java.util.Set;
 import java.util.function.Function;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
@@ -27,7 +26,7 @@ public class TracingJedisSentinelPool extends JedisSentinelPool {
 
   private final Tracer tracer;
   private final boolean traceWithActiveSpanOnly;
-  private Function<String, String> spanNameProvider;
+  private final Function<String, String> spanNameProvider;
 
   public TracingJedisSentinelPool(Tracer tracer, boolean traceWithActiveSpanOnly, String masterName,
       Set<String> sentinels,
@@ -36,16 +35,7 @@ public class TracingJedisSentinelPool extends JedisSentinelPool {
         Protocol.DEFAULT_DATABASE);
     this.tracer = tracer;
     this.traceWithActiveSpanOnly = traceWithActiveSpanOnly;
-    spanNameProvider = RedisSpanNameProvider.OPERATION_NAME;
-  }
-
-  /**
-   * GlobalTracer is used to get tracer
-   */
-  public TracingJedisSentinelPool(boolean traceWithActiveSpanOnly, String masterName,
-      Set<String> sentinels,
-      final GenericObjectPoolConfig poolConfig) {
-    this(GlobalTracer.get(), traceWithActiveSpanOnly, masterName, sentinels, poolConfig);
+    this.spanNameProvider = RedisSpanNameProvider.OPERATION_NAME;
   }
 
   public TracingJedisSentinelPool(Tracer tracer, boolean traceWithActiveSpanOnly, String masterName,
@@ -54,15 +44,7 @@ public class TracingJedisSentinelPool extends JedisSentinelPool {
         Protocol.DEFAULT_DATABASE);
     this.tracer = tracer;
     this.traceWithActiveSpanOnly = traceWithActiveSpanOnly;
-    spanNameProvider = RedisSpanNameProvider.OPERATION_NAME;
-  }
-
-  /**
-   * GlobalTracer is used to get tracer
-   */
-  public TracingJedisSentinelPool(boolean traceWithActiveSpanOnly, String masterName,
-      Set<String> sentinels) {
-    this(GlobalTracer.get(), traceWithActiveSpanOnly, masterName, sentinels);
+    this.spanNameProvider = RedisSpanNameProvider.OPERATION_NAME;
   }
 
   public TracingJedisSentinelPool(Tracer tracer, boolean traceWithActiveSpanOnly, String masterName,
@@ -70,15 +52,7 @@ public class TracingJedisSentinelPool extends JedisSentinelPool {
     super(masterName, sentinels, new GenericObjectPoolConfig(), Protocol.DEFAULT_TIMEOUT, password);
     this.tracer = tracer;
     this.traceWithActiveSpanOnly = traceWithActiveSpanOnly;
-    spanNameProvider = RedisSpanNameProvider.OPERATION_NAME;
-  }
-
-  /**
-   * GlobalTracer is used to get tracer
-   */
-  public TracingJedisSentinelPool(boolean traceWithActiveSpanOnly, String masterName,
-      Set<String> sentinels, String password) {
-    this(GlobalTracer.get(), traceWithActiveSpanOnly, masterName, sentinels, password);
+    this.spanNameProvider = RedisSpanNameProvider.OPERATION_NAME;
   }
 
   public TracingJedisSentinelPool(Tracer tracer, boolean traceWithActiveSpanOnly, String masterName,
@@ -87,17 +61,7 @@ public class TracingJedisSentinelPool extends JedisSentinelPool {
     super(masterName, sentinels, poolConfig, timeout, password, Protocol.DEFAULT_DATABASE);
     this.tracer = tracer;
     this.traceWithActiveSpanOnly = traceWithActiveSpanOnly;
-    spanNameProvider = RedisSpanNameProvider.OPERATION_NAME;
-  }
-
-  /**
-   * GlobalTracer is used to get tracer
-   */
-  public TracingJedisSentinelPool(boolean traceWithActiveSpanOnly, String masterName,
-      Set<String> sentinels,
-      final GenericObjectPoolConfig poolConfig, int timeout, final String password) {
-    this(GlobalTracer.get(), traceWithActiveSpanOnly, masterName, sentinels, poolConfig, timeout,
-        password);
+    this.spanNameProvider = RedisSpanNameProvider.OPERATION_NAME;
   }
 
   public TracingJedisSentinelPool(Tracer tracer, boolean traceWithActiveSpanOnly, String masterName,
@@ -106,16 +70,7 @@ public class TracingJedisSentinelPool extends JedisSentinelPool {
     super(masterName, sentinels, poolConfig, timeout, null, Protocol.DEFAULT_DATABASE);
     this.tracer = tracer;
     this.traceWithActiveSpanOnly = traceWithActiveSpanOnly;
-    spanNameProvider = RedisSpanNameProvider.OPERATION_NAME;
-  }
-
-  /**
-   * GlobalTracer is used to get tracer
-   */
-  public TracingJedisSentinelPool(boolean traceWithActiveSpanOnly, String masterName,
-      Set<String> sentinels,
-      final GenericObjectPoolConfig poolConfig, final int timeout) {
-    this(GlobalTracer.get(), traceWithActiveSpanOnly, masterName, sentinels, poolConfig, timeout);
+    this.spanNameProvider = RedisSpanNameProvider.OPERATION_NAME;
   }
 
   public TracingJedisSentinelPool(Tracer tracer, boolean traceWithActiveSpanOnly, String masterName,
@@ -124,16 +79,7 @@ public class TracingJedisSentinelPool extends JedisSentinelPool {
     super(masterName, sentinels, poolConfig, Protocol.DEFAULT_TIMEOUT, password);
     this.tracer = tracer;
     this.traceWithActiveSpanOnly = traceWithActiveSpanOnly;
-    spanNameProvider = RedisSpanNameProvider.OPERATION_NAME;
-  }
-
-  /**
-   * GlobalTracer is used to get tracer
-   */
-  public TracingJedisSentinelPool(boolean traceWithActiveSpanOnly, String masterName,
-      Set<String> sentinels,
-      final GenericObjectPoolConfig poolConfig, final String password) {
-    this(GlobalTracer.get(), traceWithActiveSpanOnly, masterName, sentinels, poolConfig, password);
+    this.spanNameProvider = RedisSpanNameProvider.OPERATION_NAME;
   }
 
   public TracingJedisSentinelPool(Tracer tracer, boolean traceWithActiveSpanOnly, String masterName,
@@ -143,18 +89,7 @@ public class TracingJedisSentinelPool extends JedisSentinelPool {
     super(masterName, sentinels, poolConfig, timeout, timeout, password, database);
     this.tracer = tracer;
     this.traceWithActiveSpanOnly = traceWithActiveSpanOnly;
-    spanNameProvider = RedisSpanNameProvider.OPERATION_NAME;
-  }
-
-  /**
-   * GlobalTracer is used to get tracer
-   */
-  public TracingJedisSentinelPool(boolean traceWithActiveSpanOnly, String masterName,
-      Set<String> sentinels,
-      final GenericObjectPoolConfig poolConfig, int timeout, final String password,
-      final int database) {
-    this(GlobalTracer.get(), traceWithActiveSpanOnly, masterName, sentinels, poolConfig, timeout,
-        password, database);
+    this.spanNameProvider = RedisSpanNameProvider.OPERATION_NAME;
   }
 
   public TracingJedisSentinelPool(Tracer tracer, boolean traceWithActiveSpanOnly, String masterName,
@@ -164,18 +99,7 @@ public class TracingJedisSentinelPool extends JedisSentinelPool {
     super(masterName, sentinels, poolConfig, timeout, timeout, password, database);
     this.tracer = tracer;
     this.traceWithActiveSpanOnly = traceWithActiveSpanOnly;
-    spanNameProvider = customSpanName;
-  }
-
-  /**
-   * GlobalTracer is used to get tracer
-   */
-  public TracingJedisSentinelPool(boolean traceWithActiveSpanOnly, String masterName,
-      Set<String> sentinels,
-      final GenericObjectPoolConfig poolConfig, int timeout, final String password,
-      final int database, Function<String, String> customSpanName) {
-    this(GlobalTracer.get(), traceWithActiveSpanOnly, masterName, sentinels, poolConfig, timeout,
-        password, database, customSpanName);
+    this.spanNameProvider = customSpanName;
   }
 
   public TracingJedisSentinelPool(Tracer tracer, boolean traceWithActiveSpanOnly, String masterName,
@@ -185,18 +109,7 @@ public class TracingJedisSentinelPool extends JedisSentinelPool {
     super(masterName, sentinels, poolConfig, timeout, timeout, password, database, clientName);
     this.tracer = tracer;
     this.traceWithActiveSpanOnly = traceWithActiveSpanOnly;
-    spanNameProvider = RedisSpanNameProvider.OPERATION_NAME;
-  }
-
-  /**
-   * GlobalTracer is used to get tracer
-   */
-  public TracingJedisSentinelPool(boolean traceWithActiveSpanOnly, String masterName,
-      Set<String> sentinels,
-      final GenericObjectPoolConfig poolConfig, int timeout, final String password,
-      final int database, final String clientName) {
-    this(GlobalTracer.get(), traceWithActiveSpanOnly, masterName, sentinels, poolConfig, timeout,
-        password, database, clientName);
+    this.spanNameProvider = RedisSpanNameProvider.OPERATION_NAME;
   }
 
   public TracingJedisSentinelPool(Tracer tracer, boolean traceWithActiveSpanOnly, String masterName,
@@ -206,18 +119,7 @@ public class TracingJedisSentinelPool extends JedisSentinelPool {
     super(masterName, sentinels, poolConfig, timeout, soTimeout, password, database, null);
     this.tracer = tracer;
     this.traceWithActiveSpanOnly = traceWithActiveSpanOnly;
-    spanNameProvider = RedisSpanNameProvider.OPERATION_NAME;
-  }
-
-  /**
-   * GlobalTracer is used to get tracer
-   */
-  public TracingJedisSentinelPool(boolean traceWithActiveSpanOnly, String masterName,
-      Set<String> sentinels,
-      final GenericObjectPoolConfig poolConfig, final int timeout, final int soTimeout,
-      final String password, final int database) {
-    this(GlobalTracer.get(), traceWithActiveSpanOnly, masterName, sentinels, poolConfig, timeout,
-        soTimeout, password, database);
+    this.spanNameProvider = RedisSpanNameProvider.OPERATION_NAME;
   }
 
   public TracingJedisSentinelPool(Tracer tracer, boolean traceWithActiveSpanOnly, String masterName,
@@ -228,19 +130,7 @@ public class TracingJedisSentinelPool extends JedisSentinelPool {
         clientName);
     this.tracer = tracer;
     this.traceWithActiveSpanOnly = traceWithActiveSpanOnly;
-    spanNameProvider = RedisSpanNameProvider.OPERATION_NAME;
-  }
-
-  /**
-   * GlobalTracer is used to get tracer
-   */
-  public TracingJedisSentinelPool(boolean traceWithActiveSpanOnly, String masterName,
-      Set<String> sentinels,
-      final GenericObjectPoolConfig poolConfig, final int connectionTimeout, final int soTimeout,
-      final String password, final int database, final String clientName) {
-    this(GlobalTracer.get(), traceWithActiveSpanOnly, masterName, sentinels, poolConfig,
-        connectionTimeout,
-        soTimeout, password, database, clientName);
+    this.spanNameProvider = RedisSpanNameProvider.OPERATION_NAME;
   }
 
   public TracingJedisSentinelPool(Tracer tracer, boolean traceWithActiveSpanOnly, String masterName,
@@ -252,20 +142,7 @@ public class TracingJedisSentinelPool extends JedisSentinelPool {
         clientName);
     this.tracer = tracer;
     this.traceWithActiveSpanOnly = traceWithActiveSpanOnly;
-    spanNameProvider = customSpanName;
-  }
-
-  /**
-   * GlobalTracer is used to get tracer
-   */
-  public TracingJedisSentinelPool(boolean traceWithActiveSpanOnly, String masterName,
-      Set<String> sentinels,
-      final GenericObjectPoolConfig poolConfig, final int connectionTimeout, final int soTimeout,
-      final String password, final int database, final String clientName,
-      Function<String, String> customSpanName) {
-    this(GlobalTracer.get(), traceWithActiveSpanOnly, masterName, sentinels, poolConfig,
-        connectionTimeout, soTimeout,
-        password, database, clientName, customSpanName);
+    this.spanNameProvider = customSpanName;
   }
 
   @Override

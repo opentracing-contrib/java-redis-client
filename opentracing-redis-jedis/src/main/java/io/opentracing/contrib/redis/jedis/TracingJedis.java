@@ -63,7 +63,7 @@ import redis.clients.util.Slowlog;
 public class TracingJedis extends Jedis {
 
   private final TracingHelper helper;
-  private Function<String, String> redisSpanNameProvider;
+  private final Function<String, String> redisSpanNameProvider;
 
   public TracingJedis(Tracer tracer, boolean traceWithActiveSpanOnly,
       Function<String, String> redisSpanNameProvider) {
@@ -414,27 +414,13 @@ public class TracingJedis extends Jedis {
   public String getSet(String key, String value) {
     Span span = helper.buildSpan("getSet", key);
     span.setTag("value", value);
-    try {
-      return super.getSet(key, value);
-    } catch (Exception e) {
-      onError(e, span);
-      throw e;
-    } finally {
-      span.finish();
-    }
+    return TracingHelper.doInScope(span, () -> super.getSet(key, value));
   }
 
   @Override
   public List<String> mget(String... keys) {
     Span span = helper.buildSpan("mget", keys);
-    try {
-      return super.mget(keys);
-    } catch (Exception e) {
-      onError(e, span);
-      throw e;
-    } finally {
-      span.finish();
-    }
+    return TracingHelper.doInScope(span, () -> super.mget(keys));
   }
 
   @Override

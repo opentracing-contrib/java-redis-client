@@ -54,7 +54,7 @@ import redis.clients.jedis.params.sortedset.ZIncrByParams;
 public class TracingJedisCluster extends JedisCluster {
 
   private final TracingHelper helper;
-  private Function<String, String> redisSpanNameProvider;
+  private final Function<String, String> redisSpanNameProvider;
 
   public TracingJedisCluster(HostAndPort node, Tracer tracer, boolean traceWithActiveSpanOnly,
       Function<String, String> redisSpanNameProvider) {
