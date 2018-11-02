@@ -15,6 +15,7 @@ package io.opentracing.contrib.redis.jedis;
 
 import static org.junit.Assert.assertEquals;
 
+import io.opentracing.contrib.redis.common.TracingConfiguration;
 import io.opentracing.mock.MockSpan;
 import io.opentracing.mock.MockTracer;
 import io.opentracing.util.ThreadLocalScopeManager;
@@ -34,7 +35,7 @@ public class TracingJedisPoolTest {
   private RedisServer redisServer;
 
   @Before
-  public void before() throws Exception {
+  public void before() {
     mockTracer.reset();
 
     redisServer = RedisServer.builder().setting("bind 127.0.0.1").build();
@@ -50,7 +51,7 @@ public class TracingJedisPoolTest {
 
   @Test
   public void testPoolReturnsTracedJedis() {
-    JedisPool pool = new TracingJedisPool(mockTracer, false);
+    JedisPool pool = new TracingJedisPool(new TracingConfiguration.Builder(mockTracer).build());
 
     Jedis jedis = pool.getResource();
     assertEquals("OK", jedis.set("key", "value"));
@@ -64,7 +65,7 @@ public class TracingJedisPoolTest {
 
   @Test
   public void testClosingTracedJedisClosesUnderlyingJedis() {
-    JedisPool pool = new TracingJedisPool(mockTracer, false);
+    JedisPool pool = new TracingJedisPool(new TracingConfiguration.Builder(mockTracer).build());
     Jedis resource = pool.getResource();
     assertEquals(1, pool.getNumActive());
 

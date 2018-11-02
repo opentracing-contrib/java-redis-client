@@ -19,8 +19,7 @@ import io.lettuce.core.api.async.RedisAsyncCommands;
 import io.lettuce.core.api.reactive.RedisReactiveCommands;
 import io.lettuce.core.api.sync.RedisCommands;
 import io.lettuce.core.protocol.RedisCommand;
-import io.opentracing.Tracer;
-import io.opentracing.util.GlobalTracer;
+import io.opentracing.contrib.redis.common.TracingConfiguration;
 import java.time.Duration;
 import java.util.Collection;
 import java.util.concurrent.TimeUnit;
@@ -28,28 +27,16 @@ import java.util.concurrent.TimeUnit;
 public class TracingStatefulRedisConnection<K, V> implements StatefulRedisConnection<K, V> {
 
   private final StatefulRedisConnection<K, V> connection;
-  private final Tracer tracer;
-  private final boolean traceWithActiveSpanOnly;
+  private final TracingConfiguration tracingConfiguration;
 
   /**
    * @param connection redis connection
-   * @param tracer tracer
-   * @param traceWithActiveSpanOnly if <code>true</code> then create new spans only if there is
-   * active span
-   */
-  public TracingStatefulRedisConnection(StatefulRedisConnection<K, V> connection, Tracer tracer,
-      boolean traceWithActiveSpanOnly) {
-    this.connection = connection;
-    this.tracer = tracer;
-    this.traceWithActiveSpanOnly = traceWithActiveSpanOnly;
-  }
-
-  /**
-   * GlobalTracer is used to get tracer
+   * @param tracingConfiguration tracing configuration
    */
   public TracingStatefulRedisConnection(StatefulRedisConnection<K, V> connection,
-      boolean traceWithActiveSpanOnly) {
-    this(connection, GlobalTracer.get(), traceWithActiveSpanOnly);
+      TracingConfiguration tracingConfiguration) {
+    this.connection = connection;
+    this.tracingConfiguration = tracingConfiguration;
   }
 
   @Override
@@ -59,12 +46,12 @@ public class TracingStatefulRedisConnection<K, V> implements StatefulRedisConnec
 
   @Override
   public RedisCommands<K, V> sync() {
-    return new TracingRedisCommands<>(connection.sync(), tracer, traceWithActiveSpanOnly);
+    return new TracingRedisCommands<>(connection.sync(), tracingConfiguration);
   }
 
   @Override
   public RedisAsyncCommands<K, V> async() {
-    return new TracingRedisAsyncCommands<>(connection.async(), tracer, traceWithActiveSpanOnly);
+    return new TracingRedisAsyncCommands<>(connection.async(), tracingConfiguration);
   }
 
   @Override

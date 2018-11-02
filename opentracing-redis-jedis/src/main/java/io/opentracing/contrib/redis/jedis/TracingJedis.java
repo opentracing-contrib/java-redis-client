@@ -17,8 +17,7 @@ import static io.opentracing.contrib.redis.common.TracingHelper.nullable;
 import static io.opentracing.contrib.redis.common.TracingHelper.onError;
 
 import io.opentracing.Span;
-import io.opentracing.Tracer;
-import io.opentracing.contrib.redis.common.RedisSpanNameProvider;
+import io.opentracing.contrib.redis.common.TracingConfiguration;
 import io.opentracing.contrib.redis.common.TracingHelper;
 import java.net.URI;
 import java.util.Arrays;
@@ -26,7 +25,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.function.Function;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLParameters;
 import javax.net.ssl.SSLSocketFactory;
@@ -63,144 +61,117 @@ import redis.clients.util.Slowlog;
 public class TracingJedis extends Jedis {
 
   private final TracingHelper helper;
-  private final Function<String, String> redisSpanNameProvider;
 
-  public TracingJedis(Tracer tracer, boolean traceWithActiveSpanOnly,
-      Function<String, String> redisSpanNameProvider) {
+  public TracingJedis(TracingConfiguration tracingConfiguration) {
     super();
-    this.redisSpanNameProvider = redisSpanNameProvider;
-    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly, this.redisSpanNameProvider);
+    this.helper = new TracingHelper(tracingConfiguration);
   }
 
-  public TracingJedis(Tracer tracer, boolean traceWithActiveSpanOnly) {
-    super();
-    this.redisSpanNameProvider = RedisSpanNameProvider.OPERATION_NAME;
-    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly, redisSpanNameProvider);
-  }
-
-  public TracingJedis(final String host, Tracer tracer, boolean traceWithActiveSpanOnly) {
+  public TracingJedis(final String host, TracingConfiguration tracingConfiguration) {
     super(host);
-    this.redisSpanNameProvider = RedisSpanNameProvider.OPERATION_NAME;
-    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly, redisSpanNameProvider);
+    this.helper = new TracingHelper(tracingConfiguration);
   }
 
-  public TracingJedis(final String host, final int port, Tracer tracer,
-      boolean traceWithActiveSpanOnly) {
+  public TracingJedis(final String host, final int port,
+      TracingConfiguration tracingConfiguration) {
     super(host, port);
-    this.redisSpanNameProvider = RedisSpanNameProvider.OPERATION_NAME;
-    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly, redisSpanNameProvider);
+    this.helper = new TracingHelper(tracingConfiguration);
   }
 
   public TracingJedis(final String host, final int port, final boolean ssl,
-      Tracer tracer, boolean traceWithActiveSpanOnly) {
+      TracingConfiguration tracingConfiguration) {
     super(host, port, ssl);
-    this.redisSpanNameProvider = RedisSpanNameProvider.OPERATION_NAME;
-    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly, redisSpanNameProvider);
+    this.helper = new TracingHelper(tracingConfiguration);
   }
 
   public TracingJedis(final String host, final int port, final boolean ssl,
       final SSLSocketFactory sslSocketFactory, final SSLParameters sslParameters,
-      final HostnameVerifier hostnameVerifier, Tracer tracer, boolean traceWithActiveSpanOnly) {
+      final HostnameVerifier hostnameVerifier, TracingConfiguration tracingConfiguration) {
     super(host, port, ssl, sslSocketFactory, sslParameters, hostnameVerifier);
-    this.redisSpanNameProvider = RedisSpanNameProvider.OPERATION_NAME;
-    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly, redisSpanNameProvider);
+    this.helper = new TracingHelper(tracingConfiguration);
   }
 
   public TracingJedis(final String host, final int port, final int timeout,
-      Tracer tracer, boolean traceWithActiveSpanOnly) {
+      TracingConfiguration tracingConfiguration) {
     super(host, port, timeout);
-    this.redisSpanNameProvider = RedisSpanNameProvider.OPERATION_NAME;
-    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly, redisSpanNameProvider);
+    this.helper = new TracingHelper(tracingConfiguration);
   }
 
   public TracingJedis(final String host, final int port, final int timeout, final boolean ssl,
-      Tracer tracer, boolean traceWithActiveSpanOnly) {
+      TracingConfiguration tracingConfiguration) {
     super(host, port, timeout, ssl);
-    this.redisSpanNameProvider = RedisSpanNameProvider.OPERATION_NAME;
-    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly, redisSpanNameProvider);
+    this.helper = new TracingHelper(tracingConfiguration);
   }
 
   public TracingJedis(final String host, final int port, final int timeout, final boolean ssl,
       final SSLSocketFactory sslSocketFactory, final SSLParameters sslParameters,
-      final HostnameVerifier hostnameVerifier, Tracer tracer, boolean traceWithActiveSpanOnly) {
+      final HostnameVerifier hostnameVerifier, TracingConfiguration tracingConfiguration) {
     super(host, port, timeout, ssl, sslSocketFactory, sslParameters, hostnameVerifier);
-    this.redisSpanNameProvider = RedisSpanNameProvider.OPERATION_NAME;
-    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly, redisSpanNameProvider);
+    this.helper = new TracingHelper(tracingConfiguration);
   }
 
   public TracingJedis(final String host, final int port, final int connectionTimeout,
-      final int soTimeout, Tracer tracer, boolean traceWithActiveSpanOnly) {
+      final int soTimeout, TracingConfiguration tracingConfiguration) {
     super(host, port, connectionTimeout, soTimeout);
-    this.redisSpanNameProvider = RedisSpanNameProvider.OPERATION_NAME;
-    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly, redisSpanNameProvider);
+    this.helper = new TracingHelper(tracingConfiguration);
   }
 
   public TracingJedis(final String host, final int port, final int connectionTimeout,
       final int soTimeout,
-      final boolean ssl, Tracer tracer, boolean traceWithActiveSpanOnly) {
+      final boolean ssl, TracingConfiguration tracingConfiguration) {
     super(host, port, connectionTimeout, soTimeout, ssl);
-    this.redisSpanNameProvider = RedisSpanNameProvider.OPERATION_NAME;
-    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly, redisSpanNameProvider);
+    this.helper = new TracingHelper(tracingConfiguration);
   }
 
   public TracingJedis(final String host, final int port, final int connectionTimeout,
       final int soTimeout,
       final boolean ssl, final SSLSocketFactory sslSocketFactory, final SSLParameters sslParameters,
-      final HostnameVerifier hostnameVerifier, Tracer tracer, boolean traceWithActiveSpanOnly) {
+      final HostnameVerifier hostnameVerifier, TracingConfiguration tracingConfiguration) {
     super(host, port, connectionTimeout, soTimeout, ssl, sslSocketFactory, sslParameters,
         hostnameVerifier);
-    this.redisSpanNameProvider = RedisSpanNameProvider.OPERATION_NAME;
-    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly, redisSpanNameProvider);
+    this.helper = new TracingHelper(tracingConfiguration);
   }
 
-  public TracingJedis(JedisShardInfo shardInfo, Tracer tracer, boolean traceWithActiveSpanOnly) {
+  public TracingJedis(JedisShardInfo shardInfo, TracingConfiguration tracingConfiguration) {
     super(shardInfo);
-    this.redisSpanNameProvider = RedisSpanNameProvider.OPERATION_NAME;
-    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly, redisSpanNameProvider);
+    this.helper = new TracingHelper(tracingConfiguration);
   }
 
-  public TracingJedis(URI uri, Tracer tracer, boolean traceWithActiveSpanOnly) {
+  public TracingJedis(URI uri, TracingConfiguration tracingConfiguration) {
     super(uri);
-    this.redisSpanNameProvider = RedisSpanNameProvider.OPERATION_NAME;
-    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly, redisSpanNameProvider);
+    this.helper = new TracingHelper(tracingConfiguration);
   }
 
   public TracingJedis(URI uri, final SSLSocketFactory sslSocketFactory,
       final SSLParameters sslParameters,
-      final HostnameVerifier hostnameVerifier, Tracer tracer, boolean traceWithActiveSpanOnly) {
+      final HostnameVerifier hostnameVerifier, TracingConfiguration tracingConfiguration) {
     super(uri, sslSocketFactory, sslParameters, hostnameVerifier);
-    this.redisSpanNameProvider = RedisSpanNameProvider.OPERATION_NAME;
-    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly, redisSpanNameProvider);
+    this.helper = new TracingHelper(tracingConfiguration);
   }
 
-  public TracingJedis(final URI uri, final int timeout, Tracer tracer,
-      boolean traceWithActiveSpanOnly) {
+  public TracingJedis(final URI uri, final int timeout, TracingConfiguration tracingConfiguration) {
     super(uri, timeout);
-    this.redisSpanNameProvider = RedisSpanNameProvider.OPERATION_NAME;
-    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly, redisSpanNameProvider);
+    this.helper = new TracingHelper(tracingConfiguration);
   }
 
   public TracingJedis(final URI uri, final int timeout, final SSLSocketFactory sslSocketFactory,
       final SSLParameters sslParameters, final HostnameVerifier hostnameVerifier,
-      Tracer tracer, boolean traceWithActiveSpanOnly) {
+      TracingConfiguration tracingConfiguration) {
     super(uri, timeout, sslSocketFactory, sslParameters, hostnameVerifier);
-    this.redisSpanNameProvider = RedisSpanNameProvider.OPERATION_NAME;
-    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly, redisSpanNameProvider);
+    this.helper = new TracingHelper(tracingConfiguration);
   }
 
   public TracingJedis(final URI uri, final int connectionTimeout, final int soTimeout,
-      Tracer tracer, boolean traceWithActiveSpanOnly) {
+      TracingConfiguration tracingConfiguration) {
     super(uri, connectionTimeout, soTimeout);
-    this.redisSpanNameProvider = RedisSpanNameProvider.OPERATION_NAME;
-    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly, redisSpanNameProvider);
+    this.helper = new TracingHelper(tracingConfiguration);
   }
 
   public TracingJedis(final URI uri, final int connectionTimeout, final int soTimeout,
       final SSLSocketFactory sslSocketFactory, final SSLParameters sslParameters,
-      final HostnameVerifier hostnameVerifier, Tracer tracer, boolean traceWithActiveSpanOnly) {
+      final HostnameVerifier hostnameVerifier, TracingConfiguration tracingConfiguration) {
     super(uri, connectionTimeout, soTimeout, sslSocketFactory, sslParameters, hostnameVerifier);
-    this.redisSpanNameProvider = RedisSpanNameProvider.OPERATION_NAME;
-    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly, redisSpanNameProvider);
+    this.helper = new TracingHelper(tracingConfiguration);
   }
 
   @Override

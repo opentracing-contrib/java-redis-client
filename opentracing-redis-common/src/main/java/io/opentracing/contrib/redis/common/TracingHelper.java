@@ -37,18 +37,13 @@ public class TracingHelper {
   private final Tracer tracer;
   private final boolean traceWithActiveSpanOnly;
   private final Function<String, String> spanNameProvider;
+  private final int maxKeysLength;
 
-  public TracingHelper(Tracer tracer, boolean traceWithActiveSpanOnly) {
-    this.tracer = tracer;
-    this.traceWithActiveSpanOnly = traceWithActiveSpanOnly;
-    this.spanNameProvider = RedisSpanNameProvider.OPERATION_NAME;
-  }
-
-  public TracingHelper(Tracer tracer, boolean traceWithActiveSpanOnly,
-      Function<String, String> spanNameProvider) {
-    this.tracer = tracer;
-    this.traceWithActiveSpanOnly = traceWithActiveSpanOnly;
-    this.spanNameProvider = spanNameProvider;
+  public TracingHelper(TracingConfiguration tracingConfiguration) {
+    this.tracer = tracingConfiguration.getTracer();
+    this.traceWithActiveSpanOnly = tracingConfiguration.isTraceWithActiveSpanOnly();
+    this.spanNameProvider = tracingConfiguration.getSpanNameProvider();
+    this.maxKeysLength = tracingConfiguration.getKeysMaxLength();
   }
 
   private static SpanBuilder builder(String operationName, Tracer tracer,
@@ -97,9 +92,16 @@ public class TracingHelper {
     if (traceWithActiveSpanOnly && getNullSafeTracer(tracer).activeSpan() == null) {
       return NoopSpan.INSTANCE;
     } else {
-      return builder(operationName, tracer, spanNameProvider).withTag("keys", Arrays.toString(keys))
-          .start();
+      return builder(operationName, tracer, spanNameProvider).withTag("keys",
+          Arrays.toString(limitKeys(keys))).start();
     }
+  }
+
+  Object[] limitKeys(Object[] keys) {
+    if (keys != null && keys.length > maxKeysLength) {
+      return Arrays.copyOfRange(keys, 0, maxKeysLength);
+    }
+    return keys;
   }
 
   public static void onError(Throwable throwable, Span span) {

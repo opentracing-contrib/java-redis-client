@@ -53,13 +53,16 @@ Tracer tracer = ...
 // Optionally register tracer with GlobalTracer
 GlobalTracer.register(tracer);
 
+// Create TracingConfiguration
+TracingConfiguration tracingConfiguration = new TracingConfiguration.Builder(tracer).build(); 
+
 ```
 
 ### Jedis
 ```java
 
 // Create Tracing Jedis
-Jedis jedis = new TracingJedis(tracer, false);
+Jedis jedis = new TracingJedis(tracingConfiguration);
 
 jedis.set("foo", "bar");
 String value = jedis.get("foo");
@@ -72,7 +75,7 @@ Set<HostAndPort> jedisClusterNodes = new HashSet<HostAndPort>();
 jedisClusterNodes.add(new HostAndPort("127.0.0.1", 7379));
 
 // Create Tracing Jedis Cluster
-JedisCluster jc = new TracingJedisCluster(jedisClusterNodes);
+JedisCluster jc = new TracingJedisCluster(jedisClusterNodes, tracingConfiguration);
 jc.set("foo", "bar");
 String value = jc.get("foo");
 
@@ -86,7 +89,7 @@ poolConfig.setMaxIdle(10);
 poolConfig.setTestOnBorrow(false);
 
 // Create Tracing Jedis Pool
-JedisPool pool = new TracingJedisPool(poolConfig, "127.0.0.1", 6379, tracer, false);
+JedisPool pool = new TracingJedisPool(poolConfig, "127.0.0.1", 6379, tracingConfiguration);
 
 try (Jedis jedis = pool.getResource()) {
     // jedis will be automatically closed and returned to the pool at the end of "try" block
@@ -98,7 +101,7 @@ try (Jedis jedis = pool.getResource()) {
 ### Jedis Sentinel Pool
 ```java
 // Create Tracing Jedis Sentinel Pool
-JedisSentinelPool pool = new TracingJedisSentinelPool(tracer, false, MASTER_NAME, sentinels, poolConfig);
+JedisSentinelPool pool = new TracingJedisSentinelPool(tracingConfiguration, MASTER_NAME, sentinels, poolConfig);
 
 try (Jedis jedis = pool.getResource()) {
 // jedis will be automatically closed and returned to the pool at the end of "try" block
@@ -108,10 +111,16 @@ try (Jedis jedis = pool.getResource()) {
 ```
 
 ### Jedis Span Name
-By default, span names are set to the operation performed by the Jedis object. To customize the span name, provide a Function to the Jedis object that alters the span name. If a function is not provided, the span name will remain the default. Refer to the RedisSpanNameProvider class for a function that prefixes the operation name. 
+By default, span names are set to the operation performed by the Jedis object. 
+To customize the span name, provide a Function to the TracingConfiguration object that alters the span name. 
+If a function is not provided, the span name will remain the default. 
+Refer to the RedisSpanNameProvider class for a function that prefixes the operation name. 
 ```java
+TracingConfiguration tracingConfiguration = new TracingConfiguration.Builder(tracer)
+    .withSpanNameProvider(RedisSpanNameProvider.PREFIX_OPERATION_NAME("redis."))
+    .build(); 
 //Create Tracing Jedis with custom span name
-Jedis jedis = new TracingJedis(tracer, false, RedisSpanNameProvider.PREFIX_OPERATION_NAME("redis.");
+Jedis jedis = new TracingJedis(tracingConfiguration);
 jedis.set("foo", "bar");
 //Span name is now set to "redis.set"
 
@@ -126,7 +135,7 @@ RedisClient client = RedisClient.create("redis://localhost");
 
 // Decorate StatefulRedisConnection with TracingStatefulRedisConnection
 StatefulRedisConnection<String, String> connection = 
-    new TracingStatefulRedisConnection(client.connect(), tracer, false);
+    new TracingStatefulRedisConnection(client.connect(), tracingConfiguration);
 
 // Get sync redis commands
 RedisCommands<String, String> commands = connection.sync();

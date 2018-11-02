@@ -36,8 +36,9 @@ public class TracingHelperTest {
   @Before
   public void setUp() {
     prefixSpanName = RedisSpanNameProvider.PREFIX_OPERATION_NAME(prefix);
-    helperWithProvider = new TracingHelper(mockTracer, false, prefixSpanName);
-    helperWithoutProvider = new TracingHelper(mockTracer, false);
+    helperWithProvider = new TracingHelper(
+        new TracingConfiguration.Builder(mockTracer).withSpanNameProvider(prefixSpanName).build());
+    helperWithoutProvider = new TracingHelper(new TracingConfiguration.Builder(mockTracer).build());
   }
 
   @Test
@@ -50,5 +51,13 @@ public class TracingHelperTest {
   public void testDefault() {
     span = (MockSpan) (helperWithoutProvider.buildSpan("get"));
     assertEquals("get", span.operationName());
+  }
+
+  @Test
+  public void limitKeys() {
+    TracingHelper helper = new TracingHelper(new TracingConfiguration.Builder(mockTracer)
+        .withKeysMaxLength(2).build());
+    Object[] keys = {"one", "two", "three"};
+    assertEquals(2, helper.limitKeys(keys).length);
   }
 }

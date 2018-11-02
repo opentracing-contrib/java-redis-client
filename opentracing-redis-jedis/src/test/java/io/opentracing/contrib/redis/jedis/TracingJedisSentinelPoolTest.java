@@ -15,6 +15,7 @@ package io.opentracing.contrib.redis.jedis;
 
 import static org.junit.Assert.assertEquals;
 
+import io.opentracing.contrib.redis.common.TracingConfiguration;
 import io.opentracing.mock.MockSpan;
 import io.opentracing.mock.MockTracer;
 import io.opentracing.util.ThreadLocalScopeManager;
@@ -68,7 +69,8 @@ public class TracingJedisSentinelPoolTest {
 
   @Test
   public void testSentinelPoolReturnsTracedJedis() {
-    JedisSentinelPool pool = new TracingJedisSentinelPool(mockTracer, false, MASTER_NAME, sentinels,
+    JedisSentinelPool pool = new TracingJedisSentinelPool(
+        new TracingConfiguration.Builder(mockTracer).build(), MASTER_NAME, sentinels,
         new GenericObjectPoolConfig());
     Jedis jedis = pool.getResource();
     assertEquals("OK", jedis.set("key", "value"));
@@ -83,7 +85,8 @@ public class TracingJedisSentinelPoolTest {
 
   @Test
   public void testClosingTracedJedisClosesUnderlyingJedis() {
-    JedisSentinelPool pool = new TracingJedisSentinelPool(mockTracer, false, MASTER_NAME, sentinels,
+    JedisSentinelPool pool = new TracingJedisSentinelPool(
+        new TracingConfiguration.Builder(mockTracer).build(), MASTER_NAME, sentinels,
         new GenericObjectPoolConfig());
     Jedis resource = pool.getResource();
     assertEquals(1, pool.getNumActive());

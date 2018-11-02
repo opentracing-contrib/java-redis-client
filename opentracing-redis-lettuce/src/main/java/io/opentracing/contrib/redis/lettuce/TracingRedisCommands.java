@@ -54,8 +54,7 @@ import io.lettuce.core.protocol.CommandArgs;
 import io.lettuce.core.protocol.CommandType;
 import io.lettuce.core.protocol.ProtocolKeyword;
 import io.opentracing.Span;
-import io.opentracing.Tracer;
-import io.opentracing.contrib.redis.common.RedisSpanNameProvider;
+import io.opentracing.contrib.redis.common.TracingConfiguration;
 import io.opentracing.contrib.redis.common.TracingHelper;
 import java.time.Duration;
 import java.util.Arrays;
@@ -64,29 +63,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
 
 public class TracingRedisCommands<K, V> implements RedisCommands<K, V> {
 
   private final RedisCommands<K, V> commands;
-  private final Tracer tracer;
-  private final boolean traceWithActiveSpanOnly;
   private final TracingHelper helper;
-  private Function<String, String> redisSpanNameProvider;
+  private final TracingConfiguration tracingConfiguration;
 
-  /**
-   * @param commands redis commands
-   * @param tracer tracer
-   * @param traceWithActiveSpanOnly if <code>true</code> then create new spans only if there is
-   * active span
-   */
-  public TracingRedisCommands(RedisCommands<K, V> commands, Tracer tracer,
-      boolean traceWithActiveSpanOnly) {
+  public TracingRedisCommands(RedisCommands<K, V> commands,
+      TracingConfiguration tracingConfiguration) {
     this.commands = commands;
-    this.tracer = tracer;
-    this.traceWithActiveSpanOnly = traceWithActiveSpanOnly;
-    this.redisSpanNameProvider = RedisSpanNameProvider.OPERATION_NAME;
-    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly, redisSpanNameProvider);
+    this.helper = new TracingHelper(tracingConfiguration);
+    this.tracingConfiguration = tracingConfiguration;
   }
 
   @Override
@@ -133,8 +121,8 @@ public class TracingRedisCommands<K, V> implements RedisCommands<K, V> {
 
   @Override
   public StatefulRedisConnection<K, V> getStatefulConnection() {
-    return new TracingStatefulRedisConnection<>(commands.getStatefulConnection(), tracer,
-        traceWithActiveSpanOnly);
+    return new TracingStatefulRedisConnection<>(commands.getStatefulConnection(),
+        tracingConfiguration);
   }
 
   @Override
