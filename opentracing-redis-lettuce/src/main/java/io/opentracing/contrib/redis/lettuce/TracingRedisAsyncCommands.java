@@ -115,14 +115,7 @@ public class TracingRedisAsyncCommands<K, V> implements RedisAsyncCommands<K, V>
     Span span = helper.buildSpan("swapdb");
     span.setTag("db1", db1);
     span.setTag("db2", db2);
-    try {
-      return prepareRedisFuture(commands.swapdb(db1, db2), span);
-    } catch (Exception e) {
-      onError(e, span);
-      throw e;
-    } finally {
-      span.finish();
-    }
+    return prepareRedisFuture(commands.swapdb(db1, db2), span);
   }
 
   @Override
