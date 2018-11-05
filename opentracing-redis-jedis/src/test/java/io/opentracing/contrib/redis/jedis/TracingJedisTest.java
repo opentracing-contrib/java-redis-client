@@ -15,6 +15,7 @@ package io.opentracing.contrib.redis.jedis;
 
 import static org.junit.Assert.assertEquals;
 
+import io.opentracing.contrib.redis.common.TracingConfiguration;
 import io.opentracing.mock.MockSpan;
 import io.opentracing.mock.MockTracer;
 import io.opentracing.util.ThreadLocalScopeManager;
@@ -49,7 +50,7 @@ public class TracingJedisTest {
 
   @Test
   public void test() {
-    Jedis jedis = new TracingJedis(mockTracer, false);
+    Jedis jedis = new TracingJedis(new TracingConfiguration.Builder(mockTracer).build());
 
     assertEquals("OK", jedis.set("key", "value"));
     assertEquals("value", jedis.get("key"));

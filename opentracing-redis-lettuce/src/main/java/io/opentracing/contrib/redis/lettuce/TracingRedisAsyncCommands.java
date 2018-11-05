@@ -56,7 +56,7 @@ import io.lettuce.core.protocol.ProtocolKeyword;
 import io.opentracing.Scope;
 import io.opentracing.Span;
 import io.opentracing.Tracer;
-import io.opentracing.contrib.redis.common.RedisSpanNameProvider;
+import io.opentracing.contrib.redis.common.TracingConfiguration;
 import io.opentracing.contrib.redis.common.TracingHelper;
 import java.time.Duration;
 import java.util.Arrays;
@@ -65,29 +65,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
 
 public class TracingRedisAsyncCommands<K, V> implements RedisAsyncCommands<K, V> {
 
   private final RedisAsyncCommands<K, V> commands;
-  private final Tracer tracer;
-  private final boolean traceWithActiveSpanOnly;
   private final TracingHelper helper;
-  private Function<String, String> redisSpanNameProvider;
+  private final TracingConfiguration tracingConfiguration;
 
   /**
    * @param commands redis async commands
-   * @param tracer tracer
-   * @param traceWithActiveSpanOnly if <code>true</code> then create new spans only if there is
-   * active span
+   * @param tracingConfiguration tracing configuration
    */
-  public TracingRedisAsyncCommands(RedisAsyncCommands<K, V> commands, Tracer tracer,
-      boolean traceWithActiveSpanOnly) {
+  public TracingRedisAsyncCommands(RedisAsyncCommands<K, V> commands,
+      TracingConfiguration tracingConfiguration) {
     this.commands = commands;
-    this.tracer = tracer;
-    this.traceWithActiveSpanOnly = traceWithActiveSpanOnly;
-    this.redisSpanNameProvider = RedisSpanNameProvider.OPERATION_NAME;
-    this.helper = new TracingHelper(tracer, traceWithActiveSpanOnly, this.redisSpanNameProvider);
+    this.tracingConfiguration = tracingConfiguration;
+    this.helper = new TracingHelper(tracingConfiguration);
   }
 
   @Override
@@ -134,8 +127,8 @@ public class TracingRedisAsyncCommands<K, V> implements RedisAsyncCommands<K, V>
 
   @Override
   public StatefulRedisConnection<K, V> getStatefulConnection() {
-    return new TracingStatefulRedisConnection<>(commands.getStatefulConnection(), tracer,
-        traceWithActiveSpanOnly);
+    return new TracingStatefulRedisConnection<>(commands.getStatefulConnection(),
+        tracingConfiguration);
   }
 
   @Override
@@ -2844,11 +2837,11 @@ public class TracingRedisAsyncCommands<K, V> implements RedisAsyncCommands<K, V>
     return prepareRedisFuture(commands.unwatch(), span);
   }
 
-  protected <V> RedisFuture<V> prepareRedisFuture(RedisFuture<V> future, Span span) {
+  private <V> RedisFuture<V> prepareRedisFuture(RedisFuture<V> future, Span span) {
     return continueScopeSpan(setCompleteAction(future, span));
   }
 
-  protected <V> RedisFuture<V> setCompleteAction(RedisFuture<V> future, Span span) {
+  private <V> RedisFuture<V> setCompleteAction(RedisFuture<V> future, Span span) {
     future.whenComplete((v, throwable) -> {
       if (throwable != null) {
         onError(throwable, span);
@@ -2859,7 +2852,8 @@ public class TracingRedisAsyncCommands<K, V> implements RedisAsyncCommands<K, V>
     return future;
   }
 
-  protected <T> RedisFuture<T> continueScopeSpan(RedisFuture<T> redisFuture) {
+  private <T> RedisFuture<T> continueScopeSpan(RedisFuture<T> redisFuture) {
+    Tracer tracer = TracingHelper.getNullSafeTracer(tracingConfiguration.getTracer());
     Span span = tracer.activeSpan();
     CompletableRedisFuture<T> customRedisFuture = new CompletableRedisFuture<>(redisFuture);
     redisFuture.whenComplete((v, throwable) -> {

@@ -22,6 +22,7 @@ import io.lettuce.core.api.async.RedisAsyncCommands;
 import io.lettuce.core.api.sync.RedisCommands;
 import io.opentracing.Scope;
 import io.opentracing.Span;
+import io.opentracing.contrib.redis.common.TracingConfiguration;
 import io.opentracing.mock.MockSpan;
 import io.opentracing.mock.MockTracer;
 import io.opentracing.util.ThreadLocalScopeManager;
@@ -40,7 +41,7 @@ public class TracingLettuceTest {
   private RedisServer redisServer;
 
   @Before
-  public void before() throws Exception {
+  public void before() {
     mockTracer.reset();
 
     redisServer = RedisServer.builder().setting("bind 127.0.0.1").build();
@@ -59,7 +60,8 @@ public class TracingLettuceTest {
     RedisClient client = RedisClient.create("redis://localhost");
 
     StatefulRedisConnection<String, String> connection =
-        new TracingStatefulRedisConnection<>(client.connect(), mockTracer, false);
+        new TracingStatefulRedisConnection<>(client.connect(),
+            new TracingConfiguration.Builder(mockTracer).build());
     RedisCommands<String, String> commands = connection.sync();
 
     assertEquals("OK", commands.set("key", "value"));
@@ -78,7 +80,8 @@ public class TracingLettuceTest {
     RedisClient client = RedisClient.create("redis://localhost");
 
     StatefulRedisConnection<String, String> connection =
-        new TracingStatefulRedisConnection<>(client.connect(), mockTracer, false);
+        new TracingStatefulRedisConnection<>(client.connect(),
+            new TracingConfiguration.Builder(mockTracer).build());
 
     RedisAsyncCommands<String, String> commands = connection.async();
 
@@ -102,7 +105,8 @@ public class TracingLettuceTest {
       RedisClient client = RedisClient.create("redis://localhost");
 
       StatefulRedisConnection<String, String> connection =
-          new TracingStatefulRedisConnection<>(client.connect(), mockTracer, false);
+          new TracingStatefulRedisConnection<>(client.connect(),
+              new TracingConfiguration.Builder(mockTracer).build());
 
       RedisAsyncCommands<String, String> commands = connection.async();
 
