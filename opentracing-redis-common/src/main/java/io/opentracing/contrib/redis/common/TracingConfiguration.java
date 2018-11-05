@@ -17,6 +17,7 @@ import io.opentracing.Tracer;
 import java.util.function.Function;
 
 public class TracingConfiguration {
+  static final int DEFAULT_KEYS_MAX_LENGTH = 100;
   private final Tracer tracer;
   private final boolean traceWithActiveSpanOnly;
   private final int keysMaxLength;
@@ -47,21 +48,13 @@ public class TracingConfiguration {
   }
 
   public static class Builder {
-    private Tracer tracer;
+    private final Tracer tracer;
     private boolean traceWithActiveSpanOnly;
-    private int keysMaxLength;
-    private Function<String, String> spanNameProvider;
-
-    public Builder() {
-    }
+    private int keysMaxLength = DEFAULT_KEYS_MAX_LENGTH;
+    private Function<String, String> spanNameProvider = RedisSpanNameProvider.OPERATION_NAME;
 
     public Builder(Tracer tracer) {
       this.tracer = tracer;
-    }
-
-    public Builder withTracer(Tracer tracer) {
-      this.tracer = tracer;
-      return this;
     }
 
     /**
@@ -73,11 +66,21 @@ public class TracingConfiguration {
       return this;
     }
 
+    /**
+     * Customize the span name, default is operation name ({@link RedisSpanNameProvider#OPERATION_NAME})
+     *
+     * @param spanNameProvider function to customize the span name
+     */
     public Builder withSpanNameProvider(Function<String, String> spanNameProvider) {
       this.spanNameProvider = spanNameProvider;
       return this;
     }
 
+    /**
+     * Limit number of keys to add to span (default is 100)
+     *
+     * @param keysMaxLength max keys length to add to span
+     */
     public Builder withKeysMaxLength(int keysMaxLength) {
       this.keysMaxLength = keysMaxLength;
       return this;
@@ -87,8 +90,8 @@ public class TracingConfiguration {
       if (spanNameProvider == null) {
         spanNameProvider = RedisSpanNameProvider.OPERATION_NAME;
       }
-      if (keysMaxLength < 0) {
-        keysMaxLength = 100;
+      if (keysMaxLength <= 0) {
+        keysMaxLength = DEFAULT_KEYS_MAX_LENGTH;
       }
       return new TracingConfiguration(tracer, traceWithActiveSpanOnly, keysMaxLength,
           spanNameProvider);
