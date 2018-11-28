@@ -20,7 +20,6 @@ import io.opentracing.Span;
 import io.opentracing.Tracer;
 import io.opentracing.contrib.redis.common.TracingHelper;
 import io.opentracing.noop.NoopScopeManager.NoopScope;
-import io.opentracing.tag.StringTag;
 import io.opentracing.tag.Tags;
 import java.util.function.Supplier;
 
@@ -34,9 +33,6 @@ import java.util.function.Supplier;
  * @author Daniel del Castillo
  */
 class RedisTracingUtils {
-
-  private static final StringTag COMMAND_TAG = new StringTag("command");
-  private static final String REDIS_COMMAND = "RedisCommand";
 
   static <T> T doInScope(String command, Supplier<T> supplier, boolean withActiveSpanOnly,
       Tracer tracer) {
@@ -59,18 +55,17 @@ class RedisTracingUtils {
       return NoopScope.INSTANCE;
     }
 
-    Tracer.SpanBuilder spanBuilder = currentTracer.buildSpan(RedisTracingUtils.REDIS_COMMAND)
+    Tracer.SpanBuilder spanBuilder = currentTracer.buildSpan(command)
         .withTag(Tags.SPAN_KIND.getKey(), Tags.SPAN_KIND_CLIENT);
 
     Scope scope = spanBuilder.startActive(true);
-    decorate(scope.span(), command);
+    decorate(scope.span());
 
     return scope;
   }
 
-  private static void decorate(Span span, String command) {
+  private static void decorate(Span span) {
     Tags.COMPONENT.set(span, TracingHelper.COMPONENT_NAME);
-    COMMAND_TAG.set(span, command);
   }
 
 }
