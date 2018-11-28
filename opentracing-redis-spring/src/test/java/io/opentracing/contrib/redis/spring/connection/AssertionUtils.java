@@ -27,16 +27,13 @@ import java.util.Optional;
  */
 final class AssertionUtils {
 
-  private static final String COMMAND_TAG = "command";
-
-
   /**
    * Make sure we get one span once we execute a Redis command.
    */
   static void commandCreatesNewSpan(MockTracer tracer, String commandName, Runnable command) {
     command.run();
     assertEquals(1, tracer.finishedSpans().size());
-    assertEquals(commandName, tracer.finishedSpans().get(0).tags().get(COMMAND_TAG));
+    assertEquals(commandName, tracer.finishedSpans().get(0).operationName());
     tracer.reset();
   }
 
