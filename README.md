@@ -12,11 +12,24 @@ OpenTracing instrumentation for Redis Client
 
 ### Jedis
 
+#### Jedis 2
+
 pom.xml
 ```xml
 <dependency>
     <groupId>io.opentracing.contrib</groupId>
     <artifactId>opentracing-redis-jedis</artifactId>
+    <version>VERSION</version>
+</dependency>
+```
+
+#### Jedis 3
+
+pom.xml
+```xml
+<dependency>
+    <groupId>io.opentracing.contrib</groupId>
+    <artifactId>opentracing-redis-jedis3</artifactId>
     <version>VERSION</version>
 </dependency>
 ```

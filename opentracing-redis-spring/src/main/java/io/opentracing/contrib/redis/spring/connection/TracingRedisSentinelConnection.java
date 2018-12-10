@@ -13,9 +13,9 @@
  */
 package io.opentracing.contrib.redis.spring.connection;
 
-import static io.opentracing.contrib.redis.spring.connection.RedisTracingUtils.doInScope;
-
+import io.opentracing.Span;
 import io.opentracing.Tracer;
+import io.opentracing.contrib.redis.common.TracingConfiguration;
 import io.opentracing.contrib.redis.common.TracingHelper;
 import java.io.IOException;
 import java.util.Collection;
@@ -25,56 +25,60 @@ import org.springframework.data.redis.connection.RedisServer;
 
 public class TracingRedisSentinelConnection implements RedisSentinelConnection {
   private final RedisSentinelConnection redisSentinelConnection;
-  private final boolean withActiveSpanOnly;
-  private final Tracer tracer;
+  private final TracingHelper helper;
 
-  public TracingRedisSentinelConnection(
-      RedisSentinelConnection redisSentinelConnection, boolean withActiveSpanOnly,
-      Tracer tracer) {
+  public TracingRedisSentinelConnection(RedisSentinelConnection redisSentinelConnection,
+      boolean withActiveSpanOnly, Tracer tracer) {
     this.redisSentinelConnection = redisSentinelConnection;
-    this.withActiveSpanOnly = withActiveSpanOnly;
-    this.tracer = tracer;
+    this.helper = new TracingHelper(new TracingConfiguration.Builder(tracer)
+        .traceWithActiveSpanOnly(withActiveSpanOnly).build());
+  }
+
+  public TracingRedisSentinelConnection(RedisSentinelConnection redisSentinelConnection,
+      TracingConfiguration configuration) {
+    this.redisSentinelConnection = redisSentinelConnection;
+    this.helper = new TracingHelper(configuration);
   }
 
   @Override
   public boolean isOpen() {
-    return doInScope("isOpen", redisSentinelConnection::isOpen, withActiveSpanOnly, tracer);
+    Span span = helper.buildSpan("isOpen");
+    return helper.decorate(span, redisSentinelConnection::isOpen);
   }
 
   @Override
   public void failover(NamedNode master) {
-    TracingHelper.doInScope("failover", () -> redisSentinelConnection.failover(master),
-        withActiveSpanOnly, tracer);
+    Span span = helper.buildSpan("failover");
+    helper.decorate(span, () -> redisSentinelConnection.failover(master));
   }
 
   @Override
   public Collection<RedisServer> masters() {
-    return TracingHelper.doInScope("masters", redisSentinelConnection::masters,
-        withActiveSpanOnly, tracer);
+    Span span = helper.buildSpan("masters");
+    return helper.decorate(span, redisSentinelConnection::masters);
   }
 
   @Override
-  public Collection<RedisServer> slaves(
-      NamedNode master) {
-    return TracingHelper.doInScope("slaves", () -> redisSentinelConnection.slaves(master),
-        withActiveSpanOnly, tracer);
+  public Collection<RedisServer> slaves(NamedNode master) {
+    Span span = helper.buildSpan("slaves");
+    return helper.decorate(span, () -> redisSentinelConnection.slaves(master));
   }
 
   @Override
   public void remove(NamedNode master) {
-    TracingHelper.doInScope("remove", () -> redisSentinelConnection.remove(master),
-        withActiveSpanOnly, tracer);
+    Span span = helper.buildSpan("remove");
+    helper.decorate(span, () -> redisSentinelConnection.remove(master));
   }
 
   @Override
   public void monitor(RedisServer master) {
-    TracingHelper.doInScope("monitor", () -> redisSentinelConnection.monitor(master),
-        withActiveSpanOnly, tracer);
+    Span span = helper.buildSpan("monitor");
+    helper.decorate(span, () -> redisSentinelConnection.monitor(master));
   }
 
   @Override
   public void close() throws IOException {
-    TracingHelper.doInScopeExceptionally("close", redisSentinelConnection::close,
-        withActiveSpanOnly, tracer);
+    Span span = helper.buildSpan("close");
+    helper.decorateThrowing(span, () -> redisSentinelConnection.close());
   }
 }

@@ -64,7 +64,7 @@ public class TracingHelper {
   }
 
   public Span buildSpan(String operationName) {
-    if (traceWithActiveSpanOnly && getNullSafeTracer(tracer).activeSpan() == null) {
+    if (traceWithActiveSpanOnly && getNullSafeTracer().activeSpan() == null) {
       return NoopSpan.INSTANCE;
     } else {
       return builder(operationName, tracer, spanNameProvider).start();
@@ -72,7 +72,7 @@ public class TracingHelper {
   }
 
   public Span buildSpan(String operationName, Object key) {
-    if (traceWithActiveSpanOnly && getNullSafeTracer(tracer).activeSpan() == null) {
+    if (traceWithActiveSpanOnly && getNullSafeTracer().activeSpan() == null) {
       return NoopSpan.INSTANCE;
     } else {
       return builder(operationName, tracer, spanNameProvider).withTag("key", nullable(key)).start();
@@ -80,7 +80,7 @@ public class TracingHelper {
   }
 
   public Span buildSpan(String operationName, byte[] key) {
-    if (traceWithActiveSpanOnly && getNullSafeTracer(tracer).activeSpan() == null) {
+    if (traceWithActiveSpanOnly && getNullSafeTracer().activeSpan() == null) {
       return NoopSpan.INSTANCE;
     } else {
       return builder(operationName, tracer, spanNameProvider).withTag("key", Arrays.toString(key))
@@ -89,7 +89,7 @@ public class TracingHelper {
   }
 
   public Span buildSpan(String operationName, Object[] keys) {
-    if (traceWithActiveSpanOnly && getNullSafeTracer(tracer).activeSpan() == null) {
+    if (traceWithActiveSpanOnly && getNullSafeTracer().activeSpan() == null) {
       return NoopSpan.INSTANCE;
     } else {
       return builder(operationName, tracer, spanNameProvider).withTag("keys",
@@ -193,6 +193,17 @@ public class TracingHelper {
     return "{" + String.join(", ", list) + "}";
   }
 
+  public <T> T decorate(Span span, Supplier<T> action) {
+    try (Scope ignore = getNullSafeTracer().scopeManager().activate(span, false)) {
+      return action.get();
+    } catch (Exception e) {
+      onError(e, span);
+      throw e;
+    } finally {
+      span.finish();
+    }
+  }
+
   public static Tracer getNullSafeTracer(final Tracer tracer) {
     if (tracer == null) {
       return GlobalTracer.get();
@@ -200,12 +211,12 @@ public class TracingHelper {
     return tracer;
   }
 
-  public static <T extends Exception> void doInScopeExceptionally(String operationName,
-      ThrowingAction<T> action,
-      boolean traceWithActiveSpanOnly, Tracer tracer)
-      throws T {
-    Span span = buildSpan(operationName, traceWithActiveSpanOnly, tracer);
-    try (Scope ignore = GlobalTracer.get().scopeManager().activate(span, false)) {
+  private Tracer getNullSafeTracer() {
+    return getNullSafeTracer(tracer);
+  }
+
+  public void decorate(Span span, Action action) {
+    try (Scope ignore = getNullSafeTracer().scopeManager().activate(span, false)) {
       action.execute();
     } catch (Exception e) {
       onError(e, span);
@@ -215,28 +226,9 @@ public class TracingHelper {
     }
   }
 
-  public static void doInScope(String operationName, Runnable action,
-      boolean traceWithActiveSpanOnly, Tracer tracer) {
-    Span span = buildSpan(operationName, traceWithActiveSpanOnly, tracer);
-    try (Scope ignore = GlobalTracer.get().scopeManager().activate(span, false)) {
-      action.run();
-    } catch (Exception e) {
-      onError(e, span);
-      throw e;
-    } finally {
-      span.finish();
-    }
-  }
-
-  public static <T> T doInScope(String operationName, Supplier<T> action,
-      boolean traceWithActiveSpanOnly, Tracer tracer) {
-    Span span = buildSpan(operationName, traceWithActiveSpanOnly, tracer);
-    return doInScope(span, action);
-  }
-
-  public static <T> T doInScope(Span span, Supplier<T> action) {
-    try (Scope ignore = GlobalTracer.get().scopeManager().activate(span, false)) {
-      return action.get();
+  public <T extends Exception> void decorateThrowing(Span span, ThrowingAction<T> action) throws T {
+    try (Scope ignore = getNullSafeTracer().scopeManager().activate(span, false)) {
+      action.execute();
     } catch (Exception e) {
       onError(e, span);
       throw e;
