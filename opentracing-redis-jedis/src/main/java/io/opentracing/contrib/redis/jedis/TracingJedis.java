@@ -33,6 +33,7 @@ import redis.clients.jedis.BinaryJedisPubSub;
 import redis.clients.jedis.BitOP;
 import redis.clients.jedis.BitPosParams;
 import redis.clients.jedis.Client;
+import redis.clients.jedis.ClusterReset;
 import redis.clients.jedis.DebugParams;
 import redis.clients.jedis.GeoCoordinate;
 import redis.clients.jedis.GeoRadiusResponse;
@@ -42,6 +43,7 @@ import redis.clients.jedis.JedisCluster.Reset;
 import redis.clients.jedis.JedisMonitor;
 import redis.clients.jedis.JedisPubSub;
 import redis.clients.jedis.JedisShardInfo;
+import redis.clients.jedis.ListPosition;
 import redis.clients.jedis.Pipeline;
 import redis.clients.jedis.PipelineBlock;
 import redis.clients.jedis.ScanParams;
@@ -175,6 +177,13 @@ public class TracingJedis extends Jedis {
   }
 
   @Override
+  public String ping(String message) {
+    Span span = helper.buildSpan("ping");
+    span.setTag("message", message);
+    return helper.decorate(span, () -> super.ping(message));
+  }
+
+  @Override
   public String set(String key, String value) {
     Span span = helper.buildSpan("set", key);
     span.setTag("value", value);
@@ -196,6 +205,15 @@ public class TracingJedis extends Jedis {
     } finally {
       span.finish();
     }
+  }
+
+  @Override
+  public String set(String key, String value, String expx, long time) {
+    Span span = helper.buildSpan("set", key);
+    span.setTag("value", value);
+    span.setTag("expx", expx);
+    span.setTag("time", time);
+    return helper.decorate(span, () -> super.set(key, value, expx, time));
   }
 
   @Override
@@ -254,6 +272,18 @@ public class TracingJedis extends Jedis {
     } finally {
       span.finish();
     }
+  }
+
+  @Override
+  public Long unlink(String... keys) {
+    Span span = helper.buildSpan("unlink", keys);
+    return helper.decorate(span, () -> super.unlink(keys));
+  }
+
+  @Override
+  public Long unlink(String key) {
+    Span span = helper.buildSpan("unlink", key);
+    return helper.decorate(span, () -> super.unlink(key));
   }
 
   @Override
@@ -365,6 +395,18 @@ public class TracingJedis extends Jedis {
     } finally {
       span.finish();
     }
+  }
+
+  @Override
+  public Long touch(String... keys) {
+    Span span = helper.buildSpan("touch", keys);
+    return helper.decorate(span, () -> super.touch(keys));
+  }
+
+  @Override
+  public Long touch(String key) {
+    Span span = helper.buildSpan("touch", key);
+    return helper.decorate(span, () -> super.touch(key));
   }
 
   @Override
@@ -561,6 +603,13 @@ public class TracingJedis extends Jedis {
     } finally {
       span.finish();
     }
+  }
+
+  @Override
+  public Long hset(String key, Map<String, String> hash) {
+    Span span = helper.buildSpan("hset", key);
+    span.setTag("hash", TracingHelper.toString(hash));
+    return helper.decorate(span, () -> super.hset(key, hash));
   }
 
   @Override
@@ -2053,6 +2102,15 @@ public class TracingJedis extends Jedis {
   }
 
   @Override
+  public Long linsert(String key, ListPosition where, String pivot, String value) {
+    Span span = helper.buildSpan("linsert", key);
+    span.setTag("where", where.name());
+    span.setTag("pivot", pivot);
+    span.setTag("value", value);
+    return helper.decorate(span, () -> super.linsert(key, where, pivot, value));
+  }
+
+  @Override
   public String brpoplpush(String source, String destination, int timeout) {
     Span span = helper.buildSpan("brpoplpush");
     span.setTag("source", source);
@@ -2643,6 +2701,14 @@ public class TracingJedis extends Jedis {
   }
 
   @Override
+  public String restoreReplace(String key, int ttl, byte[] serializedValue) {
+    Span span = helper.buildSpan("restoreReplace", key);
+    span.setTag("ttl", ttl);
+    span.setTag("serializedValue", Arrays.toString(serializedValue));
+    return helper.decorate(span, () -> super.restoreReplace(key, ttl, serializedValue));
+  }
+
+  @Override
   public String ping() {
     Span span = helper.buildSpan("ping");
     try {
@@ -2653,6 +2719,13 @@ public class TracingJedis extends Jedis {
     } finally {
       span.finish();
     }
+  }
+
+  @Override
+  public byte[] ping(byte[] message) {
+    Span span = helper.buildSpan("ping");
+    span.setTag("message", Arrays.toString(message));
+    return helper.decorate(span, () -> super.ping(message));
   }
 
   @Override
@@ -2684,6 +2757,15 @@ public class TracingJedis extends Jedis {
     } finally {
       span.finish();
     }
+  }
+
+  @Override
+  public String set(byte[] key, byte[] value, byte[] expx, long time) {
+    Span span = helper.buildSpan("set", key);
+    span.setTag("value", Arrays.toString(value));
+    span.setTag("expx", Arrays.toString(expx));
+    span.setTag("time", time);
+    return helper.decorate(span, () -> super.set(key, value, expx, time));
   }
 
   @Override
@@ -2764,6 +2846,18 @@ public class TracingJedis extends Jedis {
     } finally {
       span.finish();
     }
+  }
+
+  @Override
+  public Long unlink(byte[]... keys) {
+    Span span = helper.buildSpan("unlink", keys);
+    return helper.decorate(span, () -> super.unlink(keys));
+  }
+
+  @Override
+  public Long unlink(byte[] key) {
+    Span span = helper.buildSpan("unlink", key);
+    return helper.decorate(span, () -> super.unlink(key));
   }
 
   @Override
@@ -2918,6 +3012,18 @@ public class TracingJedis extends Jedis {
   }
 
   @Override
+  public Long touch(byte[]... keys) {
+    Span span = helper.buildSpan("touch", keys);
+    return helper.decorate(span, () -> super.touch(keys));
+  }
+
+  @Override
+  public Long touch(byte[] key) {
+    Span span = helper.buildSpan("touch", key);
+    return helper.decorate(span, () -> super.touch(key));
+  }
+
+  @Override
   public String select(int index) {
     Span span = helper.buildSpan("select");
     span.setTag("index", index);
@@ -2929,6 +3035,14 @@ public class TracingJedis extends Jedis {
     } finally {
       span.finish();
     }
+  }
+
+  @Override
+  public String swapDB(int index1, int index2) {
+    Span span = helper.buildSpan("swapDB");
+    span.setTag("index1", index1);
+    span.setTag("index2", index2);
+    return helper.decorate(span, () -> super.swapDB(index1, index2));
   }
 
   @Override
@@ -3153,6 +3267,13 @@ public class TracingJedis extends Jedis {
     } finally {
       span.finish();
     }
+  }
+
+  @Override
+  public Long hset(byte[] key, Map<byte[], byte[]> hash) {
+    Span span = helper.buildSpan("hset", key);
+    span.setTag("hash", TracingHelper.toStringMap(hash));
+    return helper.decorate(span, () -> super.hset(key, hash));
   }
 
   @Override
@@ -3950,6 +4071,11 @@ public class TracingJedis extends Jedis {
   }
 
   @Override
+  protected void checkIsInMultiOrPipeline() {
+    super.checkIsInMultiOrPipeline();
+  }
+
+  @Override
   public void connect() {
     Span span = helper.buildSpan("connect");
     try {
@@ -4434,6 +4560,13 @@ public class TracingJedis extends Jedis {
     } finally {
       span.finish();
     }
+  }
+
+  @Override
+  public String clusterReset(ClusterReset resetType) {
+    Span span = helper.buildSpan("clusterReset");
+    span.setTag("resetType", resetType.name());
+    return helper.decorate(span, () -> super.clusterReset(resetType));
   }
 
   @Override
@@ -5073,6 +5206,12 @@ public class TracingJedis extends Jedis {
   }
 
   @Override
+  protected Set<Tuple> getTupledSet() {
+    Span span = helper.buildSpan("getTupledSet");
+    return helper.decorate(span, () -> super.getTupledSet());
+  }
+
+  @Override
   public Set<byte[]> zrevrangeByScore(byte[] key, double max, double min) {
     Span span = helper.buildSpan("zrevrangeByScore", key);
     span.setTag("min", min);
@@ -5564,6 +5703,12 @@ public class TracingJedis extends Jedis {
   }
 
   @Override
+  public String configRewrite() {
+    Span span = helper.buildSpan("configRewrite");
+    return helper.decorate(span, super::configRewrite);
+  }
+
+  @Override
   public byte[] configSet(byte[] parameter, byte[] value) {
     Span span = helper.buildSpan("configSet");
     span.setTag("parameter", Arrays.toString(parameter));
@@ -5686,6 +5831,15 @@ public class TracingJedis extends Jedis {
     } finally {
       span.finish();
     }
+  }
+
+  @Override
+  public Long linsert(byte[] key, ListPosition where, byte[] pivot, byte[] value) {
+    Span span = helper.buildSpan("linsert", key);
+    span.setTag("where", where.name());
+    span.setTag("pivot", Arrays.toString(pivot));
+    span.setTag("value", Arrays.toString(value));
+    return helper.decorate(span, () -> super.linsert(key, where, pivot, value));
   }
 
   @Override
@@ -6209,6 +6363,14 @@ public class TracingJedis extends Jedis {
   }
 
   @Override
+  public String restoreReplace(byte[] key, int ttl, byte[] serializedValue) {
+    Span span = helper.buildSpan("restoreReplace", key);
+    span.setTag("ttl", ttl);
+    span.setTag("serializedValue", Arrays.toString(serializedValue));
+    return helper.decorate(span, () -> super.restoreReplace(key, ttl, serializedValue));
+  }
+
+  @Override
   public Long pexpire(byte[] key, int milliseconds) {
     Span span = helper.buildSpan("pexpire", key);
     span.setTag("milliseconds", milliseconds);
@@ -6340,6 +6502,14 @@ public class TracingJedis extends Jedis {
   }
 
   @Override
+  public String clientKill(String ip, int port) {
+    Span span = helper.buildSpan("clientKill");
+    span.setTag("ip", ip);
+    span.setTag("port", port);
+    return helper.decorate(span, () -> super.clientKill(ip, port));
+  }
+
+  @Override
   public String clientGetname() {
     Span span = helper.buildSpan("clientGetname");
     try {
@@ -6350,6 +6520,12 @@ public class TracingJedis extends Jedis {
     } finally {
       span.finish();
     }
+  }
+
+  @Override
+  public byte[] clientGetnameBinary() {
+    Span span = helper.buildSpan("clientGetnameBinary");
+    return helper.decorate(span, super::clientGetnameBinary);
   }
 
   @Override
@@ -6366,6 +6542,12 @@ public class TracingJedis extends Jedis {
   }
 
   @Override
+  public byte[] clientListBinary() {
+    Span span = helper.buildSpan("clientListBinary");
+    return helper.decorate(span, super::clientListBinary);
+  }
+
+  @Override
   public String clientSetname(byte[] name) {
     Span span = helper.buildSpan("clientSetname");
     span.setTag("name", Arrays.toString(name));
@@ -6377,6 +6559,13 @@ public class TracingJedis extends Jedis {
     } finally {
       span.finish();
     }
+  }
+
+  @Override
+  public String clientPause(long timeout) {
+    Span span = helper.buildSpan("clientPause");
+    span.setTag("timeout", timeout);
+    return helper.decorate(span, () -> super.clientPause(timeout));
   }
 
   @Override
@@ -6407,6 +6596,16 @@ public class TracingJedis extends Jedis {
     } finally {
       span.finish();
     }
+  }
+
+  @Override
+  public String migrate(String host, int port, byte[] key, int destinationDb, int timeout) {
+    Span span = helper.buildSpan("migrate", key);
+    span.setTag("host", host);
+    span.setTag("port", port);
+    span.setTag("destinationDb", destinationDb);
+    span.setTag("timeout", timeout);
+    return helper.decorate(span, () -> super.migrate(host, port, key, destinationDb, timeout));
   }
 
   @Override
@@ -6704,6 +6903,18 @@ public class TracingJedis extends Jedis {
   }
 
   @Override
+  public List<GeoRadiusResponse> georadiusReadonly(byte[] key, double longitude, double latitude,
+      double radius, GeoUnit unit) {
+    Span span = helper.buildSpan("georadiusReadonly", key);
+    span.setTag("longitude", longitude);
+    span.setTag("latitude", latitude);
+    span.setTag("radius", radius);
+    span.setTag("unit", unit.name());
+    return helper
+        .decorate(span, () -> super.georadiusReadonly(key, longitude, latitude, radius, unit));
+  }
+
+  @Override
   public List<GeoRadiusResponse> georadius(byte[] key, double longitude, double latitude,
       double radius, GeoUnit unit, GeoRadiusParam param) {
     Span span = helper.buildSpan("georadius", key);
@@ -6723,6 +6934,20 @@ public class TracingJedis extends Jedis {
   }
 
   @Override
+  public List<GeoRadiusResponse> georadiusReadonly(byte[] key, double longitude, double latitude,
+      double radius, GeoUnit unit, GeoRadiusParam param) {
+    Span span = helper.buildSpan("georadiusReadonly", key);
+    span.setTag("longitude", longitude);
+    span.setTag("latitude", latitude);
+    span.setTag("radius", radius);
+    span.setTag("unit", unit.name());
+    span.setTag("param", TracingHelper.toString(param.getByteParams()));
+    return helper
+        .decorate(span,
+            () -> super.georadiusReadonly(key, longitude, latitude, radius, unit, param));
+  }
+
+  @Override
   public List<GeoRadiusResponse> georadiusByMember(byte[] key, byte[] member, double radius,
       GeoUnit unit) {
     Span span = helper.buildSpan("georadiusByMember", key);
@@ -6737,6 +6962,17 @@ public class TracingJedis extends Jedis {
     } finally {
       span.finish();
     }
+  }
+
+  @Override
+  public List<GeoRadiusResponse> georadiusByMemberReadonly(byte[] key, byte[] member, double radius,
+      GeoUnit unit) {
+    Span span = helper.buildSpan("georadiusByMemberReadonly", key);
+    span.setTag("member", Arrays.toString(member));
+    span.setTag("radius", radius);
+    span.setTag("unit", unit.name());
+    return helper
+        .decorate(span, () -> super.georadiusByMemberReadonly(key, member, radius, unit));
   }
 
   @Override
@@ -6758,17 +6994,29 @@ public class TracingJedis extends Jedis {
   }
 
   @Override
-  public List<byte[]> bitfield(byte[] key, byte[]... arguments) {
-    Span span = helper.buildSpan("bitfield");
-    span.setTag("arguments", TracingHelper.toString(arguments));
-    try {
-      return super.bitfield(key, arguments);
-    } catch (Exception e) {
-      onError(e, span);
-      throw e;
-    } finally {
-      span.finish();
-    }
+  public List<GeoRadiusResponse> georadiusByMemberReadonly(byte[] key, byte[] member, double radius,
+      GeoUnit unit, GeoRadiusParam param) {
+    Span span = helper.buildSpan("georadiusByMemberReadonly", key);
+    span.setTag("member", Arrays.toString(member));
+    span.setTag("radius", radius);
+    span.setTag("unit", unit.name());
+    span.setTag("param", TracingHelper.toString(param.getByteParams()));
+    return helper
+        .decorate(span, () -> super.georadiusByMemberReadonly(key, member, radius, unit, param));
+  }
+
+  @Override
+  public List<Long> bitfield(byte[] key, byte[]... arguments) {
+    Span span = helper.buildSpan("bitfield", key);
+    span.setTag("arguments", Arrays.toString(arguments));
+    return helper.decorate(span, () -> super.bitfield(key, arguments));
+  }
+
+  @Override
+  public Long hstrlen(byte[] key, byte[] field) {
+    Span span = helper.buildSpan("hstrlen", key);
+    span.setTag("field", Arrays.toString(field));
+    return helper.decorate(span, () -> super.hstrlen(key, field));
   }
 
   @Override
@@ -6975,6 +7223,18 @@ public class TracingJedis extends Jedis {
   }
 
   @Override
+  public List<GeoRadiusResponse> georadiusReadonly(String key, double longitude, double latitude,
+      double radius, GeoUnit unit) {
+    Span span = helper.buildSpan("georadiusReadonly", key);
+    span.setTag("longitude", longitude);
+    span.setTag("latitude", latitude);
+    span.setTag("radius", radius);
+    span.setTag("unit", unit.name());
+    return helper
+        .decorate(span, () -> super.georadiusReadonly(key, longitude, latitude, radius, unit));
+  }
+
+  @Override
   public List<GeoRadiusResponse> georadius(String key, double longitude, double latitude,
       double radius, GeoUnit unit, GeoRadiusParam param) {
     Span span = helper.buildSpan("georadius", key);
@@ -6994,6 +7254,20 @@ public class TracingJedis extends Jedis {
   }
 
   @Override
+  public List<GeoRadiusResponse> georadiusReadonly(String key, double longitude, double latitude,
+      double radius, GeoUnit unit, GeoRadiusParam param) {
+    Span span = helper.buildSpan("georadiusReadonly", key);
+    span.setTag("longitude", longitude);
+    span.setTag("latitude", latitude);
+    span.setTag("radius", radius);
+    span.setTag("unit", unit.name());
+    span.setTag("param", TracingHelper.toString(param.getByteParams()));
+    return helper
+        .decorate(span,
+            () -> super.georadiusReadonly(key, longitude, latitude, radius, unit, param));
+  }
+
+  @Override
   public List<GeoRadiusResponse> georadiusByMember(String key, String member, double radius,
       GeoUnit unit) {
     Span span = helper.buildSpan("georadiusByMember", key);
@@ -7008,6 +7282,29 @@ public class TracingJedis extends Jedis {
     } finally {
       span.finish();
     }
+  }
+
+  @Override
+  public List<GeoRadiusResponse> georadiusByMemberReadonly(String key, String member, double radius,
+      GeoUnit unit, GeoRadiusParam param) {
+    Span span = helper.buildSpan("georadiusByMemberReadonly", key);
+    span.setTag("member", member);
+    span.setTag("radius", radius);
+    span.setTag("unit", unit.name());
+    span.setTag("param", TracingHelper.toString(param.getByteParams()));
+    return helper
+        .decorate(span, () -> super.georadiusByMemberReadonly(key, member, radius, unit, param));
+  }
+
+  @Override
+  public List<GeoRadiusResponse> georadiusByMemberReadonly(String key, String member, double radius,
+      GeoUnit unit) {
+    Span span = helper.buildSpan("georadiusByMemberReadonly", key);
+    span.setTag("member", member);
+    span.setTag("radius", radius);
+    span.setTag("unit", unit.name());
+    return helper
+        .decorate(span, () -> super.georadiusByMemberReadonly(key, member, radius, unit));
   }
 
   @Override
@@ -7040,5 +7337,12 @@ public class TracingJedis extends Jedis {
     } finally {
       span.finish();
     }
+  }
+
+  @Override
+  public Long hstrlen(String key, String field) {
+    Span span = helper.buildSpan("hstrlen", key);
+    span.setTag("field", field);
+    return helper.decorate(span, () -> super.hstrlen(key, field));
   }
 }
