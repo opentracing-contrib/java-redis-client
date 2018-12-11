@@ -29,11 +29,13 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 
 public class TracingHelper {
 
   public static final String COMPONENT_NAME = "java-redis";
+  public static final String DB_TYPE = "redis";
   private final Tracer tracer;
   private final boolean traceWithActiveSpanOnly;
   private final Function<String, String> spanNameProvider;
@@ -51,7 +53,7 @@ public class TracingHelper {
     return getNullSafeTracer(tracer).buildSpan(spanNameProvider.apply(operationName))
         .withTag(Tags.COMPONENT.getKey(), COMPONENT_NAME)
         .withTag(Tags.SPAN_KIND.getKey(), Tags.SPAN_KIND_CLIENT)
-        .withTag(Tags.DB_TYPE.getKey(), "redis");
+        .withTag(Tags.DB_TYPE.getKey(), DB_TYPE);
   }
 
   public static Span buildSpan(String operationName, boolean traceWithActiveSpanOnly,
@@ -148,6 +150,13 @@ public class TracingHelper {
     return "[" + String.join(", ", list) + "]";
   }
 
+  public static String collectionToString(Collection<?> collection) {
+    if (collection == null) {
+      return "";
+    }
+    return collection.stream().map(Object::toString).collect(Collectors.joining(", "));
+  }
+
   public static String toString(Collection<byte[]> collection) {
     if (collection == null) {
       return "null";
@@ -193,9 +202,19 @@ public class TracingHelper {
     return "{" + String.join(", ", list) + "}";
   }
 
-  public <T> T decorate(Span span, Supplier<T> action) {
+  public static <K, V> String mapToString(Map<K, V> map) {
+    if (map == null) {
+      return "";
+    }
+    return map.entrySet()
+        .stream()
+        .map(entry -> entry.getKey() + " -> " + entry.getValue())
+        .collect(Collectors.joining(", "));
+  }
+
+  public <T> T decorate(Span span, Supplier<T> supplier) {
     try (Scope ignore = getNullSafeTracer().scopeManager().activate(span, false)) {
-      return action.get();
+      return supplier.get();
     } catch (Exception e) {
       onError(e, span);
       throw e;
@@ -211,7 +230,7 @@ public class TracingHelper {
     return tracer;
   }
 
-  private Tracer getNullSafeTracer() {
+  public Tracer getNullSafeTracer() {
     return getNullSafeTracer(tracer);
   }
 
@@ -229,6 +248,18 @@ public class TracingHelper {
   public <T extends Exception> void decorateThrowing(Span span, ThrowingAction<T> action) throws T {
     try (Scope ignore = getNullSafeTracer().scopeManager().activate(span, false)) {
       action.execute();
+    } catch (Exception e) {
+      onError(e, span);
+      throw e;
+    } finally {
+      span.finish();
+    }
+  }
+
+  public <T extends Exception, V> V decorateThrowing(Span span, ThrowingSupplier<T, V> supplier)
+      throws T {
+    try (Scope ignore = getNullSafeTracer().scopeManager().activate(span, false)) {
+      return supplier.get();
     } catch (Exception e) {
       onError(e, span);
       throw e;
