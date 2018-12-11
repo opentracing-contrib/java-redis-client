@@ -45,6 +45,16 @@ pom.xml
 </dependency>
 ```
 
+### Redisson
+pom.xml
+```xml
+<dependency>
+    <groupId>io.opentracing.contrib</groupId>
+    <artifactId>opentracing-redis-redisson</artifactId>
+    <version>VERSION</version>
+</dependency>
+```
+
 ### Spring
 
 pom.xml
@@ -156,6 +166,28 @@ RedisCommands<String, String> commands = connection.sync();
 // Get async redis commands
 RedisAsyncCommands<String, String> commandsAsync = connection.async();
 
+```
+
+### Redisson
+
+```java
+// Instantiate tracer
+Tracer tracer = ...
+
+// Optionally register tracer with GlobalTracer
+GlobalTracer.register(tracer);
+
+// Create Redisson config object
+Config = ...
+
+// Create Redisson instance
+RedissonClient redissonClient = Redisson.create(config);
+
+// Decorate RedissonClient with TracingRedissonClient
+RedissonClient tracingRedissonClient =  new TracingRedissonClient(redissonClient, tracer);
+
+// Get object you need using TracingRedissonClient
+RMap<MyKey, MyValue> map = tracingRedissonClient.getMap("myMap");
 ```
 
 ### Spring
