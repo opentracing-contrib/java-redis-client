@@ -24,9 +24,9 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>opentracing-redis-jedis</artifactId>
-  <name>OpenTracing Instrumentation for Jedis</name>
-  <description>OpenTracing Instrumentation for Jedis</description>
+  <artifactId>opentracing-redis-redisson</artifactId>
+  <name>OpenTracing Instrumentation for Redisson</name>
+  <description>OpenTracing Instrumentation for Redisson</description>
 
   <dependencies>
 
@@ -37,9 +37,9 @@
     </dependency>
 
     <dependency>
-      <groupId>redis.clients</groupId>
-      <artifactId>jedis</artifactId>
-      <version>2.10.0</version>
+      <groupId>org.redisson</groupId>
+      <artifactId>redisson</artifactId>
+      <version>3.9.0</version>
     </dependency>
 
     <dependency>
@@ -47,6 +47,7 @@
       <artifactId>embedded-redis</artifactId>
       <scope>test</scope>
     </dependency>
+
   </dependencies>
 
 </project>

@@ -25,7 +25,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>opentracing-redis-lettuce</artifactId>
-  <name>${project.groupId}:${project.artifactId}</name>
+  <name>OpenTracing Instrumentation for Lettuce Redis Client</name>
   <description>OpenTracing Instrumentation for Lettuce Redis Client</description>
 
   <dependencies>

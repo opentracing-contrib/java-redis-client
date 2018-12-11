@@ -29,9 +29,10 @@
     <module>opentracing-redis-jedis3</module>
     <module>opentracing-redis-common</module>
     <module>opentracing-redis-spring</module>
+    <module>opentracing-redis-redisson</module>
   </modules>
 
-  <name>${project.groupId}:${project.artifactId}</name>
+  <name>OpenTracing Instrumentation for Apache Redis Client</name>
   <description>OpenTracing Instrumentation for Apache Redis Client</description>
   <url>https://github.com/opentracing-contrib/java-redis-client</url>
   <inceptionYear>2017-2018</inceptionYear>
