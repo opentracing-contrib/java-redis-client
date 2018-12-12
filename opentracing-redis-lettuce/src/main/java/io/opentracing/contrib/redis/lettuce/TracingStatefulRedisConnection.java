@@ -19,9 +19,11 @@ import io.lettuce.core.api.async.RedisAsyncCommands;
 import io.lettuce.core.api.reactive.RedisReactiveCommands;
 import io.lettuce.core.api.sync.RedisCommands;
 import io.lettuce.core.protocol.RedisCommand;
+import io.lettuce.core.resource.ClientResources;
 import io.opentracing.contrib.redis.common.TracingConfiguration;
 import java.time.Duration;
 import java.util.Collection;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 public class TracingStatefulRedisConnection<K, V> implements StatefulRedisConnection<K, V> {
@@ -93,6 +95,11 @@ public class TracingStatefulRedisConnection<K, V> implements StatefulRedisConnec
   }
 
   @Override
+  public CompletableFuture<Void> closeAsync() {
+    return connection.closeAsync();
+  }
+
+  @Override
   public boolean isOpen() {
     return connection.isOpen();
   }
@@ -100,6 +107,11 @@ public class TracingStatefulRedisConnection<K, V> implements StatefulRedisConnec
   @Override
   public ClientOptions getOptions() {
     return connection.getOptions();
+  }
+
+  @Override
+  public ClientResources getResources() {
+    return connection.getResources();
   }
 
   @Override

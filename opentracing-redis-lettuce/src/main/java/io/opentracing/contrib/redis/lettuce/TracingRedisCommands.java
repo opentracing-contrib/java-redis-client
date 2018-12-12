@@ -18,6 +18,7 @@ import static io.opentracing.contrib.redis.common.TracingHelper.nullable;
 import static io.opentracing.contrib.redis.common.TracingHelper.onError;
 
 import io.lettuce.core.BitFieldArgs;
+import io.lettuce.core.Consumer;
 import io.lettuce.core.GeoArgs;
 import io.lettuce.core.GeoArgs.Unit;
 import io.lettuce.core.GeoCoordinates;
@@ -30,6 +31,7 @@ import io.lettuce.core.Limit;
 import io.lettuce.core.MapScanCursor;
 import io.lettuce.core.MigrateArgs;
 import io.lettuce.core.Range;
+import io.lettuce.core.RestoreArgs;
 import io.lettuce.core.ScanArgs;
 import io.lettuce.core.ScanCursor;
 import io.lettuce.core.ScoredValue;
@@ -37,10 +39,16 @@ import io.lettuce.core.ScoredValueScanCursor;
 import io.lettuce.core.ScriptOutputType;
 import io.lettuce.core.SetArgs;
 import io.lettuce.core.SortArgs;
+import io.lettuce.core.StreamMessage;
 import io.lettuce.core.StreamScanCursor;
 import io.lettuce.core.TransactionResult;
+import io.lettuce.core.UnblockType;
 import io.lettuce.core.Value;
 import io.lettuce.core.ValueScanCursor;
+import io.lettuce.core.XAddArgs;
+import io.lettuce.core.XClaimArgs;
+import io.lettuce.core.XReadArgs;
+import io.lettuce.core.XReadArgs.StreamOffset;
 import io.lettuce.core.ZAddArgs;
 import io.lettuce.core.ZStoreArgs;
 import io.lettuce.core.api.StatefulRedisConnection;
@@ -804,6 +812,13 @@ public class TracingRedisCommands<K, V> implements RedisCommands<K, V> {
     } finally {
       span.finish();
     }
+  }
+
+  @Override
+  public String restore(K key, byte[] value, RestoreArgs args) {
+    Span span = helper.buildSpan("restore", key);
+    span.setTag("value", Arrays.toString(value));
+    return helper.decorate(span, () -> commands.restore(key, value, args));
   }
 
   @Override
@@ -2091,6 +2106,20 @@ public class TracingRedisCommands<K, V> implements RedisCommands<K, V> {
   }
 
   @Override
+  public KeyValue<K, ScoredValue<V>> bzpopmin(long timeout, K... keys) {
+    Span span = helper.buildSpan("bzpopmin", keys);
+    span.setTag("timeout", timeout);
+    return helper.decorate(span, () -> commands.bzpopmin(timeout, keys));
+  }
+
+  @Override
+  public KeyValue<K, ScoredValue<V>> bzpopmax(long timeout, K... keys) {
+    Span span = helper.buildSpan("bzpopmax", keys);
+    span.setTag("timeout", timeout);
+    return helper.decorate(span, () -> commands.bzpopmax(timeout, keys));
+  }
+
+  @Override
   public Long zadd(K key, double score, V member) {
     Span span = helper.buildSpan("zadd", key);
     span.setTag("score", score);
@@ -2258,7 +2287,7 @@ public class TracingRedisCommands<K, V> implements RedisCommands<K, V> {
   }
 
   @Override
-  public Double zincrby(K key, double amount, K member) {
+  public Double zincrby(K key, double amount, V member) {
     Span span = helper.buildSpan("zincrby", key);
     span.setTag("amount", amount);
     try {
@@ -2325,6 +2354,32 @@ public class TracingRedisCommands<K, V> implements RedisCommands<K, V> {
     } finally {
       span.finish();
     }
+  }
+
+  @Override
+  public ScoredValue<V> zpopmin(K key) {
+    Span span = helper.buildSpan("zpopmin", key);
+    return helper.decorate(span, () -> commands.zpopmin(key));
+  }
+
+  @Override
+  public List<ScoredValue<V>> zpopmin(K key, long count) {
+    Span span = helper.buildSpan("zpopmin", key);
+    span.setTag("count", count);
+    return helper.decorate(span, () -> commands.zpopmin(key, count));
+  }
+
+  @Override
+  public ScoredValue<V> zpopmax(K key) {
+    Span span = helper.buildSpan("zpopmax", key);
+    return helper.decorate(span, () -> commands.zpopmax(key));
+  }
+
+  @Override
+  public List<ScoredValue<V>> zpopmax(K key, long count) {
+    Span span = helper.buildSpan("zpopmax", key);
+    span.setTag("count", count);
+    return helper.decorate(span, () -> commands.zpopmax(key, count));
   }
 
   @Override
@@ -3653,6 +3708,205 @@ public class TracingRedisCommands<K, V> implements RedisCommands<K, V> {
   }
 
   @Override
+  public Long xack(K key, K group, String... messageIds) {
+    Span span = helper.buildSpan("xack", key);
+    span.setTag("group", nullable(group));
+    span.setTag("messageIds", Arrays.toString(messageIds));
+    return helper.decorate(span, () -> commands.xack(key, group, messageIds));
+  }
+
+  @Override
+  public String xadd(K key, Map<K, V> body) {
+    Span span = helper.buildSpan("xadd", key);
+    span.setTag("body", TracingHelper.mapToString(body));
+    return helper.decorate(span, () -> commands.xadd(key, body));
+  }
+
+  @Override
+  public String xadd(K key, XAddArgs args, Map<K, V> body) {
+    Span span = helper.buildSpan("xadd", key);
+    span.setTag("body", TracingHelper.mapToString(body));
+    return helper.decorate(span, () -> commands.xadd(key, args, body));
+  }
+
+  @Override
+  public String xadd(K key, Object... keysAndValues) {
+    Span span = helper.buildSpan("xadd", key);
+    span.setTag("keysAndValues", Arrays.toString(keysAndValues));
+    return helper.decorate(span, () -> commands.xadd(key, keysAndValues));
+  }
+
+  @Override
+  public String xadd(K key, XAddArgs args, Object... keysAndValues) {
+    Span span = helper.buildSpan("xadd", key);
+    span.setTag("keysAndValues", Arrays.toString(keysAndValues));
+    return helper.decorate(span, () -> commands.xadd(key, args, keysAndValues));
+  }
+
+  @Override
+  public List<StreamMessage<K, V>> xclaim(K key, Consumer<K> consumer, long minIdleTime,
+      String... messageIds) {
+    Span span = helper.buildSpan("xclaim", key);
+    span.setTag("minIdleTime", minIdleTime);
+    span.setTag("consumer", nullable(consumer));
+    span.setTag("messageIds", Arrays.toString(messageIds));
+    return helper.decorate(span, () -> commands.xclaim(key, consumer, minIdleTime, messageIds));
+  }
+
+  @Override
+  public List<StreamMessage<K, V>> xclaim(K key, Consumer<K> consumer, XClaimArgs args,
+      String... messageIds) {
+    Span span = helper.buildSpan("xclaim", key);
+    span.setTag("consumer", nullable(consumer));
+    span.setTag("messageIds", Arrays.toString(messageIds));
+    return helper.decorate(span, () -> commands.xclaim(key, consumer, args, messageIds));
+  }
+
+  @Override
+  public Long xdel(K key, String... messageIds) {
+    Span span = helper.buildSpan("xdel", key);
+    span.setTag("messageIds", Arrays.toString(messageIds));
+    return helper.decorate(span, () -> commands.xdel(key, messageIds));
+  }
+
+  @Override
+  public String xgroupCreate(StreamOffset<K> streamOffset, K group) {
+    Span span = helper.buildSpan("xgroupCreate");
+    span.setTag("streamOffset", nullable(streamOffset));
+    span.setTag("group", nullable(group));
+    return helper.decorate(span, () -> commands.xgroupCreate(streamOffset, group));
+  }
+
+  @Override
+  public Boolean xgroupDelconsumer(K key, Consumer<K> consumer) {
+    Span span = helper.buildSpan("xgroupDelconsumer", key);
+    span.setTag("consumer", nullable(consumer));
+    return helper.decorate(span, () -> commands.xgroupDelconsumer(key, consumer));
+  }
+
+  @Override
+  public Boolean xgroupDestroy(K key, K group) {
+    Span span = helper.buildSpan("xgroupDestroy", key);
+    span.setTag("group", nullable(group));
+    return helper.decorate(span, () -> commands.xgroupDestroy(key, group));
+  }
+
+  @Override
+  public String xgroupSetid(StreamOffset<K> streamOffset, K group) {
+    Span span = helper.buildSpan("xgroupSetid");
+    span.setTag("streamOffset", nullable(streamOffset));
+    span.setTag("group", nullable(group));
+    return helper.decorate(span, () -> commands.xgroupSetid(streamOffset, group));
+  }
+
+  @Override
+  public Long xlen(K key) {
+    Span span = helper.buildSpan("xlen", key);
+    return helper.decorate(span, () -> commands.xlen(key));
+  }
+
+  @Override
+  public List<Object> xpending(K key, K group) {
+    Span span = helper.buildSpan("xpending", key);
+    span.setTag("group", nullable(group));
+    return helper.decorate(span, () -> commands.xpending(key, group));
+  }
+
+  @Override
+  public List<Object> xpending(K key, K group, Range<String> range, Limit limit) {
+    Span span = helper.buildSpan("xpending", key);
+    span.setTag("group", nullable(group));
+    span.setTag("range", nullable(range));
+    span.setTag("limit", nullable(limit));
+    return helper.decorate(span, () -> commands.xpending(key, group, range, limit));
+  }
+
+  @Override
+  public List<Object> xpending(K key, Consumer<K> consumer, Range<String> range, Limit limit) {
+    Span span = helper.buildSpan("xpending", key);
+    span.setTag("consumer", nullable(consumer));
+    span.setTag("range", nullable(range));
+    span.setTag("limit", nullable(limit));
+    return helper.decorate(span, () -> commands.xpending(key, consumer, range, limit));
+  }
+
+  @Override
+  public List<StreamMessage<K, V>> xrange(K key, Range<String> range) {
+    Span span = helper.buildSpan("xrange", key);
+    span.setTag("range", nullable(range));
+    return helper.decorate(span, () -> commands.xrange(key, range));
+  }
+
+  @Override
+  public List<StreamMessage<K, V>> xrange(K key, Range<String> range, Limit limit) {
+    Span span = helper.buildSpan("xrange", key);
+    span.setTag("range", nullable(range));
+    span.setTag("limit", nullable(limit));
+    return helper.decorate(span, () -> commands.xrange(key, range, limit));
+  }
+
+  @Override
+  public List<StreamMessage<K, V>> xread(StreamOffset<K>... streams) {
+    Span span = helper.buildSpan("xread");
+    span.setTag("streams", Arrays.toString(streams));
+    return helper.decorate(span, () -> commands.xread(streams));
+  }
+
+  @Override
+  public List<StreamMessage<K, V>> xread(XReadArgs args, StreamOffset<K>... streams) {
+    Span span = helper.buildSpan("xread");
+    span.setTag("streams", Arrays.toString(streams));
+    return helper.decorate(span, () -> commands.xread(args, streams));
+  }
+
+  @Override
+  public List<StreamMessage<K, V>> xreadgroup(Consumer<K> consumer, StreamOffset<K>... streams) {
+    Span span = helper.buildSpan("xreadgroup");
+    span.setTag("consumer", nullable(consumer));
+    span.setTag("streams", Arrays.toString(streams));
+    return helper.decorate(span, () -> commands.xreadgroup(consumer, streams));
+  }
+
+  @Override
+  public List<StreamMessage<K, V>> xreadgroup(Consumer<K> consumer, XReadArgs args,
+      StreamOffset<K>... streams) {
+    Span span = helper.buildSpan("xreadgroup");
+    span.setTag("consumer", nullable(consumer));
+    span.setTag("streams", Arrays.toString(streams));
+    return helper.decorate(span, () -> commands.xreadgroup(consumer, args, streams));
+  }
+
+  @Override
+  public List<StreamMessage<K, V>> xrevrange(K key, Range<String> range) {
+    Span span = helper.buildSpan("xrevrange", key);
+    span.setTag("range", nullable(range));
+    return helper.decorate(span, () -> commands.xrevrange(key, range));
+  }
+
+  @Override
+  public List<StreamMessage<K, V>> xrevrange(K key, Range<String> range, Limit limit) {
+    Span span = helper.buildSpan("xrevrange", key);
+    span.setTag("range", nullable(range));
+    span.setTag("limit", nullable(limit));
+    return helper.decorate(span, () -> commands.xrevrange(key, range, limit));
+  }
+
+  @Override
+  public Long xtrim(K key, long count) {
+    Span span = helper.buildSpan("xtrim", key);
+    span.setTag("count", count);
+    return helper.decorate(span, () -> commands.xtrim(key, count));
+  }
+
+  @Override
+  public Long xtrim(K key, boolean approximateTrimming, long count) {
+    Span span = helper.buildSpan("xtrim", key);
+    span.setTag("approximateTrimming", approximateTrimming);
+    span.setTag("count", count);
+    return helper.decorate(span, () -> commands.xtrim(key, approximateTrimming, count));
+  }
+
+  @Override
   public <T> T eval(String script, ScriptOutputType type, K... keys) {
     Span span = helper.buildSpan("eval", keys);
     try {
@@ -3846,6 +4100,14 @@ public class TracingRedisCommands<K, V> implements RedisCommands<K, V> {
     } finally {
       span.finish();
     }
+  }
+
+  @Override
+  public Long clientUnblock(long id, UnblockType type) {
+    Span span = helper.buildSpan("clientUnblock");
+    span.setTag("id", id);
+    span.setTag("type", nullable(type));
+    return helper.decorate(span, () -> commands.clientUnblock(id, type));
   }
 
   @Override
