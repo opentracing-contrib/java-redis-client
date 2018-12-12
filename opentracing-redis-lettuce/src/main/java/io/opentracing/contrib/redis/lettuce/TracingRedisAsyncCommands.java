@@ -17,6 +17,7 @@ import static io.opentracing.contrib.redis.common.TracingHelper.nullable;
 import static io.opentracing.contrib.redis.common.TracingHelper.onError;
 
 import io.lettuce.core.BitFieldArgs;
+import io.lettuce.core.Consumer;
 import io.lettuce.core.GeoArgs;
 import io.lettuce.core.GeoArgs.Unit;
 import io.lettuce.core.GeoCoordinates;
@@ -30,6 +31,7 @@ import io.lettuce.core.MapScanCursor;
 import io.lettuce.core.MigrateArgs;
 import io.lettuce.core.Range;
 import io.lettuce.core.RedisFuture;
+import io.lettuce.core.RestoreArgs;
 import io.lettuce.core.ScanArgs;
 import io.lettuce.core.ScanCursor;
 import io.lettuce.core.ScoredValue;
@@ -37,10 +39,16 @@ import io.lettuce.core.ScoredValueScanCursor;
 import io.lettuce.core.ScriptOutputType;
 import io.lettuce.core.SetArgs;
 import io.lettuce.core.SortArgs;
+import io.lettuce.core.StreamMessage;
 import io.lettuce.core.StreamScanCursor;
 import io.lettuce.core.TransactionResult;
+import io.lettuce.core.UnblockType;
 import io.lettuce.core.Value;
 import io.lettuce.core.ValueScanCursor;
+import io.lettuce.core.XAddArgs;
+import io.lettuce.core.XClaimArgs;
+import io.lettuce.core.XReadArgs;
+import io.lettuce.core.XReadArgs.StreamOffset;
 import io.lettuce.core.ZAddArgs;
 import io.lettuce.core.ZStoreArgs;
 import io.lettuce.core.api.StatefulRedisConnection;
@@ -458,6 +466,13 @@ public class TracingRedisAsyncCommands<K, V> implements RedisAsyncCommands<K, V>
     Span span = helper.buildSpan("restore", key);
     span.setTag("ttl", ttl);
     return prepareRedisFuture(commands.restore(key, ttl, value), span);
+  }
+
+  @Override
+  public RedisFuture<String> restore(K key, byte[] value, RestoreArgs args) {
+    Span span = helper.buildSpan("restore", key);
+    span.setTag("value", Arrays.toString(value));
+    return prepareRedisFuture(commands.restore(key, value, args), span);
   }
 
   @Override
@@ -1096,6 +1111,20 @@ public class TracingRedisAsyncCommands<K, V> implements RedisAsyncCommands<K, V>
   }
 
   @Override
+  public RedisFuture<KeyValue<K, ScoredValue<V>>> bzpopmin(long timeout, K... keys) {
+    Span span = helper.buildSpan("bzpopmin", keys);
+    span.setTag("timeout", timeout);
+    return prepareRedisFuture(commands.bzpopmin(timeout, keys), span);
+  }
+
+  @Override
+  public RedisFuture<KeyValue<K, ScoredValue<V>>> bzpopmax(long timeout, K... keys) {
+    Span span = helper.buildSpan("bzpopmax", keys);
+    span.setTag("timeout", timeout);
+    return prepareRedisFuture(commands.bzpopmax(timeout, keys), span);
+  }
+
+  @Override
   public RedisFuture<Long> zadd(K key, double score, V member) {
     Span span = helper.buildSpan("zadd", key);
     span.setTag("score", score);
@@ -1184,7 +1213,7 @@ public class TracingRedisAsyncCommands<K, V> implements RedisAsyncCommands<K, V>
   }
 
   @Override
-  public RedisFuture<Double> zincrby(K key, double amount, K member) {
+  public RedisFuture<Double> zincrby(K key, double amount, V member) {
     Span span = helper.buildSpan("zincrby", key);
     span.setTag("amount", amount);
     return prepareRedisFuture(commands.zincrby(key, amount, member), span);
@@ -1217,6 +1246,32 @@ public class TracingRedisAsyncCommands<K, V> implements RedisAsyncCommands<K, V>
     Span span = helper.buildSpan("zlexcount", key);
     span.setTag("range", nullable(range));
     return prepareRedisFuture(commands.zlexcount(key, range), span);
+  }
+
+  @Override
+  public RedisFuture<ScoredValue<V>> zpopmin(K key) {
+    Span span = helper.buildSpan("zpopmin", key);
+    return prepareRedisFuture(commands.zpopmin(key), span);
+  }
+
+  @Override
+  public RedisFuture<List<ScoredValue<V>>> zpopmin(K key, long count) {
+    Span span = helper.buildSpan("zpopmin", key);
+    span.setTag("count", count);
+    return prepareRedisFuture(commands.zpopmin(key, count), span);
+  }
+
+  @Override
+  public RedisFuture<ScoredValue<V>> zpopmax(K key) {
+    Span span = helper.buildSpan("zpopmax", key);
+    return prepareRedisFuture(commands.zpopmax(key), span);
+  }
+
+  @Override
+  public RedisFuture<List<ScoredValue<V>>> zpopmax(K key, long count) {
+    Span span = helper.buildSpan("zpopmax", key);
+    span.setTag("count", count);
+    return prepareRedisFuture(commands.zpopmax(key, count), span);
   }
 
   @Override
@@ -2008,6 +2063,207 @@ public class TracingRedisAsyncCommands<K, V> implements RedisAsyncCommands<K, V>
   }
 
   @Override
+  public RedisFuture<Long> xack(K key, K group, String... messageIds) {
+    Span span = helper.buildSpan("xack", key);
+    span.setTag("group", nullable(group));
+    span.setTag("messageIds", Arrays.toString(messageIds));
+    return prepareRedisFuture(commands.xack(key, group, messageIds), span);
+  }
+
+  @Override
+  public RedisFuture<String> xadd(K key, Map<K, V> body) {
+    Span span = helper.buildSpan("xadd", key);
+    span.setTag("body", TracingHelper.mapToString(body));
+    return prepareRedisFuture(commands.xadd(key, body), span);
+  }
+
+  @Override
+  public RedisFuture<String> xadd(K key, XAddArgs args, Map<K, V> body) {
+    Span span = helper.buildSpan("xadd", key);
+    span.setTag("body", TracingHelper.mapToString(body));
+    return prepareRedisFuture(commands.xadd(key, args, body), span);
+  }
+
+  @Override
+  public RedisFuture<String> xadd(K key, Object... keysAndValues) {
+    Span span = helper.buildSpan("xadd", key);
+    span.setTag("keysAndValues", Arrays.toString(keysAndValues));
+    return prepareRedisFuture(commands.xadd(key, keysAndValues), span);
+  }
+
+  @Override
+  public RedisFuture<String> xadd(K key, XAddArgs args, Object... keysAndValues) {
+    Span span = helper.buildSpan("xadd", key);
+    span.setTag("keysAndValues", Arrays.toString(keysAndValues));
+    return prepareRedisFuture(commands.xadd(key, args, keysAndValues), span);
+  }
+
+  @Override
+  public RedisFuture<List<StreamMessage<K, V>>> xclaim(K key, Consumer<K> consumer,
+      long minIdleTime, String... messageIds) {
+    Span span = helper.buildSpan("xclaim", key);
+    span.setTag("minIdleTime", minIdleTime);
+    span.setTag("consumer", nullable(consumer));
+    span.setTag("messageIds", Arrays.toString(messageIds));
+    return prepareRedisFuture(commands.xclaim(key, consumer, minIdleTime, messageIds), span);
+  }
+
+  @Override
+  public RedisFuture<List<StreamMessage<K, V>>> xclaim(K key, Consumer<K> consumer, XClaimArgs args,
+      String... messageIds) {
+    Span span = helper.buildSpan("xclaim", key);
+    span.setTag("consumer", nullable(consumer));
+    span.setTag("messageIds", Arrays.toString(messageIds));
+    return prepareRedisFuture(commands.xclaim(key, consumer, args, messageIds), span);
+  }
+
+  @Override
+  public RedisFuture<Long> xdel(K key, String... messageIds) {
+    Span span = helper.buildSpan("xdel", key);
+    span.setTag("messageIds", Arrays.toString(messageIds));
+    return prepareRedisFuture(commands.xdel(key, messageIds), span);
+  }
+
+  @Override
+  public RedisFuture<String> xgroupCreate(StreamOffset<K> streamOffset, K group) {
+    Span span = helper.buildSpan("xgroupCreate");
+    span.setTag("streamOffset", nullable(streamOffset));
+    span.setTag("group", nullable(group));
+    return prepareRedisFuture(commands.xgroupCreate(streamOffset, group), span);
+  }
+
+  @Override
+  public RedisFuture<Boolean> xgroupDelconsumer(K key, Consumer<K> consumer) {
+    Span span = helper.buildSpan("xgroupDelconsumer", key);
+    span.setTag("consumer", nullable(consumer));
+    return prepareRedisFuture(commands.xgroupDelconsumer(key, consumer), span);
+  }
+
+  @Override
+  public RedisFuture<Boolean> xgroupDestroy(K key, K group) {
+    Span span = helper.buildSpan("xgroupDestroy", key);
+    span.setTag("group", nullable(group));
+    return prepareRedisFuture(commands.xgroupDestroy(key, group), span);
+  }
+
+  @Override
+  public RedisFuture<String> xgroupSetid(StreamOffset<K> streamOffset, K group) {
+    Span span = helper.buildSpan("xgroupSetid");
+    span.setTag("streamOffset", nullable(streamOffset));
+    span.setTag("group", nullable(group));
+    return prepareRedisFuture(commands.xgroupSetid(streamOffset, group), span);
+  }
+
+  @Override
+  public RedisFuture<Long> xlen(K key) {
+    Span span = helper.buildSpan("xlen", key);
+    return prepareRedisFuture(commands.xlen(key), span);
+  }
+
+  @Override
+  public RedisFuture<List<Object>> xpending(K key, K group) {
+    Span span = helper.buildSpan("xpending", key);
+    span.setTag("group", nullable(group));
+    return prepareRedisFuture(commands.xpending(key, group), span);
+  }
+
+  @Override
+  public RedisFuture<List<Object>> xpending(K key, K group, Range<String> range, Limit limit) {
+    Span span = helper.buildSpan("xpending", key);
+    span.setTag("group", nullable(group));
+    span.setTag("range", nullable(range));
+    span.setTag("limit", nullable(limit));
+    return prepareRedisFuture(commands.xpending(key, group, range, limit), span);
+  }
+
+  @Override
+  public RedisFuture<List<Object>> xpending(K key, Consumer<K> consumer, Range<String> range,
+      Limit limit) {
+    Span span = helper.buildSpan("xpending", key);
+    span.setTag("consumer", nullable(consumer));
+    span.setTag("range", nullable(range));
+    span.setTag("limit", nullable(limit));
+    return prepareRedisFuture(commands.xpending(key, consumer, range, limit), span);
+  }
+
+  @Override
+  public RedisFuture<List<StreamMessage<K, V>>> xrange(K key, Range<String> range) {
+    Span span = helper.buildSpan("xrange", key);
+    span.setTag("range", nullable(range));
+    return prepareRedisFuture(commands.xrange(key, range), span);
+  }
+
+  @Override
+  public RedisFuture<List<StreamMessage<K, V>>> xrange(K key, Range<String> range, Limit limit) {
+    Span span = helper.buildSpan("xrange", key);
+    span.setTag("range", nullable(range));
+    span.setTag("limit", nullable(limit));
+    return prepareRedisFuture(commands.xrange(key, range, limit), span);
+  }
+
+  @Override
+  public RedisFuture<List<StreamMessage<K, V>>> xread(StreamOffset<K>... streams) {
+    Span span = helper.buildSpan("xread");
+    span.setTag("streams", Arrays.toString(streams));
+    return prepareRedisFuture(commands.xread(streams), span);
+  }
+
+  @Override
+  public RedisFuture<List<StreamMessage<K, V>>> xread(XReadArgs args, StreamOffset<K>... streams) {
+    Span span = helper.buildSpan("xread");
+    span.setTag("streams", Arrays.toString(streams));
+    return prepareRedisFuture(commands.xread(args, streams), span);
+  }
+
+  @Override
+  public RedisFuture<List<StreamMessage<K, V>>> xreadgroup(Consumer<K> consumer,
+      StreamOffset<K>... streams) {
+    Span span = helper.buildSpan("xreadgroup");
+    span.setTag("consumer", nullable(consumer));
+    span.setTag("streams", Arrays.toString(streams));
+    return prepareRedisFuture(commands.xreadgroup(consumer, streams), span);
+  }
+
+  @Override
+  public RedisFuture<List<StreamMessage<K, V>>> xreadgroup(Consumer<K> consumer, XReadArgs args,
+      StreamOffset<K>... streams) {
+    Span span = helper.buildSpan("xreadgroup");
+    span.setTag("consumer", nullable(consumer));
+    span.setTag("streams", Arrays.toString(streams));
+    return prepareRedisFuture(commands.xreadgroup(consumer, args, streams), span);
+  }
+
+  @Override
+  public RedisFuture<List<StreamMessage<K, V>>> xrevrange(K key, Range<String> range) {
+    Span span = helper.buildSpan("xrevrange", key);
+    span.setTag("range", nullable(range));
+    return prepareRedisFuture(commands.xrevrange(key, range), span);
+  }
+
+  @Override
+  public RedisFuture<List<StreamMessage<K, V>>> xrevrange(K key, Range<String> range, Limit limit) {
+    Span span = helper.buildSpan("xrevrange", key);
+    span.setTag("range", nullable(range));
+    span.setTag("limit", nullable(limit));
+    return prepareRedisFuture(commands.xrevrange(key, range, limit), span);
+  }
+
+  @Override
+  public RedisFuture<Long> xtrim(K key, long count) {
+    Span span = helper.buildSpan("xtrim", key);
+    span.setTag("count", count);
+    return prepareRedisFuture(commands.xtrim(key, count), span);
+  }
+
+  @Override
+  public RedisFuture<Long> xtrim(K key, boolean approximateTrimming, long count) {
+    Span span = helper.buildSpan("xtrim", key);
+    span.setTag("approximateTrimming", approximateTrimming);
+    span.setTag("count", count);
+    return prepareRedisFuture(commands.xtrim(key, approximateTrimming, count), span);
+  }
+
+  @Override
   public <T> RedisFuture<T> eval(String script, ScriptOutputType type,
       K... keys) {
     Span span = helper.buildSpan("eval", keys);
@@ -2107,6 +2363,14 @@ public class TracingRedisAsyncCommands<K, V> implements RedisAsyncCommands<K, V>
   public RedisFuture<Long> clientKill(KillArgs killArgs) {
     Span span = helper.buildSpan("clientKill");
     return prepareRedisFuture(commands.clientKill(killArgs), span);
+  }
+
+  @Override
+  public RedisFuture<Long> clientUnblock(long id, UnblockType type) {
+    Span span = helper.buildSpan("clientUnblock");
+    span.setTag("id", id);
+    span.setTag("type", nullable(type));
+    return prepareRedisFuture(commands.clientUnblock(id, type), span);
   }
 
   @Override
