@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 The OpenTracing Authors
+ * Copyright 2017-2019 The OpenTracing Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -23,17 +23,17 @@ import org.springframework.stereotype.Component;
 @Component
 public class RedisConnectionFactoryBeanPostProcessor implements BeanPostProcessor {
 
-  private Tracer tracer;
+    private Tracer tracer;
 
-  public RedisConnectionFactoryBeanPostProcessor(Tracer tracer) {
-    this.tracer = tracer;
-  }
-
-  @Override
-  public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-    if (bean instanceof RedisConnectionFactory) {
-      bean = new TracingRedisConnectionFactory((RedisConnectionFactory) bean, false, tracer);
+    public RedisConnectionFactoryBeanPostProcessor(Tracer tracer) {
+        this.tracer = tracer;
     }
-    return bean;
-  }
+
+    @Override
+    public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+        if (bean instanceof RedisConnectionFactory) {
+            bean = new TracingRedisConnectionFactory((RedisConnectionFactory) bean, false, tracer);
+        }
+        return bean;
+    }
 }

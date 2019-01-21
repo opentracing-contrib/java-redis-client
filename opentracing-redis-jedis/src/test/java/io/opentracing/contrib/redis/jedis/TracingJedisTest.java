@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 The OpenTracing Authors
+ * Copyright 2017-2019 The OpenTracing Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -13,52 +13,53 @@
  */
 package io.opentracing.contrib.redis.jedis;
 
-import static org.junit.Assert.assertEquals;
-
 import io.opentracing.contrib.redis.common.TracingConfiguration;
 import io.opentracing.mock.MockSpan;
 import io.opentracing.mock.MockTracer;
 import io.opentracing.util.ThreadLocalScopeManager;
-import java.util.List;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import redis.clients.jedis.Jedis;
 import redis.embedded.RedisServer;
 
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+
 public class TracingJedisTest {
 
-  private MockTracer mockTracer = new MockTracer(new ThreadLocalScopeManager(),
-      MockTracer.Propagator.TEXT_MAP);
+    private MockTracer mockTracer = new MockTracer(new ThreadLocalScopeManager(),
+            MockTracer.Propagator.TEXT_MAP);
 
-  private RedisServer redisServer;
+    private RedisServer redisServer;
 
-  @Before
-  public void before() throws Exception {
-    mockTracer.reset();
+    @Before
+    public void before() throws Exception {
+        mockTracer.reset();
 
-    redisServer = RedisServer.builder().setting("bind 127.0.0.1").build();
-    redisServer.start();
-  }
-
-  @After
-  public void after() {
-    if (redisServer != null) {
-      redisServer.stop();
+        redisServer = RedisServer.builder().setting("bind 127.0.0.1").build();
+        redisServer.start();
     }
-  }
 
-  @Test
-  public void test() {
-    Jedis jedis = new TracingJedis(new TracingConfiguration.Builder(mockTracer).build());
+    @After
+    public void after() {
+        if (redisServer != null) {
+            redisServer.stop();
+        }
+    }
 
-    assertEquals("OK", jedis.set("key", "value"));
-    assertEquals("value", jedis.get("key"));
+    @Test
+    public void test() {
+        Jedis jedis = new TracingJedis(new TracingConfiguration.Builder(mockTracer).build());
 
-    jedis.close();
+        assertEquals("OK", jedis.set("key", "value"));
+        assertEquals("value", jedis.get("key"));
 
-    List<MockSpan> spans = mockTracer.finishedSpans();
-    assertEquals(2, spans.size());
-  }
+        jedis.close();
+
+        List<MockSpan> spans = mockTracer.finishedSpans();
+        assertEquals(2, spans.size());
+    }
 
 }

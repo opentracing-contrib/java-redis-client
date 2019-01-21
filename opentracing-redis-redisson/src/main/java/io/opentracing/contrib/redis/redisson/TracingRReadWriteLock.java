@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 The OpenTracing Authors
+ * Copyright 2017-2019 The OpenTracing Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -17,22 +17,22 @@ import org.redisson.api.RLock;
 import org.redisson.api.RReadWriteLock;
 
 public class TracingRReadWriteLock implements RReadWriteLock {
-  private final RReadWriteLock lock;
-  private final TracingRedissonHelper tracingRedissonHelper;
+    private final RReadWriteLock lock;
+    private final TracingRedissonHelper tracingRedissonHelper;
 
-  public TracingRReadWriteLock(RReadWriteLock lock, TracingRedissonHelper tracingRedissonHelper) {
-    this.lock = lock;
-    this.tracingRedissonHelper = tracingRedissonHelper;
-  }
+    public TracingRReadWriteLock(RReadWriteLock lock, TracingRedissonHelper tracingRedissonHelper) {
+        this.lock = lock;
+        this.tracingRedissonHelper = tracingRedissonHelper;
+    }
 
-  @Override
-  public RLock readLock() {
-    return new TracingRLock(lock.readLock(), tracingRedissonHelper);
-  }
+    @Override
+    public RLock readLock() {
+        return new TracingRLock(lock.readLock(), tracingRedissonHelper);
+    }
 
-  @Override
-  public RLock writeLock() {
-    return new TracingRLock(lock.writeLock(), tracingRedissonHelper);
-  }
+    @Override
+    public RLock writeLock() {
+        return new TracingRLock(lock.writeLock(), tracingRedissonHelper);
+    }
 
 }

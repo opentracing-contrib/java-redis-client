@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 The OpenTracing Authors
+ * Copyright 2017-2019 The OpenTracing Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -13,8 +13,6 @@
  */
 package io.opentracing.contrib.redis.spring.processor;
 
-import static org.junit.Assert.assertTrue;
-
 import io.opentracing.contrib.redis.spring.connection.TracingRedisConnectionFactory;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,16 +22,18 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import static org.junit.Assert.assertTrue;
+
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = RedisConnectionFactoryBeanPostProcessorConfiguration.class)
 @EnableAutoConfiguration
 public class RedisConnectionFactoryBeanPostProcessorTest {
 
-  @Autowired
-  private RedisConnectionFactory redisConnectionFactory;
+    @Autowired
+    private RedisConnectionFactory redisConnectionFactory;
 
-  @Test
-  public void test() {
-    assertTrue(redisConnectionFactory instanceof TracingRedisConnectionFactory);
-  }
+    @Test
+    public void test() {
+        assertTrue(redisConnectionFactory instanceof TracingRedisConnectionFactory);
+    }
 }
