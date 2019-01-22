@@ -35,8 +35,11 @@ import org.redisson.config.Config;
 import redis.embedded.RedisServer;
 
 import java.util.List;
+import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
+import static org.awaitility.Awaitility.await;
+import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
@@ -178,6 +181,8 @@ public class TracingRedissonTest {
             }).get(15, TimeUnit.SECONDS));
 
         }
+
+        await().atMost(15, TimeUnit.SECONDS).until(reportedSpansSize(), equalTo(2));
         List<MockSpan> spans = tracer.finishedSpans();
         assertEquals(2, spans.size());
 
@@ -191,5 +196,9 @@ public class TracingRedissonTest {
             assertEquals(TracingHelper.DB_TYPE, span.tags().get(Tags.DB_TYPE.getKey()));
             assertEquals(0, span.generatedErrors().size());
         }
+    }
+
+    private Callable<Integer> reportedSpansSize() {
+        return () -> tracer.finishedSpans().size();
     }
 }
