@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 The OpenTracing Authors
+ * Copyright 2017-2019 The OpenTracing Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -13,13 +13,10 @@
  */
 package io.opentracing.contrib.redis.jedis3;
 
-import static org.junit.Assert.assertEquals;
-
 import io.opentracing.contrib.redis.common.TracingConfiguration;
 import io.opentracing.mock.MockSpan;
 import io.opentracing.mock.MockTracer;
 import io.opentracing.util.ThreadLocalScopeManager;
-import java.util.List;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -27,56 +24,60 @@ import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.embedded.RedisServer;
 
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+
 public class TracingJedisPoolTest {
 
-  private MockTracer mockTracer = new MockTracer(new ThreadLocalScopeManager(),
-      MockTracer.Propagator.TEXT_MAP);
+    private MockTracer mockTracer = new MockTracer(new ThreadLocalScopeManager(),
+            MockTracer.Propagator.TEXT_MAP);
 
-  private RedisServer redisServer;
+    private RedisServer redisServer;
 
-  @Before
-  public void before() {
-    mockTracer.reset();
+    @Before
+    public void before() {
+        mockTracer.reset();
 
-    redisServer = RedisServer.builder().setting("bind 127.0.0.1").build();
-    redisServer.start();
-  }
-
-  @After
-  public void after() {
-    if (redisServer != null) {
-      redisServer.stop();
+        redisServer = RedisServer.builder().setting("bind 127.0.0.1").build();
+        redisServer.start();
     }
-  }
 
-  @Test
-  public void testPoolReturnsTracedJedis() {
-    JedisPool pool = new TracingJedisPool(new TracingConfiguration.Builder(mockTracer).build());
+    @After
+    public void after() {
+        if (redisServer != null) {
+            redisServer.stop();
+        }
+    }
 
-    Jedis jedis = pool.getResource();
-    assertEquals("OK", jedis.set("key", "value"));
-    assertEquals("value", jedis.get("key"));
+    @Test
+    public void testPoolReturnsTracedJedis() {
+        JedisPool pool = new TracingJedisPool(new TracingConfiguration.Builder(mockTracer).build());
 
-    jedis.close();
+        Jedis jedis = pool.getResource();
+        assertEquals("OK", jedis.set("key", "value"));
+        assertEquals("value", jedis.get("key"));
 
-    List<MockSpan> spans = mockTracer.finishedSpans();
-    assertEquals(2, spans.size());
-  }
+        jedis.close();
 
-  @Test
-  public void testClosingTracedJedisClosesUnderlyingJedis() {
-    JedisPool pool = new TracingJedisPool(new TracingConfiguration.Builder(mockTracer).build());
-    Jedis resource = pool.getResource();
-    assertEquals(1, pool.getNumActive());
+        List<MockSpan> spans = mockTracer.finishedSpans();
+        assertEquals(2, spans.size());
+    }
 
-    resource.close();
-    assertEquals(0, pool.getNumActive());
-    assertEquals(1, pool.getNumIdle());
+    @Test
+    public void testClosingTracedJedisClosesUnderlyingJedis() {
+        JedisPool pool = new TracingJedisPool(new TracingConfiguration.Builder(mockTracer).build());
+        Jedis resource = pool.getResource();
+        assertEquals(1, pool.getNumActive());
 
-    // ensure that resource is reused
-    Jedis nextResource = pool.getResource();
-    assertEquals(1, pool.getNumActive());
-    assertEquals(0, pool.getNumIdle());
-    nextResource.close();
-  }
+        resource.close();
+        assertEquals(0, pool.getNumActive());
+        assertEquals(1, pool.getNumIdle());
+
+        // ensure that resource is reused
+        Jedis nextResource = pool.getResource();
+        assertEquals(1, pool.getNumActive());
+        assertEquals(0, pool.getNumIdle());
+        nextResource.close();
+    }
 }

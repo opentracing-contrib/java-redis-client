@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 The OpenTracing Authors
+ * Copyright 2017-2019 The OpenTracing Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -18,38 +18,38 @@ import org.redisson.api.RFuture;
 import org.redisson.api.RLocalCachedMap;
 
 public class TracingRLocalCachedMap<K, V> extends TracingRMap<K, V> implements
-    RLocalCachedMap<K, V> {
-  private final RLocalCachedMap<K, V> map;
-  private final TracingRedissonHelper tracingRedissonHelper;
+        RLocalCachedMap<K, V> {
+    private final RLocalCachedMap<K, V> map;
+    private final TracingRedissonHelper tracingRedissonHelper;
 
-  public TracingRLocalCachedMap(RLocalCachedMap<K, V> map,
-      TracingRedissonHelper tracingRedissonHelper) {
-    super(map, tracingRedissonHelper);
-    this.map = map;
-    this.tracingRedissonHelper = tracingRedissonHelper;
-  }
+    public TracingRLocalCachedMap(RLocalCachedMap<K, V> map,
+                                  TracingRedissonHelper tracingRedissonHelper) {
+        super(map, tracingRedissonHelper);
+        this.map = map;
+        this.tracingRedissonHelper = tracingRedissonHelper;
+    }
 
-  @Override
-  public void preloadCache() {
-    Span span = tracingRedissonHelper.buildSpan("preloadCache", map);
-    tracingRedissonHelper.decorate(span, map::preloadCache);
-  }
+    @Override
+    public void preloadCache() {
+        Span span = tracingRedissonHelper.buildSpan("preloadCache", map);
+        tracingRedissonHelper.decorate(span, map::preloadCache);
+    }
 
-  @Override
-  public RFuture<Void> clearLocalCacheAsync() {
-    Span span = tracingRedissonHelper.buildSpan("clearLocalCacheAsync", map);
-    return tracingRedissonHelper.prepareRFuture(span, map::clearLocalCacheAsync);
-  }
+    @Override
+    public RFuture<Void> clearLocalCacheAsync() {
+        Span span = tracingRedissonHelper.buildSpan("clearLocalCacheAsync", map);
+        return tracingRedissonHelper.prepareRFuture(span, map::clearLocalCacheAsync);
+    }
 
-  @Override
-  public void clearLocalCache() {
-    Span span = tracingRedissonHelper.buildSpan("clearLocalCache", map);
-    tracingRedissonHelper.decorate(span, map::clearLocalCache);
-  }
+    @Override
+    public void clearLocalCache() {
+        Span span = tracingRedissonHelper.buildSpan("clearLocalCache", map);
+        tracingRedissonHelper.decorate(span, map::clearLocalCache);
+    }
 
-  @Override
-  public void destroy() {
-    Span span = tracingRedissonHelper.buildSpan("destroy", map);
-    tracingRedissonHelper.decorate(span, map::destroy);
-  }
+    @Override
+    public void destroy() {
+        Span span = tracingRedissonHelper.buildSpan("destroy", map);
+        tracingRedissonHelper.decorate(span, map::destroy);
+    }
 }
