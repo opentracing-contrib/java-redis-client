@@ -55,13 +55,24 @@ pom.xml
 </dependency>
 ```
 
-### Spring
+### Spring Data Redis 1.x
 
 pom.xml
 ```xml
 <dependency>
     <groupId>io.opentracing.contrib</groupId>
-    <artifactId>opentracing-redis-spring</artifactId>
+    <artifactId>opentracing-redis-spring-data</artifactId>
+    <version>VERSION</version>
+</dependency>
+```
+
+### Spring Data Redis 2.x
+
+pom.xml
+```xml
+<dependency>
+    <groupId>io.opentracing.contrib</groupId>
+    <artifactId>opentracing-redis-spring-data2</artifactId>
     <version>VERSION</version>
 </dependency>
 ```

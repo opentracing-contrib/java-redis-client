@@ -27,9 +27,9 @@
         <module>opentracing-redis-jedis</module>
         <module>opentracing-redis-jedis3</module>
         <module>opentracing-redis-common</module>
-        <module>opentracing-redis-spring</module>
         <module>opentracing-redis-redisson</module>
         <module>opentracing-redis-spring-data</module>
+        <module>opentracing-redis-spring-data2</module>
     </modules>
 
     <name>OpenTracing Instrumentation for Apache Redis Client</name>
