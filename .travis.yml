@@ -5,6 +5,9 @@ language: java
 jdk:
   - oraclejdk8
 
+git:
+  quiet: true
+
 cache:
   directories:
     - $HOME/.m2/repository
@@ -20,7 +23,7 @@ before_install:
 
 install:
   # Override default travis to use the maven wrapper
-  - ./mvnw install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
+  - ./mvnw install -DskipTests=true -Dmaven.javadoc.skip=true -B -V -q
 
 script:
   - ./travis/publish.sh
