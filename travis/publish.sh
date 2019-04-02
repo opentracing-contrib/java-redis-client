@@ -91,8 +91,8 @@ safe_checkout_master() {
   # master is where our tag is.
   git checkout -B master
   git fetch origin master:origin/master
-  commit_local_master="$(git show --pretty='format:%H' master)"
-  commit_remote_master="$(git show --pretty='format:%H' origin/master)"
+  commit_local_master="$(git log --pretty='format:%H' -n 1 master)"
+  commit_remote_master="$(git log --pretty='format:%H' -n 1 origin/master)"
   if [ "$commit_local_master" != "$commit_remote_master" ]; then
     echo "Master on remote 'origin' has commits since the version under release, aborting"
     exit 1
