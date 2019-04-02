@@ -23,17 +23,17 @@ import org.springframework.stereotype.Component;
 @Component
 public class RedisConnectionFactoryBeanPostProcessor implements BeanPostProcessor {
 
-    private Tracer tracer;
+  private Tracer tracer;
 
-    public RedisConnectionFactoryBeanPostProcessor(Tracer tracer) {
-        this.tracer = tracer;
-    }
+  public RedisConnectionFactoryBeanPostProcessor(Tracer tracer) {
+    this.tracer = tracer;
+  }
 
-    @Override
-    public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-        if (bean instanceof RedisConnectionFactory) {
-            bean = new TracingRedisConnectionFactory((RedisConnectionFactory) bean, false, tracer);
-        }
-        return bean;
+  @Override
+  public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+    if (bean instanceof RedisConnectionFactory) {
+      bean = new TracingRedisConnectionFactory((RedisConnectionFactory) bean, false, tracer);
     }
+    return bean;
+  }
 }

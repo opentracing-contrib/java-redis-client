@@ -16,5 +16,5 @@ package io.opentracing.contrib.redis.common;
 @FunctionalInterface
 public interface ThrowingSupplier<T extends Exception, V> {
 
-    V get() throws T;
+  V get() throws T;
 }

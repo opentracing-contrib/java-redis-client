@@ -13,12 +13,23 @@
  */
 package io.opentracing.contrib.redis.redisson;
 
+import static org.awaitility.Awaitility.await;
+import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+
 import io.opentracing.Scope;
 import io.opentracing.Span;
 import io.opentracing.contrib.redis.common.TracingHelper;
 import io.opentracing.mock.MockSpan;
 import io.opentracing.mock.MockTracer;
 import io.opentracing.tag.Tags;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -34,171 +45,159 @@ import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;
 import redis.embedded.RedisServer;
 
-import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
-
-import static org.awaitility.Awaitility.await;
-import static org.hamcrest.core.IsEqual.equalTo;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-
 public class TracingRedissonTest {
-    private MockTracer tracer = new MockTracer();
-    private RedisServer redisServer;
-    private RedissonClient client;
+  private MockTracer tracer = new MockTracer();
+  private RedisServer redisServer;
+  private RedissonClient client;
 
-    @Before
-    public void before() {
-        tracer.reset();
+  @Before
+  public void before() {
+    tracer.reset();
 
-        redisServer = RedisServer.builder().setting("bind 127.0.0.1").build();
-        redisServer.start();
+    redisServer = RedisServer.builder().setting("bind 127.0.0.1").build();
+    redisServer.start();
 
-        Config config = new Config();
-        config.useSingleServer().setAddress("redis://127.0.0.1:6379");
+    Config config = new Config();
+    config.useSingleServer().setAddress("redis://127.0.0.1:6379");
 
-        client = new TracingRedissonClient(Redisson.create(config), tracer, false);
+    client = new TracingRedissonClient(Redisson.create(config), tracer, false);
+  }
+
+  @After
+  public void after() {
+    if (client != null) {
+      client.shutdown();
+    }
+    if (redisServer != null) {
+      redisServer.stop();
+    }
+  }
+
+  @Test
+  public void test_map() {
+    RMap<String, String> map = client.getMap("map");
+
+    map.put("key", "value");
+    assertEquals("value", map.get("key"));
+
+    List<MockSpan> spans = tracer.finishedSpans();
+    assertEquals(2, spans.size());
+    checkSpans(spans);
+    assertNull(tracer.activeSpan());
+  }
+
+  @Test
+  public void test_list() {
+    RList<Object> list = client.getList("list");
+
+    list.add("key");
+    assertTrue(list.contains("key"));
+
+    List<MockSpan> spans = tracer.finishedSpans();
+    assertEquals(2, spans.size());
+    checkSpans(spans);
+    assertNull(tracer.activeSpan());
+  }
+
+  @Test
+  public void test_set() {
+    RSet<Object> set = client.getSet("set");
+
+    set.add("key");
+    assertTrue(set.contains("key"));
+
+    List<MockSpan> spans = tracer.finishedSpans();
+    assertEquals(2, spans.size());
+    checkSpans(spans);
+    assertNull(tracer.activeSpan());
+  }
+
+  @Test
+  public void test_lock() {
+    RLock lock = client.getLock("lock");
+
+    lock.lock(10, TimeUnit.SECONDS);
+    lock.unlock();
+
+    List<MockSpan> spans = tracer.finishedSpans();
+    assertEquals(2, spans.size());
+    checkSpans(spans);
+    assertNull(tracer.activeSpan());
+  }
+
+  @Test
+  public void test_atomic_long() {
+    RAtomicLong atomicLong = client.getAtomicLong("long");
+
+    atomicLong.set(10);
+    assertEquals(10, atomicLong.get());
+
+    List<MockSpan> spans = tracer.finishedSpans();
+    assertEquals(2, spans.size());
+    checkSpans(spans);
+    assertNull(tracer.activeSpan());
+  }
+
+  @Test
+  public void test_list_multi_map() {
+    RListMultimap<String, String> map = client.getListMultimap("map");
+
+    map.put("key", "value");
+    assertEquals("value", map.get("key").get(0));
+
+    List<MockSpan> spans = tracer.finishedSpans();
+    assertEquals(3, spans.size());
+    checkSpans(spans);
+    assertNull(tracer.activeSpan());
+  }
+
+  @Test
+  public void test_set_multi_map() {
+    RSetMultimap<String, String> map = client.getSetMultimap("map");
+
+    map.put("key", "value");
+    assertEquals("value", map.get("key").iterator().next());
+
+    List<MockSpan> spans = tracer.finishedSpans();
+    assertEquals(2, spans.size());
+    checkSpans(spans);
+    assertNull(tracer.activeSpan());
+  }
+
+  @Test
+  public void async_continue_span() throws Exception {
+    try (Scope ignore = tracer.buildSpan("test").startActive(true)) {
+      Span activeSpan = tracer.activeSpan();
+
+      RMap<String, String> map = client.getMap("map");
+
+      assertFalse(map.containsKeyAsync("key").toCompletableFuture().thenApply(s -> {
+        System.out.println(
+            "active span: " + tracer.activeSpan() + " in thread: " + Thread.currentThread()
+                .getName());
+        assertSame(activeSpan, tracer.activeSpan());
+        return s;
+      }).get(15, TimeUnit.SECONDS));
+
     }
 
-    @After
-    public void after() {
-        if (client != null) {
-            client.shutdown();
-        }
-        if (redisServer != null) {
-            redisServer.stop();
-        }
+    await().atMost(15, TimeUnit.SECONDS).until(reportedSpansSize(), equalTo(2));
+    List<MockSpan> spans = tracer.finishedSpans();
+    assertEquals(2, spans.size());
+
+    assertNull(tracer.activeSpan());
+  }
+
+  private void checkSpans(List<MockSpan> spans) {
+    for (MockSpan span : spans) {
+      assertEquals(span.tags().get(Tags.SPAN_KIND.getKey()), Tags.SPAN_KIND_CLIENT);
+      assertEquals(TracingHelper.COMPONENT_NAME, span.tags().get(Tags.COMPONENT.getKey()));
+      assertEquals(TracingHelper.DB_TYPE, span.tags().get(Tags.DB_TYPE.getKey()));
+      assertEquals(0, span.generatedErrors().size());
     }
+  }
 
-    @Test
-    public void test_map() {
-        RMap<String, String> map = client.getMap("map");
-
-        map.put("key", "value");
-        assertEquals("value", map.get("key"));
-
-        List<MockSpan> spans = tracer.finishedSpans();
-        assertEquals(2, spans.size());
-        checkSpans(spans);
-        assertNull(tracer.activeSpan());
-    }
-
-    @Test
-    public void test_list() {
-        RList<Object> list = client.getList("list");
-
-        list.add("key");
-        assertTrue(list.contains("key"));
-
-        List<MockSpan> spans = tracer.finishedSpans();
-        assertEquals(2, spans.size());
-        checkSpans(spans);
-        assertNull(tracer.activeSpan());
-    }
-
-    @Test
-    public void test_set() {
-        RSet<Object> set = client.getSet("set");
-
-        set.add("key");
-        assertTrue(set.contains("key"));
-
-        List<MockSpan> spans = tracer.finishedSpans();
-        assertEquals(2, spans.size());
-        checkSpans(spans);
-        assertNull(tracer.activeSpan());
-    }
-
-    @Test
-    public void test_lock() {
-        RLock lock = client.getLock("lock");
-
-        lock.lock(10, TimeUnit.SECONDS);
-        lock.unlock();
-
-        List<MockSpan> spans = tracer.finishedSpans();
-        assertEquals(2, spans.size());
-        checkSpans(spans);
-        assertNull(tracer.activeSpan());
-    }
-
-    @Test
-    public void test_atomic_long() {
-        RAtomicLong atomicLong = client.getAtomicLong("long");
-
-        atomicLong.set(10);
-        assertEquals(10, atomicLong.get());
-
-        List<MockSpan> spans = tracer.finishedSpans();
-        assertEquals(2, spans.size());
-        checkSpans(spans);
-        assertNull(tracer.activeSpan());
-    }
-
-    @Test
-    public void test_list_multi_map() {
-        RListMultimap<String, String> map = client.getListMultimap("map");
-
-        map.put("key", "value");
-        assertEquals("value", map.get("key").get(0));
-
-        List<MockSpan> spans = tracer.finishedSpans();
-        assertEquals(3, spans.size());
-        checkSpans(spans);
-        assertNull(tracer.activeSpan());
-    }
-
-    @Test
-    public void test_set_multi_map() {
-        RSetMultimap<String, String> map = client.getSetMultimap("map");
-
-        map.put("key", "value");
-        assertEquals("value", map.get("key").iterator().next());
-
-        List<MockSpan> spans = tracer.finishedSpans();
-        assertEquals(2, spans.size());
-        checkSpans(spans);
-        assertNull(tracer.activeSpan());
-    }
-
-    @Test
-    public void async_continue_span() throws Exception {
-        try (Scope ignore = tracer.buildSpan("test").startActive(true)) {
-            Span activeSpan = tracer.activeSpan();
-
-            RMap<String, String> map = client.getMap("map");
-
-            assertFalse(map.containsKeyAsync("key").toCompletableFuture().thenApply(s -> {
-                System.out.println(
-                        "active span: " + tracer.activeSpan() + " in thread: " + Thread.currentThread()
-                                .getName());
-                assertSame(activeSpan, tracer.activeSpan());
-                return s;
-            }).get(15, TimeUnit.SECONDS));
-
-        }
-
-        await().atMost(15, TimeUnit.SECONDS).until(reportedSpansSize(), equalTo(2));
-        List<MockSpan> spans = tracer.finishedSpans();
-        assertEquals(2, spans.size());
-
-        assertNull(tracer.activeSpan());
-    }
-
-    private void checkSpans(List<MockSpan> spans) {
-        for (MockSpan span : spans) {
-            assertEquals(span.tags().get(Tags.SPAN_KIND.getKey()), Tags.SPAN_KIND_CLIENT);
-            assertEquals(TracingHelper.COMPONENT_NAME, span.tags().get(Tags.COMPONENT.getKey()));
-            assertEquals(TracingHelper.DB_TYPE, span.tags().get(Tags.DB_TYPE.getKey()));
-            assertEquals(0, span.generatedErrors().size());
-        }
-    }
-
-    private Callable<Integer> reportedSpansSize() {
-        return () -> tracer.finishedSpans().size();
-    }
+  private Callable<Integer> reportedSpansSize() {
+    return () -> tracer.finishedSpans().size();
+  }
 }

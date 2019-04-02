@@ -30,82 +30,82 @@ import org.springframework.data.redis.connection.ReactiveStringCommands;
 import org.springframework.data.redis.connection.ReactiveZSetCommands;
 
 public class TracingReactiveRedisConnection implements ReactiveRedisConnection {
-    private final ReactiveRedisConnection reactiveRedisConnection;
-    private final boolean withActiveSpanOnly;
-    private final Tracer tracer;
+  private final ReactiveRedisConnection reactiveRedisConnection;
+  private final boolean withActiveSpanOnly;
+  private final Tracer tracer;
 
-    public TracingReactiveRedisConnection(
-            ReactiveRedisConnection reactiveRedisConnection, boolean withActiveSpanOnly,
-            Tracer tracer) {
-        this.reactiveRedisConnection = reactiveRedisConnection;
-        this.withActiveSpanOnly = withActiveSpanOnly;
-        this.tracer = tracer;
-    }
+  public TracingReactiveRedisConnection(
+      ReactiveRedisConnection reactiveRedisConnection, boolean withActiveSpanOnly,
+      Tracer tracer) {
+    this.reactiveRedisConnection = reactiveRedisConnection;
+    this.withActiveSpanOnly = withActiveSpanOnly;
+    this.tracer = tracer;
+  }
 
-    @Override
-    public void close() {
-        reactiveRedisConnection.close();
-    }
+  @Override
+  public void close() {
+    reactiveRedisConnection.close();
+  }
 
-    @Override
-    public ReactiveKeyCommands keyCommands() {
-        return reactiveRedisConnection.keyCommands();
-    }
+  @Override
+  public ReactiveKeyCommands keyCommands() {
+    return reactiveRedisConnection.keyCommands();
+  }
 
-    @Override
-    public ReactiveStringCommands stringCommands() {
-        return reactiveRedisConnection.stringCommands();
-    }
+  @Override
+  public ReactiveStringCommands stringCommands() {
+    return reactiveRedisConnection.stringCommands();
+  }
 
-    @Override
-    public ReactiveNumberCommands numberCommands() {
-        return reactiveRedisConnection.numberCommands();
-    }
+  @Override
+  public ReactiveNumberCommands numberCommands() {
+    return reactiveRedisConnection.numberCommands();
+  }
 
-    @Override
-    public ReactiveListCommands listCommands() {
-        return reactiveRedisConnection.listCommands();
-    }
+  @Override
+  public ReactiveListCommands listCommands() {
+    return reactiveRedisConnection.listCommands();
+  }
 
-    @Override
-    public ReactiveSetCommands setCommands() {
-        return reactiveRedisConnection.setCommands();
-    }
+  @Override
+  public ReactiveSetCommands setCommands() {
+    return reactiveRedisConnection.setCommands();
+  }
 
-    @Override
-    public ReactiveZSetCommands zSetCommands() {
-        return reactiveRedisConnection.zSetCommands();
-    }
+  @Override
+  public ReactiveZSetCommands zSetCommands() {
+    return reactiveRedisConnection.zSetCommands();
+  }
 
-    @Override
-    public ReactiveHashCommands hashCommands() {
-        return reactiveRedisConnection.hashCommands();
-    }
+  @Override
+  public ReactiveHashCommands hashCommands() {
+    return reactiveRedisConnection.hashCommands();
+  }
 
-    @Override
-    public ReactiveGeoCommands geoCommands() {
-        return reactiveRedisConnection.geoCommands();
-    }
+  @Override
+  public ReactiveGeoCommands geoCommands() {
+    return reactiveRedisConnection.geoCommands();
+  }
 
-    @Override
-    public ReactiveHyperLogLogCommands hyperLogLogCommands() {
-        return reactiveRedisConnection.hyperLogLogCommands();
-    }
+  @Override
+  public ReactiveHyperLogLogCommands hyperLogLogCommands() {
+    return reactiveRedisConnection.hyperLogLogCommands();
+  }
 
-    @Override
-    public ReactiveScriptingCommands scriptingCommands() {
-        return reactiveRedisConnection.scriptingCommands();
-    }
+  @Override
+  public ReactiveScriptingCommands scriptingCommands() {
+    return reactiveRedisConnection.scriptingCommands();
+  }
 
-    @Override
-    public ReactiveServerCommands serverCommands() {
-        return reactiveRedisConnection.serverCommands();
-    }
+  @Override
+  public ReactiveServerCommands serverCommands() {
+    return reactiveRedisConnection.serverCommands();
+  }
 
-    @Override
-    public reactor.core.publisher.Mono<String> ping() {
-        return TracingHelper.doInScope(RedisCommand.PING, reactiveRedisConnection::ping,
-                withActiveSpanOnly, tracer);
-    }
+  @Override
+  public reactor.core.publisher.Mono<String> ping() {
+    return TracingHelper.doInScope(RedisCommand.PING, reactiveRedisConnection::ping,
+        withActiveSpanOnly, tracer);
+  }
 
 }

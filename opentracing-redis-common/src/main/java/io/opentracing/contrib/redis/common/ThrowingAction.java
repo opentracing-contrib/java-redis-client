@@ -16,5 +16,5 @@ package io.opentracing.contrib.redis.common;
 @FunctionalInterface
 public interface ThrowingAction<T extends Exception> {
 
-    void execute() throws T;
+  void execute() throws T;
 }

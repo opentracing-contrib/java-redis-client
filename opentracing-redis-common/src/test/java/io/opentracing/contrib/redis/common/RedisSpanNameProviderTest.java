@@ -14,40 +14,39 @@
 
 package io.opentracing.contrib.redis.common;
 
-import org.junit.Before;
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
 
 import java.util.function.Function;
-
-import static org.junit.Assert.assertEquals;
+import org.junit.Before;
+import org.junit.Test;
 
 
 public class RedisSpanNameProviderTest {
 
-    private String prefix = "redis.";
-    private String actual = "";
-    private Function<String, String> prefixSpanName;
+  private String prefix = "redis.";
+  private String actual = "";
+  private Function<String, String> prefixSpanName;
 
-    @Before
-    public void setUp() {
-        prefixSpanName = RedisSpanNameProvider.PREFIX_OPERATION_NAME(prefix);
-    }
+  @Before
+  public void setUp() {
+    prefixSpanName = RedisSpanNameProvider.PREFIX_OPERATION_NAME(prefix);
+  }
 
-    @Test
-    public void testGetPrefix() {
-        actual = prefixSpanName.apply("get");
-        assertEquals("redis.get", actual);
-    }
+  @Test
+  public void testGetPrefix() {
+    actual = prefixSpanName.apply("get");
+    assertEquals("redis.get", actual);
+  }
 
-    @Test
-    public void testSetPrefix() {
-        actual = prefixSpanName.apply("set");
-        assertEquals("redis.set", actual);
-    }
+  @Test
+  public void testSetPrefix() {
+    actual = prefixSpanName.apply("set");
+    assertEquals("redis.set", actual);
+  }
 
-    @Test
-    public void testPersistPrefix() {
-        actual = prefixSpanName.apply("persist");
-        assertEquals("redis.persist", actual);
-    }
+  @Test
+  public void testPersistPrefix() {
+    actual = prefixSpanName.apply("persist");
+    assertEquals("redis.persist", actual);
+  }
 }

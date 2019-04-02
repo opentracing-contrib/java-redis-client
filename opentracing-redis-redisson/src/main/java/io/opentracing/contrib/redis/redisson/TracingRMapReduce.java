@@ -13,40 +13,39 @@
  */
 package io.opentracing.contrib.redis.redisson;
 
+import java.util.concurrent.TimeUnit;
 import org.redisson.api.mapreduce.RMapReduce;
 import org.redisson.api.mapreduce.RMapper;
 import org.redisson.api.mapreduce.RReducer;
 
-import java.util.concurrent.TimeUnit;
-
 public class TracingRMapReduce<KIn, VIn, KOut, VOut> extends
-        TracingRMapReduceExecutor<VIn, KOut, VOut> implements
-        RMapReduce<KIn, VIn, KOut, VOut> {
-    private final RMapReduce<KIn, VIn, KOut, VOut> mapReduce;
-    private final TracingRedissonHelper tracingRedissonHelper;
+    TracingRMapReduceExecutor<VIn, KOut, VOut> implements
+    RMapReduce<KIn, VIn, KOut, VOut> {
+  private final RMapReduce<KIn, VIn, KOut, VOut> mapReduce;
+  private final TracingRedissonHelper tracingRedissonHelper;
 
-    public TracingRMapReduce(RMapReduce<KIn, VIn, KOut, VOut> mapReduce,
-                             TracingRedissonHelper tracingRedissonHelper) {
-        super(mapReduce, tracingRedissonHelper);
-        this.mapReduce = mapReduce;
-        this.tracingRedissonHelper = tracingRedissonHelper;
-    }
+  public TracingRMapReduce(RMapReduce<KIn, VIn, KOut, VOut> mapReduce,
+      TracingRedissonHelper tracingRedissonHelper) {
+    super(mapReduce, tracingRedissonHelper);
+    this.mapReduce = mapReduce;
+    this.tracingRedissonHelper = tracingRedissonHelper;
+  }
 
-    @Override
-    public RMapReduce<KIn, VIn, KOut, VOut> timeout(long timeout, TimeUnit unit) {
-        return new TracingRMapReduce<>(mapReduce.timeout(timeout, unit), tracingRedissonHelper);
-    }
+  @Override
+  public RMapReduce<KIn, VIn, KOut, VOut> timeout(long timeout, TimeUnit unit) {
+    return new TracingRMapReduce<>(mapReduce.timeout(timeout, unit), tracingRedissonHelper);
+  }
 
-    @Override
-    public RMapReduce<KIn, VIn, KOut, VOut> mapper(
-            RMapper<KIn, VIn, KOut, VOut> mapper) {
-        return new TracingRMapReduce<>(mapReduce.mapper(mapper), tracingRedissonHelper);
-    }
+  @Override
+  public RMapReduce<KIn, VIn, KOut, VOut> mapper(
+      RMapper<KIn, VIn, KOut, VOut> mapper) {
+    return new TracingRMapReduce<>(mapReduce.mapper(mapper), tracingRedissonHelper);
+  }
 
-    @Override
-    public RMapReduce<KIn, VIn, KOut, VOut> reducer(
-            RReducer<KOut, VOut> reducer) {
-        return new TracingRMapReduce<>(mapReduce.reducer(reducer), tracingRedissonHelper);
-    }
+  @Override
+  public RMapReduce<KIn, VIn, KOut, VOut> reducer(
+      RReducer<KOut, VOut> reducer) {
+    return new TracingRMapReduce<>(mapReduce.reducer(reducer), tracingRedissonHelper);
+  }
 
 }

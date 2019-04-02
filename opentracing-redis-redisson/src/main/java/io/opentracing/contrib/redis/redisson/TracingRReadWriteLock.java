@@ -17,22 +17,22 @@ import org.redisson.api.RLock;
 import org.redisson.api.RReadWriteLock;
 
 public class TracingRReadWriteLock implements RReadWriteLock {
-    private final RReadWriteLock lock;
-    private final TracingRedissonHelper tracingRedissonHelper;
+  private final RReadWriteLock lock;
+  private final TracingRedissonHelper tracingRedissonHelper;
 
-    public TracingRReadWriteLock(RReadWriteLock lock, TracingRedissonHelper tracingRedissonHelper) {
-        this.lock = lock;
-        this.tracingRedissonHelper = tracingRedissonHelper;
-    }
+  public TracingRReadWriteLock(RReadWriteLock lock, TracingRedissonHelper tracingRedissonHelper) {
+    this.lock = lock;
+    this.tracingRedissonHelper = tracingRedissonHelper;
+  }
 
-    @Override
-    public RLock readLock() {
-        return new TracingRLock(lock.readLock(), tracingRedissonHelper);
-    }
+  @Override
+  public RLock readLock() {
+    return new TracingRLock(lock.readLock(), tracingRedissonHelper);
+  }
 
-    @Override
-    public RLock writeLock() {
-        return new TracingRLock(lock.writeLock(), tracingRedissonHelper);
-    }
+  @Override
+  public RLock writeLock() {
+    return new TracingRLock(lock.writeLock(), tracingRedissonHelper);
+  }
 
 }

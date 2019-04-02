@@ -21,7 +21,6 @@ import io.lettuce.core.api.sync.RedisCommands;
 import io.lettuce.core.protocol.RedisCommand;
 import io.lettuce.core.resource.ClientResources;
 import io.opentracing.contrib.redis.common.TracingConfiguration;
-
 import java.time.Duration;
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
@@ -29,104 +28,104 @@ import java.util.concurrent.TimeUnit;
 
 public class TracingStatefulRedisConnection<K, V> implements StatefulRedisConnection<K, V> {
 
-    private final StatefulRedisConnection<K, V> connection;
-    private final TracingConfiguration tracingConfiguration;
+  private final StatefulRedisConnection<K, V> connection;
+  private final TracingConfiguration tracingConfiguration;
 
-    /**
-     * @param connection           redis connection
-     * @param tracingConfiguration tracing configuration
-     */
-    public TracingStatefulRedisConnection(StatefulRedisConnection<K, V> connection,
-                                          TracingConfiguration tracingConfiguration) {
-        this.connection = connection;
-        this.tracingConfiguration = tracingConfiguration;
-    }
+  /**
+   * @param connection redis connection
+   * @param tracingConfiguration tracing configuration
+   */
+  public TracingStatefulRedisConnection(StatefulRedisConnection<K, V> connection,
+      TracingConfiguration tracingConfiguration) {
+    this.connection = connection;
+    this.tracingConfiguration = tracingConfiguration;
+  }
 
-    @Override
-    public boolean isMulti() {
-        return connection.isMulti();
-    }
+  @Override
+  public boolean isMulti() {
+    return connection.isMulti();
+  }
 
-    @Override
-    public RedisCommands<K, V> sync() {
-        return new TracingRedisCommands<>(connection.sync(), tracingConfiguration);
-    }
+  @Override
+  public RedisCommands<K, V> sync() {
+    return new TracingRedisCommands<>(connection.sync(), tracingConfiguration);
+  }
 
-    @Override
-    public RedisAsyncCommands<K, V> async() {
-        return new TracingRedisAsyncCommands<>(connection.async(), tracingConfiguration);
-    }
+  @Override
+  public RedisAsyncCommands<K, V> async() {
+    return new TracingRedisAsyncCommands<>(connection.async(), tracingConfiguration);
+  }
 
-    @Override
-    public RedisReactiveCommands<K, V> reactive() {
-        return connection.reactive();
-    }
+  @Override
+  public RedisReactiveCommands<K, V> reactive() {
+    return connection.reactive();
+  }
 
-    @Override
-    public void setTimeout(Duration timeout) {
-        connection.setTimeout(timeout);
-    }
+  @Override
+  public void setTimeout(Duration timeout) {
+    connection.setTimeout(timeout);
+  }
 
-    @Override
-    @Deprecated
-    public void setTimeout(long timeout, TimeUnit unit) {
-        connection.setTimeout(timeout, unit);
-    }
+  @Override
+  @Deprecated
+  public void setTimeout(long timeout, TimeUnit unit) {
+    connection.setTimeout(timeout, unit);
+  }
 
-    @Override
-    public Duration getTimeout() {
-        return connection.getTimeout();
-    }
+  @Override
+  public Duration getTimeout() {
+    return connection.getTimeout();
+  }
 
-    @Override
-    public <T> RedisCommand<K, V, T> dispatch(
-            RedisCommand<K, V, T> command) {
-        return connection.dispatch(command);
-    }
+  @Override
+  public <T> RedisCommand<K, V, T> dispatch(
+      RedisCommand<K, V, T> command) {
+    return connection.dispatch(command);
+  }
 
-    @Override
-    public Collection<RedisCommand<K, V, ?>> dispatch(
-            Collection<? extends RedisCommand<K, V, ?>> redisCommands) {
-        return connection.dispatch(redisCommands);
-    }
+  @Override
+  public Collection<RedisCommand<K, V, ?>> dispatch(
+      Collection<? extends RedisCommand<K, V, ?>> redisCommands) {
+    return connection.dispatch(redisCommands);
+  }
 
-    @Override
-    public void close() {
-        connection.close();
-    }
+  @Override
+  public void close() {
+    connection.close();
+  }
 
-    @Override
-    public CompletableFuture<Void> closeAsync() {
-        return connection.closeAsync();
-    }
+  @Override
+  public CompletableFuture<Void> closeAsync() {
+    return connection.closeAsync();
+  }
 
-    @Override
-    public boolean isOpen() {
-        return connection.isOpen();
-    }
+  @Override
+  public boolean isOpen() {
+    return connection.isOpen();
+  }
 
-    @Override
-    public ClientOptions getOptions() {
-        return connection.getOptions();
-    }
+  @Override
+  public ClientOptions getOptions() {
+    return connection.getOptions();
+  }
 
-    @Override
-    public ClientResources getResources() {
-        return connection.getResources();
-    }
+  @Override
+  public ClientResources getResources() {
+    return connection.getResources();
+  }
 
-    @Override
-    public void reset() {
-        connection.reset();
-    }
+  @Override
+  public void reset() {
+    connection.reset();
+  }
 
-    @Override
-    public void setAutoFlushCommands(boolean autoFlush) {
-        connection.setAutoFlushCommands(autoFlush);
-    }
+  @Override
+  public void setAutoFlushCommands(boolean autoFlush) {
+    connection.setAutoFlushCommands(autoFlush);
+  }
 
-    @Override
-    public void flushCommands() {
-        connection.flushCommands();
-    }
+  @Override
+  public void flushCommands() {
+    connection.flushCommands();
+  }
 }

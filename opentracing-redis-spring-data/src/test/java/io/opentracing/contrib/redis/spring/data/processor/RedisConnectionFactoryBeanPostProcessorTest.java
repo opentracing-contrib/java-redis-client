@@ -13,6 +13,8 @@
  */
 package io.opentracing.contrib.redis.spring.data.processor;
 
+import static org.junit.Assert.assertTrue;
+
 import io.opentracing.contrib.redis.spring.data.connection.TracingRedisConnectionFactory;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,18 +24,16 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import static org.junit.Assert.assertTrue;
-
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = RedisConnectionFactoryBeanPostProcessorConfiguration.class)
 @EnableAutoConfiguration
 public class RedisConnectionFactoryBeanPostProcessorTest {
 
-    @Autowired
-    private RedisConnectionFactory redisConnectionFactory;
+  @Autowired
+  private RedisConnectionFactory redisConnectionFactory;
 
-    @Test
-    public void test() {
-        assertTrue(redisConnectionFactory instanceof TracingRedisConnectionFactory);
-    }
+  @Test
+  public void test() {
+    assertTrue(redisConnectionFactory instanceof TracingRedisConnectionFactory);
+  }
 }

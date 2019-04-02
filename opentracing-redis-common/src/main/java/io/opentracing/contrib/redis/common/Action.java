@@ -16,5 +16,5 @@ package io.opentracing.contrib.redis.common;
 @FunctionalInterface
 public interface Action {
 
-    void execute();
+  void execute();
 }

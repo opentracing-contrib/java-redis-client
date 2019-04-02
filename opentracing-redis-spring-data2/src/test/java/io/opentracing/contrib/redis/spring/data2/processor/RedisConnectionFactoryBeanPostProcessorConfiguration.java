@@ -22,8 +22,8 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @ComponentScan("io.opentracing.contrib.redis.spring.data2.processor")
 public class RedisConnectionFactoryBeanPostProcessorConfiguration {
-    @Bean
-    public Tracer tracer() {
-        return new MockTracer();
-    }
+  @Bean
+  public Tracer tracer() {
+    return new MockTracer();
+  }
 }

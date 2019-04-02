@@ -13,43 +13,42 @@
  */
 package io.opentracing.contrib.redis.redisson;
 
+import static io.opentracing.contrib.redis.common.TracingHelper.nullable;
+
 import io.opentracing.Span;
+import java.util.concurrent.TimeUnit;
 import org.redisson.api.RFuture;
 import org.redisson.api.RSetMultimapCache;
 
-import java.util.concurrent.TimeUnit;
-
-import static io.opentracing.contrib.redis.common.TracingHelper.nullable;
-
 public class TracingRSetMultimapCache<K, V> extends TracingRSetMultimap<K, V> implements
-        RSetMultimapCache<K, V> {
-    private final RSetMultimapCache<K, V> cache;
-    private final TracingRedissonHelper tracingRedissonHelper;
+    RSetMultimapCache<K, V> {
+  private final RSetMultimapCache<K, V> cache;
+  private final TracingRedissonHelper tracingRedissonHelper;
 
-    public TracingRSetMultimapCache(RSetMultimapCache<K, V> cache,
-                                    TracingRedissonHelper tracingRedissonHelper) {
-        super(cache, tracingRedissonHelper);
-        this.cache = cache;
-        this.tracingRedissonHelper = tracingRedissonHelper;
-    }
+  public TracingRSetMultimapCache(RSetMultimapCache<K, V> cache,
+      TracingRedissonHelper tracingRedissonHelper) {
+    super(cache, tracingRedissonHelper);
+    this.cache = cache;
+    this.tracingRedissonHelper = tracingRedissonHelper;
+  }
 
-    @Override
-    public boolean expireKey(K key, long timeToLive, TimeUnit timeUnit) {
-        Span span = tracingRedissonHelper.buildSpan("expireKey", cache);
-        span.setTag("key", nullable(key));
-        span.setTag("timeToLive", timeToLive);
-        span.setTag("timeUnit", nullable(timeUnit));
-        return tracingRedissonHelper.decorate(span, () -> cache.expireKey(key, timeToLive, timeUnit));
-    }
+  @Override
+  public boolean expireKey(K key, long timeToLive, TimeUnit timeUnit) {
+    Span span = tracingRedissonHelper.buildSpan("expireKey", cache);
+    span.setTag("key", nullable(key));
+    span.setTag("timeToLive", timeToLive);
+    span.setTag("timeUnit", nullable(timeUnit));
+    return tracingRedissonHelper.decorate(span, () -> cache.expireKey(key, timeToLive, timeUnit));
+  }
 
-    @Override
-    public RFuture<Boolean> expireKeyAsync(K key, long timeToLive, TimeUnit timeUnit) {
-        Span span = tracingRedissonHelper.buildSpan("expireKeyAsync", cache);
-        span.setTag("key", nullable(key));
-        span.setTag("timeToLive", timeToLive);
-        span.setTag("timeUnit", nullable(timeUnit));
-        return tracingRedissonHelper
-                .prepareRFuture(span, () -> cache.expireKeyAsync(key, timeToLive, timeUnit));
-    }
+  @Override
+  public RFuture<Boolean> expireKeyAsync(K key, long timeToLive, TimeUnit timeUnit) {
+    Span span = tracingRedissonHelper.buildSpan("expireKeyAsync", cache);
+    span.setTag("key", nullable(key));
+    span.setTag("timeToLive", timeToLive);
+    span.setTag("timeUnit", nullable(timeUnit));
+    return tracingRedissonHelper
+        .prepareRFuture(span, () -> cache.expireKeyAsync(key, timeToLive, timeUnit));
+  }
 
 }

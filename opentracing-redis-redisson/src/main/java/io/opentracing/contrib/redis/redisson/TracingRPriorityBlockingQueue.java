@@ -13,34 +13,33 @@
  */
 package io.opentracing.contrib.redis.redisson;
 
-import io.opentracing.Span;
-import org.redisson.api.RPriorityBlockingQueue;
-
-import java.util.Comparator;
-
 import static io.opentracing.contrib.redis.common.TracingHelper.nullable;
 
+import io.opentracing.Span;
+import java.util.Comparator;
+import org.redisson.api.RPriorityBlockingQueue;
+
 public class TracingRPriorityBlockingQueue<V> extends TracingRBlockingQueue<V> implements
-        RPriorityBlockingQueue<V> {
-    private final RPriorityBlockingQueue<V> queue;
-    private final TracingRedissonHelper tracingRedissonHelper;
+    RPriorityBlockingQueue<V> {
+  private final RPriorityBlockingQueue<V> queue;
+  private final TracingRedissonHelper tracingRedissonHelper;
 
-    public TracingRPriorityBlockingQueue(RPriorityBlockingQueue<V> queue,
-                                         TracingRedissonHelper tracingRedissonHelper) {
-        super(queue, tracingRedissonHelper);
-        this.queue = queue;
-        this.tracingRedissonHelper = tracingRedissonHelper;
-    }
+  public TracingRPriorityBlockingQueue(RPriorityBlockingQueue<V> queue,
+      TracingRedissonHelper tracingRedissonHelper) {
+    super(queue, tracingRedissonHelper);
+    this.queue = queue;
+    this.tracingRedissonHelper = tracingRedissonHelper;
+  }
 
-    @Override
-    public Comparator<? super V> comparator() {
-        return queue.comparator();
-    }
+  @Override
+  public Comparator<? super V> comparator() {
+    return queue.comparator();
+  }
 
-    @Override
-    public boolean trySetComparator(Comparator<? super V> comparator) {
-        Span span = tracingRedissonHelper.buildSpan("trySetComparator", queue);
-        span.setTag("comparator", nullable(comparator));
-        return tracingRedissonHelper.decorate(span, () -> queue.trySetComparator(comparator));
-    }
+  @Override
+  public boolean trySetComparator(Comparator<? super V> comparator) {
+    Span span = tracingRedissonHelper.buildSpan("trySetComparator", queue);
+    span.setTag("comparator", nullable(comparator));
+    return tracingRedissonHelper.decorate(span, () -> queue.trySetComparator(comparator));
+  }
 }
