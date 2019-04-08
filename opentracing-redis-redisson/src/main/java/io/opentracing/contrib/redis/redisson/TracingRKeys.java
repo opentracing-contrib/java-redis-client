@@ -19,6 +19,7 @@ import io.opentracing.Span;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 import org.redisson.api.RFuture;
 import org.redisson.api.RKeys;
 import org.redisson.api.RObject;
@@ -164,6 +165,34 @@ public class TracingRKeys implements RKeys {
     Span span = tracingRedissonHelper.buildSpan("getKeys");
     span.setTag("count", count);
     return tracingRedissonHelper.decorate(span, () -> keys.getKeys(count));
+  }
+
+  @Override
+  public Stream<String> getKeysStreamByPattern(String pattern) {
+    Span span = tracingRedissonHelper.buildSpan("getKeysStreamByPattern");
+    span.setTag("pattern", nullable(pattern));
+    return tracingRedissonHelper.decorate(span, () -> keys.getKeysStreamByPattern(pattern));
+  }
+
+  @Override
+  public Stream<String> getKeysStreamByPattern(String pattern, int count) {
+    Span span = tracingRedissonHelper.buildSpan("getKeysStreamByPattern");
+    span.setTag("pattern", nullable(pattern));
+    span.setTag("count", count);
+    return tracingRedissonHelper.decorate(span, () -> keys.getKeysStreamByPattern(pattern, count));
+  }
+
+  @Override
+  public Stream<String> getKeysStream() {
+    Span span = tracingRedissonHelper.buildSpan("getKeysStream");
+    return tracingRedissonHelper.decorate(span, () -> keys.getKeysStream());
+  }
+
+  @Override
+  public Stream<String> getKeysStream(int count) {
+    Span span = tracingRedissonHelper.buildSpan("getKeysStream");
+    span.setTag("count", count);
+    return tracingRedissonHelper.decorate(span, () -> keys.getKeysStream(count));
   }
 
   @Override

@@ -14,6 +14,9 @@
 package io.opentracing.contrib.redis.redisson;
 
 import io.opentracing.Span;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Set;
 import org.redisson.api.RFuture;
 import org.redisson.api.RLocalCachedMap;
 
@@ -45,6 +48,30 @@ public class TracingRLocalCachedMap<K, V> extends TracingRMap<K, V> implements
   public void clearLocalCache() {
     Span span = tracingRedissonHelper.buildSpan("clearLocalCache", map);
     tracingRedissonHelper.decorate(span, map::clearLocalCache);
+  }
+
+  @Override
+  public Set<K> cachedKeySet() {
+    Span span = tracingRedissonHelper.buildSpan("cachedKeySet", map);
+    return tracingRedissonHelper.decorate(span, map::cachedKeySet);
+  }
+
+  @Override
+  public Collection<V> cachedValues() {
+    Span span = tracingRedissonHelper.buildSpan("cachedValues", map);
+    return tracingRedissonHelper.decorate(span, map::cachedValues);
+  }
+
+  @Override
+  public Set<Entry<K, V>> cachedEntrySet() {
+    Span span = tracingRedissonHelper.buildSpan("cachedEntrySet", map);
+    return tracingRedissonHelper.decorate(span, map::cachedEntrySet);
+  }
+
+  @Override
+  public Map<K, V> getCachedMap() {
+    Span span = tracingRedissonHelper.buildSpan("getCachedMap", map);
+    return tracingRedissonHelper.decorate(span, map::getCachedMap);
   }
 
   @Override

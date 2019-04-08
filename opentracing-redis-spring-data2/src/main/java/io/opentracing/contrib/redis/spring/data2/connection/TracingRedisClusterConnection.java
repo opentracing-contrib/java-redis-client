@@ -35,6 +35,7 @@ import static io.opentracing.contrib.redis.common.RedisCommand.CONFIG_GET;
 import static io.opentracing.contrib.redis.common.RedisCommand.CONFIG_RESETSTAT;
 import static io.opentracing.contrib.redis.common.RedisCommand.CONFIG_SET;
 import static io.opentracing.contrib.redis.common.RedisCommand.DBSIZE;
+import static io.opentracing.contrib.redis.common.RedisCommand.EXECUTE;
 import static io.opentracing.contrib.redis.common.RedisCommand.FLUSHALL;
 import static io.opentracing.contrib.redis.common.RedisCommand.FLUSHDB;
 import static io.opentracing.contrib.redis.common.RedisCommand.INFO;
@@ -43,6 +44,7 @@ import static io.opentracing.contrib.redis.common.RedisCommand.LASTSAVE;
 import static io.opentracing.contrib.redis.common.RedisCommand.PING;
 import static io.opentracing.contrib.redis.common.RedisCommand.RANDOMKEY;
 import static io.opentracing.contrib.redis.common.RedisCommand.SAVE;
+import static io.opentracing.contrib.redis.common.RedisCommand.SCAN;
 import static io.opentracing.contrib.redis.common.RedisCommand.SHUTDOWN;
 import static io.opentracing.contrib.redis.common.RedisCommand.TIME;
 
@@ -57,6 +59,8 @@ import org.springframework.data.redis.connection.RedisClusterConnection;
 import org.springframework.data.redis.connection.RedisClusterNode;
 import org.springframework.data.redis.connection.RedisClusterNode.SlotRange;
 import org.springframework.data.redis.connection.RedisClusterServerCommands;
+import org.springframework.data.redis.core.Cursor;
+import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.data.redis.core.types.RedisClientInfo;
 
 
@@ -222,8 +226,18 @@ public class TracingRedisClusterConnection extends TracingRedisConnection
   }
 
   @Override
+  public Cursor<byte[]> scan(RedisClusterNode node, ScanOptions options) {
+    return doInScope(SCAN, () -> connection.scan(node, options));
+  }
+
+  @Override
   public byte[] randomKey(RedisClusterNode node) {
     return doInScope(RANDOMKEY, () -> connection.randomKey(node));
+  }
+
+  @Override
+  public <T> T execute(String command, byte[] key, Collection<byte[]> args) {
+    return doInScope(EXECUTE, () -> connection.execute(command, key, args));
   }
 
   @Override

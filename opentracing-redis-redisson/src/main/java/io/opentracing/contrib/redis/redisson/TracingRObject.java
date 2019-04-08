@@ -18,6 +18,7 @@ import static io.opentracing.contrib.redis.common.TracingHelper.nullable;
 import io.opentracing.Span;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
+import org.redisson.api.ObjectListener;
 import org.redisson.api.RFuture;
 import org.redisson.api.RObject;
 import org.redisson.client.codec.Codec;
@@ -29,6 +30,12 @@ public class TracingRObject implements RObject {
   public TracingRObject(RObject object, TracingRedissonHelper tracingRedissonHelper) {
     this.object = object;
     this.tracingRedissonHelper = tracingRedissonHelper;
+  }
+
+  @Override
+  public long sizeInMemory() {
+    Span span = tracingRedissonHelper.buildSpan("sizeInMemory", object);
+    return tracingRedissonHelper.decorate(span, object::sizeInMemory);
   }
 
   @Override
@@ -146,6 +153,25 @@ public class TracingRObject implements RObject {
   }
 
   @Override
+  public int addListener(ObjectListener listener) {
+    Span span = tracingRedissonHelper.buildSpan("addListener", object);
+    return tracingRedissonHelper.decorate(span, () -> object.addListener(listener));
+  }
+
+  @Override
+  public void removeListener(int listenerId) {
+    Span span = tracingRedissonHelper.buildSpan("removeListener", object);
+    span.setTag("listenerId", listenerId);
+    tracingRedissonHelper.decorate(span, () -> object.removeListener(listenerId));
+  }
+
+  @Override
+  public RFuture<Long> sizeInMemoryAsync() {
+    Span span = tracingRedissonHelper.buildSpan("sizeInMemoryAsync", object);
+    return tracingRedissonHelper.prepareRFuture(span, object::sizeInMemoryAsync);
+  }
+
+  @Override
   public RFuture<Void> restoreAsync(byte[] state) {
     Span span = tracingRedissonHelper.buildSpan("restoreAsync", object);
     span.setTag("state", Arrays.toString(state));
@@ -253,6 +279,19 @@ public class TracingRObject implements RObject {
   public RFuture<Boolean> isExistsAsync() {
     Span span = tracingRedissonHelper.buildSpan("isExistsAsync", object);
     return tracingRedissonHelper.prepareRFuture(span, object::isExistsAsync);
+  }
+
+  @Override
+  public RFuture<Integer> addListenerAsync(ObjectListener listener) {
+    Span span = tracingRedissonHelper.buildSpan("addListenerAsync", object);
+    return tracingRedissonHelper.prepareRFuture(span, () -> object.addListenerAsync(listener));
+  }
+
+  @Override
+  public RFuture<Void> removeListenerAsync(int listenerId) {
+    Span span = tracingRedissonHelper.buildSpan("removeListenerAsync", object);
+    span.setTag("listenerId", listenerId);
+    return tracingRedissonHelper.prepareRFuture(span, () -> object.removeListenerAsync(listenerId));
   }
 
   @Override

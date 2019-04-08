@@ -24,8 +24,12 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
+import org.redisson.api.RCountDownLatch;
 import org.redisson.api.RFuture;
 import org.redisson.api.RLock;
+import org.redisson.api.RPermitExpirableSemaphore;
+import org.redisson.api.RReadWriteLock;
+import org.redisson.api.RSemaphore;
 import org.redisson.api.RSetCache;
 import org.redisson.api.mapreduce.RCollectionMapReduce;
 
@@ -40,8 +44,56 @@ public class TracingRSetCache<V> extends TracingRExpirable implements RSetCache<
   }
 
   @Override
+  public RCountDownLatch getCountDownLatch(V value) {
+    return new TracingRCountDownLatch(cache.getCountDownLatch(value), tracingRedissonHelper);
+  }
+
+  @Override
+  public RPermitExpirableSemaphore getPermitExpirableSemaphore(V value) {
+    return new TracingRPermitExpirableSemaphore(cache.getPermitExpirableSemaphore(value),
+        tracingRedissonHelper);
+  }
+
+  @Override
+  public RSemaphore getSemaphore(V value) {
+    return new TracingRSemaphore(cache.getSemaphore(value), tracingRedissonHelper);
+  }
+
+  @Override
+  public RLock getFairLock(V value) {
+    return new TracingRLock(cache.getFairLock(value), tracingRedissonHelper);
+  }
+
+  @Override
+  public RReadWriteLock getReadWriteLock(V value) {
+    return new TracingRReadWriteLock(cache.getReadWriteLock(value), tracingRedissonHelper);
+  }
+
+  @Override
   public RLock getLock(V value) {
     return new TracingRLock(cache.getLock(value), tracingRedissonHelper);
+  }
+
+  @Override
+  public Stream<V> stream(int count) {
+    Span span = tracingRedissonHelper.buildSpan("stream", cache);
+    span.setTag("count", count);
+    return tracingRedissonHelper.decorate(span, () -> cache.stream(count));
+  }
+
+  @Override
+  public Stream<V> stream(String pattern, int count) {
+    Span span = tracingRedissonHelper.buildSpan("stream", cache);
+    span.setTag("pattern", nullable(pattern));
+    span.setTag("count", count);
+    return tracingRedissonHelper.decorate(span, () -> cache.stream(pattern, count));
+  }
+
+  @Override
+  public Stream<V> stream(String pattern) {
+    Span span = tracingRedissonHelper.buildSpan("stream", cache);
+    span.setTag("pattern", nullable(pattern));
+    return tracingRedissonHelper.decorate(span, () -> cache.stream(pattern));
   }
 
   @Override

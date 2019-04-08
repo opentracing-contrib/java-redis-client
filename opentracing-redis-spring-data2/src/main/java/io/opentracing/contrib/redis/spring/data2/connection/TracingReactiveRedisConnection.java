@@ -22,12 +22,14 @@ import org.springframework.data.redis.connection.ReactiveHyperLogLogCommands;
 import org.springframework.data.redis.connection.ReactiveKeyCommands;
 import org.springframework.data.redis.connection.ReactiveListCommands;
 import org.springframework.data.redis.connection.ReactiveNumberCommands;
+import org.springframework.data.redis.connection.ReactivePubSubCommands;
 import org.springframework.data.redis.connection.ReactiveRedisConnection;
 import org.springframework.data.redis.connection.ReactiveScriptingCommands;
 import org.springframework.data.redis.connection.ReactiveServerCommands;
 import org.springframework.data.redis.connection.ReactiveSetCommands;
 import org.springframework.data.redis.connection.ReactiveStringCommands;
 import org.springframework.data.redis.connection.ReactiveZSetCommands;
+import reactor.core.publisher.Mono;
 
 public class TracingReactiveRedisConnection implements ReactiveRedisConnection {
   private final ReactiveRedisConnection reactiveRedisConnection;
@@ -45,6 +47,11 @@ public class TracingReactiveRedisConnection implements ReactiveRedisConnection {
   @Override
   public void close() {
     reactiveRedisConnection.close();
+  }
+
+  @Override
+  public Mono<Void> closeLater() {
+    return reactiveRedisConnection.closeLater();
   }
 
   @Override
@@ -90,6 +97,11 @@ public class TracingReactiveRedisConnection implements ReactiveRedisConnection {
   @Override
   public ReactiveHyperLogLogCommands hyperLogLogCommands() {
     return reactiveRedisConnection.hyperLogLogCommands();
+  }
+
+  @Override
+  public ReactivePubSubCommands pubSubCommands() {
+    return reactiveRedisConnection.pubSubCommands();
   }
 
   @Override

@@ -253,6 +253,10 @@ public final class RedisCommand {
   public static final String XREAD = "XREAD";
   public static final String XREADGROUP = "XREADGROUP";
   public static final String XPENDING = "XPENDING";
+  public static final String ENCODING = "ENCODING";
+  public static final String IDLETIME = "IDLETIME";
+  public static final String REFCOUNT = "REFCOUNT";
+  public static final String EXECUTE = "EXECUTE";
 
   private RedisCommand() {
   }

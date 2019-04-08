@@ -16,6 +16,7 @@ package io.opentracing.contrib.redis.spring.data2.connection;
 import io.opentracing.Tracer;
 import io.opentracing.contrib.redis.common.RedisCommand;
 import io.opentracing.contrib.redis.common.TracingHelper;
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -29,6 +30,7 @@ import org.springframework.data.geo.Distance;
 import org.springframework.data.geo.GeoResults;
 import org.springframework.data.geo.Metric;
 import org.springframework.data.geo.Point;
+import org.springframework.data.redis.connection.BitFieldSubCommands;
 import org.springframework.data.redis.connection.DataType;
 import org.springframework.data.redis.connection.MessageListener;
 import org.springframework.data.redis.connection.RedisConnection;
@@ -48,6 +50,7 @@ import org.springframework.data.redis.connection.RedisZSetCommands;
 import org.springframework.data.redis.connection.ReturnType;
 import org.springframework.data.redis.connection.SortParameters;
 import org.springframework.data.redis.connection.Subscription;
+import org.springframework.data.redis.connection.ValueEncoding;
 import org.springframework.data.redis.core.Cursor;
 import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.data.redis.core.types.Expiration;
@@ -195,13 +198,28 @@ public class TracingRedisConnection implements RedisConnection {
   }
 
   @Override
+  public Long exists(byte[]... keys) {
+    return null;
+  }
+
+  @Override
   public Long del(byte[]... keys) {
     return doInScope(RedisCommand.DEL, () -> connection.del(keys));
   }
 
   @Override
+  public Long unlink(byte[]... keys) {
+    return null;
+  }
+
+  @Override
   public DataType type(byte[] key) {
     return doInScope(RedisCommand.TYPE, () -> connection.type(key));
+  }
+
+  @Override
+  public Long touch(byte[]... keys) {
+    return null;
   }
 
   @Override
@@ -297,6 +315,27 @@ public class TracingRedisConnection implements RedisConnection {
   @Override
   public void restore(byte[] key, long ttlInMillis, byte[] serializedValue) {
     doInScope(RedisCommand.RESTORE, () -> connection.restore(key, ttlInMillis, serializedValue));
+  }
+
+  @Override
+  public void restore(byte[] key, long ttlInMillis, byte[] serializedValue, boolean replace) {
+    doInScope(RedisCommand.RESTORE,
+        () -> connection.restore(key, ttlInMillis, serializedValue, replace));
+  }
+
+  @Override
+  public ValueEncoding encodingOf(byte[] key) {
+    return doInScope(RedisCommand.ENCODING, () -> connection.encodingOf(key));
+  }
+
+  @Override
+  public Duration idletime(byte[] key) {
+    return doInScope(RedisCommand.IDLETIME, () -> connection.idletime(key));
+  }
+
+  @Override
+  public Long refcount(byte[] key) {
+    return doInScope(RedisCommand.REFCOUNT, () -> connection.refcount(key));
   }
 
   @Override
@@ -410,8 +449,18 @@ public class TracingRedisConnection implements RedisConnection {
   }
 
   @Override
+  public List<Long> bitField(byte[] key, BitFieldSubCommands subCommands) {
+    return doInScope(RedisCommand.BITFIELD, () -> connection.bitField(key, subCommands));
+  }
+
+  @Override
   public Long bitOp(BitOperation op, byte[] destination, byte[]... keys) {
     return doInScope(RedisCommand.BITOP, () -> connection.bitOp(op, destination, keys));
+  }
+
+  @Override
+  public Long bitPos(byte[] key, boolean bit, org.springframework.data.domain.Range<Long> range) {
+    return doInScope(RedisCommand.BITPOS, () -> connection.bitPos(key, bit, range));
   }
 
   @Override
@@ -794,12 +843,24 @@ public class TracingRedisConnection implements RedisConnection {
   }
 
   @Override
+  public Long zUnionStore(byte[] destKey, Aggregate aggregate, Weights weights, byte[]... sets) {
+    return doInScope(RedisCommand.ZUNIONSTORE,
+        () -> connection.zUnionStore(destKey, aggregate, weights, sets));
+  }
+
+  @Override
   public Long zInterStore(byte[] destKey, byte[]... sets) {
     return doInScope(RedisCommand.ZINTERSTORE, () -> connection.zInterStore(destKey, sets));
   }
 
   @Override
   public Long zInterStore(byte[] destKey, Aggregate aggregate, int[] weights, byte[]... sets) {
+    return doInScope(RedisCommand.ZINTERSTORE,
+        () -> connection.zInterStore(destKey, aggregate, weights, sets));
+  }
+
+  @Override
+  public Long zInterStore(byte[] destKey, Aggregate aggregate, Weights weights, byte[]... sets) {
     return doInScope(RedisCommand.ZINTERSTORE,
         () -> connection.zInterStore(destKey, aggregate, weights, sets));
   }
@@ -892,6 +953,11 @@ public class TracingRedisConnection implements RedisConnection {
   @Override
   public Cursor<Entry<byte[], byte[]>> hScan(byte[] key, ScanOptions options) {
     return doInScope(RedisCommand.HSCAN, () -> connection.hScan(key, options));
+  }
+
+  @Override
+  public Long hStrLen(byte[] key, byte[] field) {
+    return doInScope(RedisCommand.HSTRLEN, () -> connection.hStrLen(key, field));
   }
 
   @Override

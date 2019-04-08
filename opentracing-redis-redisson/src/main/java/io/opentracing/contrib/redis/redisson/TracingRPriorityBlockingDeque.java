@@ -17,6 +17,7 @@ import static io.opentracing.contrib.redis.common.TracingHelper.nullable;
 
 import io.opentracing.Span;
 import java.util.Comparator;
+import java.util.stream.Stream;
 import org.redisson.api.RPriorityBlockingDeque;
 
 public class TracingRPriorityBlockingDeque<V> extends TracingRBlockingDeque<V> implements
@@ -43,4 +44,9 @@ public class TracingRPriorityBlockingDeque<V> extends TracingRBlockingDeque<V> i
     return tracingRedissonHelper.decorate(span, () -> deque.trySetComparator(comparator));
   }
 
+  @Override
+  public Stream<V> descendingStream() {
+    Span span = tracingRedissonHelper.buildSpan("descendingStream", deque);
+    return tracingRedissonHelper.decorate(span, deque::descendingStream);
+  }
 }

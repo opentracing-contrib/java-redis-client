@@ -13,9 +13,9 @@
  */
 package io.opentracing.contrib.redis.redisson;
 
-import io.netty.util.concurrent.FutureListener;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BiConsumer;
 import org.redisson.api.RFuture;
 
 public class CompletableRFuture<T> extends CompletableFuture<T> implements RFuture<T> {
@@ -51,26 +51,6 @@ public class CompletableRFuture<T> extends CompletableFuture<T> implements RFutu
   }
 
   @Override
-  public RFuture<T> addListener(FutureListener<? super T> listener) {
-    return wrappedFuture.addListener(listener);
-  }
-
-  @Override
-  public RFuture<T> addListeners(FutureListener<? super T>... listeners) {
-    return wrappedFuture.addListeners(listeners);
-  }
-
-  @Override
-  public RFuture<T> removeListener(FutureListener<? super T> listener) {
-    return wrappedFuture.removeListener(listener);
-  }
-
-  @Override
-  public RFuture<T> removeListeners(FutureListener<? super T>... listeners) {
-    return wrappedFuture.removeListeners(listeners);
-  }
-
-  @Override
   public RFuture<T> sync() throws InterruptedException {
     return wrappedFuture.sync();
   }
@@ -98,5 +78,10 @@ public class CompletableRFuture<T> extends CompletableFuture<T> implements RFutu
   @Override
   public boolean awaitUninterruptibly(long timeoutMillis) {
     return wrappedFuture.awaitUninterruptibly(timeoutMillis);
+  }
+
+  @Override
+  public void onComplete(BiConsumer<? super T, ? super Throwable> biConsumer) {
+    wrappedFuture.onComplete(biConsumer);
   }
 }
