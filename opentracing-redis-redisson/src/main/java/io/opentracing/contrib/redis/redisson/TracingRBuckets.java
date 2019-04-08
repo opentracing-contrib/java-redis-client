@@ -53,6 +53,13 @@ public class TracingRBuckets implements RBuckets {
   }
 
   @Override
+  public long delete(String... keys) {
+    Span span = tracingRedissonHelper.buildSpan("delete");
+    span.setTag("keys", Arrays.toString(keys));
+    return tracingRedissonHelper.decorate(span, () -> buckets.delete(keys));
+  }
+
+  @Override
   public <V> RFuture<Map<String, V>> getAsync(String... keys) {
     Span span = tracingRedissonHelper.buildSpan("getAsync");
     span.setTag("keys", Arrays.toString(keys));
@@ -71,6 +78,13 @@ public class TracingRBuckets implements RBuckets {
     Span span = tracingRedissonHelper.buildSpan("setAsync");
     span.setTag("buckets", nullable(buckets));
     return tracingRedissonHelper.prepareRFuture(span, () -> this.buckets.setAsync(buckets));
+  }
+
+  @Override
+  public RFuture<Long> deleteAsync(String... keys) {
+    Span span = tracingRedissonHelper.buildSpan("deleteAsync");
+    span.setTag("keys", nullable(keys));
+    return tracingRedissonHelper.prepareRFuture(span, () -> this.buckets.deleteAsync(keys));
   }
 
 }

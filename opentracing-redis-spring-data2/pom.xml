@@ -14,7 +14,9 @@
     the License.
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <parent>
     <artifactId>opentracing-redis-parent</artifactId>
     <groupId>io.opentracing.contrib</groupId>
@@ -27,9 +29,9 @@
   <description>OpenTracing Instrumentation for Spring Redis classes</description>
 
   <properties>
-    <spring.data.redis.version>2.0.10.RELEASE</spring.data.redis.version>
-    <spring-boot.version>2.0.5.RELEASE</spring-boot.version>
-    <spring.version>5.0.9.RELEASE</spring.version>
+    <spring.data.redis.version>2.1.6.RELEASE</spring.data.redis.version>
+    <spring-boot.version>2.1.4.RELEASE</spring-boot.version>
+    <spring.version>5.1.6.RELEASE</spring.version>
   </properties>
 
   <dependencies>

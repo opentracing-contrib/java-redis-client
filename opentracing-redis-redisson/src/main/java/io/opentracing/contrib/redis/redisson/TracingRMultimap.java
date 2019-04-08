@@ -20,10 +20,13 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map.Entry;
 import java.util.Set;
+import org.redisson.api.RCountDownLatch;
 import org.redisson.api.RFuture;
 import org.redisson.api.RLock;
 import org.redisson.api.RMultimap;
+import org.redisson.api.RPermitExpirableSemaphore;
 import org.redisson.api.RReadWriteLock;
+import org.redisson.api.RSemaphore;
 
 public class TracingRMultimap<K, V> extends TracingRExpirable implements RMultimap<K, V> {
   private final RMultimap<K, V> map;
@@ -33,6 +36,27 @@ public class TracingRMultimap<K, V> extends TracingRExpirable implements RMultim
     super(map, tracingRedissonHelper);
     this.map = map;
     this.tracingRedissonHelper = tracingRedissonHelper;
+  }
+
+  @Override
+  public RCountDownLatch getCountDownLatch(K key) {
+    return new TracingRCountDownLatch(map.getCountDownLatch(key), tracingRedissonHelper);
+  }
+
+  @Override
+  public RPermitExpirableSemaphore getPermitExpirableSemaphore(K key) {
+    return new TracingRPermitExpirableSemaphore(map.getPermitExpirableSemaphore(key),
+        tracingRedissonHelper);
+  }
+
+  @Override
+  public RSemaphore getSemaphore(K key) {
+    return new TracingRSemaphore(map.getSemaphore(key), tracingRedissonHelper);
+  }
+
+  @Override
+  public RLock getFairLock(K key) {
+    return new TracingRLock(map.getFairLock(key), tracingRedissonHelper);
   }
 
   @Override

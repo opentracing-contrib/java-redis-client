@@ -294,6 +294,16 @@ public class TracingRedissonClient implements RedissonClient {
   }
 
   @Override
+  public RLock getMultiLock(RLock... locks) {
+    return new TracingRLock(redissonClient.getMultiLock(locks), tracingRedissonHelper);
+  }
+
+  @Override
+  public RLock getRedLock(RLock... locks) {
+    return new TracingRLock(redissonClient.getRedLock(locks), tracingRedissonHelper);
+  }
+
+  @Override
   public RLock getFairLock(String name) {
     return new TracingRLock(redissonClient.getFairLock(name), tracingRedissonHelper);
   }

@@ -21,14 +21,18 @@ import java.util.concurrent.locks.Condition;
 import org.redisson.api.RFuture;
 import org.redisson.api.RLock;
 
-public class TracingRLock extends TracingRExpirable implements RLock {
+public class TracingRLock implements RLock {
   private final RLock lock;
   private final TracingRedissonHelper tracingRedissonHelper;
 
   public TracingRLock(RLock lock, TracingRedissonHelper tracingRedissonHelper) {
-    super(lock, tracingRedissonHelper);
     this.lock = lock;
     this.tracingRedissonHelper = tracingRedissonHelper;
+  }
+
+  @Override
+  public String getName() {
+    return lock.getName();
   }
 
   @Override
@@ -66,6 +70,13 @@ public class TracingRLock extends TracingRExpirable implements RLock {
   public boolean isLocked() {
     Span span = tracingRedissonHelper.buildSpan("isLocked", lock);
     return tracingRedissonHelper.decorate(span, lock::isLocked);
+  }
+
+  @Override
+  public boolean isHeldByThread(long threadId) {
+    Span span = tracingRedissonHelper.buildSpan("isHeldByThread", lock);
+    span.setTag("threadId", threadId);
+    return tracingRedissonHelper.decorate(span, () -> lock.isHeldByThread(threadId));
   }
 
   @Override

@@ -17,6 +17,7 @@ import static io.opentracing.contrib.redis.common.TracingHelper.nullable;
 
 import io.opentracing.Span;
 import java.util.Iterator;
+import java.util.stream.Stream;
 import org.redisson.api.RPriorityDeque;
 
 
@@ -205,4 +206,9 @@ public class TracingRPriorityDeque<V> extends TracingRPriorityQueue<V> implement
   }
 
 
+  @Override
+  public Stream<V> descendingStream() {
+    Span span = tracingRedissonHelper.buildSpan("descendingStream", deque);
+    return tracingRedissonHelper.decorate(span, deque::descendingStream);
+  }
 }

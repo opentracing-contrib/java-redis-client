@@ -26,6 +26,7 @@ import java.util.Set;
 import java.util.Spliterator;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 import org.redisson.api.RFuture;
 import org.redisson.api.RScoredSortedSet;
 import org.redisson.api.SortOrder;
@@ -66,6 +67,18 @@ public class TracingRScoredSortedSet<V> extends TracingRExpirable implements RSc
     span.setTag("queueNames", Arrays.toString(queueNames));
     return tracingRedissonHelper
         .decorate(span, () -> set.pollFirstFromAny(timeout, unit, queueNames));
+  }
+
+  @Override
+  public V takeFirst() {
+    Span span = tracingRedissonHelper.buildSpan("takeFirst", set);
+    return tracingRedissonHelper.decorate(span, set::takeFirst);
+  }
+
+  @Override
+  public V takeLast() {
+    Span span = tracingRedissonHelper.buildSpan("takeLast", set);
+    return tracingRedissonHelper.decorate(span, set::takeLast);
   }
 
   @Override
@@ -223,6 +236,34 @@ public class TracingRScoredSortedSet<V> extends TracingRExpirable implements RSc
   public boolean isEmpty() {
     Span span = tracingRedissonHelper.buildSpan("isEmpty", set);
     return tracingRedissonHelper.decorate(span, set::isEmpty);
+  }
+
+  @Override
+  public Stream<V> stream() {
+    Span span = tracingRedissonHelper.buildSpan("stream", set);
+    return tracingRedissonHelper.decorate(span, () -> set.stream());
+  }
+
+  @Override
+  public Stream<V> stream(String pattern) {
+    Span span = tracingRedissonHelper.buildSpan("stream", set);
+    span.setTag("pattern", nullable(pattern));
+    return tracingRedissonHelper.decorate(span, () -> set.stream(pattern));
+  }
+
+  @Override
+  public Stream<V> stream(int count) {
+    Span span = tracingRedissonHelper.buildSpan("stream", set);
+    span.setTag("count", count);
+    return tracingRedissonHelper.decorate(span, () -> set.stream(count));
+  }
+
+  @Override
+  public Stream<V> stream(String pattern, int count) {
+    Span span = tracingRedissonHelper.buildSpan("stream", set);
+    span.setTag("pattern", nullable(pattern));
+    span.setTag("count", count);
+    return tracingRedissonHelper.decorate(span, () -> set.stream(pattern, count));
   }
 
   @Override
@@ -556,6 +597,18 @@ public class TracingRScoredSortedSet<V> extends TracingRExpirable implements RSc
     span.setTag("timeout", timeout);
     span.setTag("unit", nullable(unit));
     return tracingRedissonHelper.prepareRFuture(span, () -> set.pollFirstAsync(timeout, unit));
+  }
+
+  @Override
+  public RFuture<V> takeFirstAsync() {
+    Span span = tracingRedissonHelper.buildSpan("takeFirstAsync", set);
+    return tracingRedissonHelper.prepareRFuture(span, set::takeFirstAsync);
+  }
+
+  @Override
+  public RFuture<V> takeLastAsync() {
+    Span span = tracingRedissonHelper.buildSpan("takeLastAsync", set);
+    return tracingRedissonHelper.prepareRFuture(span, set::takeLastAsync);
   }
 
   @Override

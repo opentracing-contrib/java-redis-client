@@ -25,10 +25,13 @@ import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import org.redisson.api.RCountDownLatch;
 import org.redisson.api.RFuture;
 import org.redisson.api.RLock;
 import org.redisson.api.RMap;
+import org.redisson.api.RPermitExpirableSemaphore;
 import org.redisson.api.RReadWriteLock;
+import org.redisson.api.RSemaphore;
 import org.redisson.api.mapreduce.RMapReduce;
 
 public class TracingRMap<K, V> extends TracingRExpirable implements RMap<K, V> {
@@ -85,6 +88,27 @@ public class TracingRMap<K, V> extends TracingRExpirable implements RMap<K, V> {
   @Override
   public <KOut, VOut> RMapReduce<K, V, KOut, VOut> mapReduce() {
     return new TracingRMapReduce<>(map.mapReduce(), tracingRedissonHelper);
+  }
+
+  @Override
+  public RCountDownLatch getCountDownLatch(K key) {
+    return new TracingRCountDownLatch(map.getCountDownLatch(key), tracingRedissonHelper);
+  }
+
+  @Override
+  public RPermitExpirableSemaphore getPermitExpirableSemaphore(K key) {
+    return new TracingRPermitExpirableSemaphore(map.getPermitExpirableSemaphore(key),
+        tracingRedissonHelper);
+  }
+
+  @Override
+  public RSemaphore getSemaphore(K key) {
+    return new TracingRSemaphore(map.getSemaphore(key), tracingRedissonHelper);
+  }
+
+  @Override
+  public RLock getFairLock(K key) {
+    return new TracingRLock(map.getFairLock(key), tracingRedissonHelper);
   }
 
   @Override

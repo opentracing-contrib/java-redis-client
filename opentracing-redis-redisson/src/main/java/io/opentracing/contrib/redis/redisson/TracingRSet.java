@@ -26,8 +26,12 @@ import java.util.Spliterator;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
+import org.redisson.api.RCountDownLatch;
 import org.redisson.api.RFuture;
 import org.redisson.api.RLock;
+import org.redisson.api.RPermitExpirableSemaphore;
+import org.redisson.api.RReadWriteLock;
+import org.redisson.api.RSemaphore;
 import org.redisson.api.RSet;
 import org.redisson.api.SortOrder;
 import org.redisson.api.mapreduce.RCollectionMapReduce;
@@ -43,8 +47,56 @@ public class TracingRSet<V> extends TracingRExpirable implements RSet<V> {
   }
 
   @Override
+  public RCountDownLatch getCountDownLatch(V value) {
+    return new TracingRCountDownLatch(set.getCountDownLatch(value), tracingRedissonHelper);
+  }
+
+  @Override
+  public RPermitExpirableSemaphore getPermitExpirableSemaphore(V value) {
+    return new TracingRPermitExpirableSemaphore(set.getPermitExpirableSemaphore(value),
+        tracingRedissonHelper);
+  }
+
+  @Override
+  public RSemaphore getSemaphore(V value) {
+    return new TracingRSemaphore(set.getSemaphore(value), tracingRedissonHelper);
+  }
+
+  @Override
+  public RLock getFairLock(V value) {
+    return new TracingRLock(set.getFairLock(value), tracingRedissonHelper);
+  }
+
+  @Override
+  public RReadWriteLock getReadWriteLock(V value) {
+    return new TracingRReadWriteLock(set.getReadWriteLock(value), tracingRedissonHelper);
+  }
+
+  @Override
   public RLock getLock(V value) {
     return new TracingRLock(set.getLock(value), tracingRedissonHelper);
+  }
+
+  @Override
+  public Stream<V> stream(int count) {
+    Span span = tracingRedissonHelper.buildSpan("stream", set);
+    span.setTag("count", count);
+    return tracingRedissonHelper.decorate(span, () -> set.stream(count));
+  }
+
+  @Override
+  public Stream<V> stream(String pattern, int count) {
+    Span span = tracingRedissonHelper.buildSpan("stream", set);
+    span.setTag("pattern", nullable(pattern));
+    span.setTag("count", count);
+    return tracingRedissonHelper.decorate(span, () -> set.stream(pattern, count));
+  }
+
+  @Override
+  public Stream<V> stream(String pattern) {
+    Span span = tracingRedissonHelper.buildSpan("stream", set);
+    span.setTag("pattern", nullable(pattern));
+    return tracingRedissonHelper.decorate(span, () -> set.stream(pattern));
   }
 
   @Override

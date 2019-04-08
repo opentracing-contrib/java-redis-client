@@ -82,6 +82,16 @@ public class TracingRBucket<V> extends TracingRExpirable implements RBucket<V> {
   }
 
   @Override
+  public V getAndSet(V value, long timeToLive, TimeUnit timeUnit) {
+    Span span = tracingRedissonHelper.buildSpan("getAndSet", bucket);
+    span.setTag("value", nullable(value));
+    span.setTag("timeToLive", timeToLive);
+    span.setTag("timeUnit", nullable(timeUnit));
+    return tracingRedissonHelper
+        .decorate(span, () -> bucket.getAndSet(value, timeToLive, timeUnit));
+  }
+
+  @Override
   public void set(V value) {
     Span span = tracingRedissonHelper.buildSpan("set", bucket);
     span.setTag("value", nullable(value));
@@ -146,6 +156,16 @@ public class TracingRBucket<V> extends TracingRExpirable implements RBucket<V> {
     Span span = tracingRedissonHelper.buildSpan("getAndSetAsync", bucket);
     span.setTag("newValue", nullable(newValue));
     return tracingRedissonHelper.prepareRFuture(span, () -> bucket.getAndSetAsync(newValue));
+  }
+
+  @Override
+  public RFuture<V> getAndSetAsync(V value, long timeToLive, TimeUnit timeUnit) {
+    Span span = tracingRedissonHelper.buildSpan("getAndSetAsync", bucket);
+    span.setTag("value", nullable(value));
+    span.setTag("timeToLive", timeToLive);
+    span.setTag("timeUnit", nullable(timeUnit));
+    return tracingRedissonHelper
+        .prepareRFuture(span, () -> bucket.getAndSetAsync(value, timeToLive, timeUnit));
   }
 
   @Override
