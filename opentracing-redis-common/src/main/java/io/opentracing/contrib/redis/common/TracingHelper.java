@@ -122,7 +122,14 @@ public class TracingHelper {
   }
 
   public static String nullable(Object object) {
-    return object == null ? "null" : object.toString();
+    if (object == null) {
+      return "";
+    }
+    if (object instanceof byte[]) {
+      // Spring Data in some cases converts string key/value to byte array
+      return Arrays.toString((byte[]) object);
+    }
+    return object.toString();
   }
 
   public static <V> String toString(Map<String, V> map) {
