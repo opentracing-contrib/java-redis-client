@@ -14,7 +14,6 @@
 package io.opentracing.contrib.redis.spring.data.connection;
 
 import io.opentracing.Span;
-import io.opentracing.Tracer;
 import io.opentracing.contrib.redis.common.TracingConfiguration;
 import io.opentracing.contrib.redis.common.TracingHelper;
 import java.io.IOException;
@@ -26,13 +25,6 @@ import org.springframework.data.redis.connection.RedisServer;
 public class TracingRedisSentinelConnection implements RedisSentinelConnection {
   private final RedisSentinelConnection redisSentinelConnection;
   private final TracingHelper helper;
-
-  public TracingRedisSentinelConnection(RedisSentinelConnection redisSentinelConnection,
-      boolean withActiveSpanOnly, Tracer tracer) {
-    this.redisSentinelConnection = redisSentinelConnection;
-    this.helper = new TracingHelper(new TracingConfiguration.Builder(tracer)
-        .traceWithActiveSpanOnly(withActiveSpanOnly).build());
-  }
 
   public TracingRedisSentinelConnection(RedisSentinelConnection redisSentinelConnection,
       TracingConfiguration configuration) {

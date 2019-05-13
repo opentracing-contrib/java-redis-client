@@ -18,6 +18,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 import io.opentracing.Tracer;
+import io.opentracing.contrib.redis.common.TracingConfiguration;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -43,7 +44,8 @@ public class TracingRedisConnectionFactoryTest {
 
   @Before
   public void init() {
-    connectionFactory = new TracingRedisConnectionFactory(delegate, false, tracer);
+    connectionFactory = new TracingRedisConnectionFactory(delegate,
+        new TracingConfiguration.Builder(tracer).traceWithActiveSpanOnly(false).build());
   }
 
   @Test

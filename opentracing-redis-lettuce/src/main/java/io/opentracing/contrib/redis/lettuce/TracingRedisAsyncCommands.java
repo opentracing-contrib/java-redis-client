@@ -3110,7 +3110,7 @@ public class TracingRedisAsyncCommands<K, V> implements RedisAsyncCommands<K, V>
   }
 
   private <T> RedisFuture<T> continueScopeSpan(RedisFuture<T> redisFuture) {
-    Tracer tracer = TracingHelper.getNullSafeTracer(tracingConfiguration.getTracer());
+    Tracer tracer = tracingConfiguration.getTracer();
     Span span = tracer.activeSpan();
     CompletableRedisFuture<T> customRedisFuture = new CompletableRedisFuture<>(redisFuture);
     redisFuture.whenComplete((v, throwable) -> {

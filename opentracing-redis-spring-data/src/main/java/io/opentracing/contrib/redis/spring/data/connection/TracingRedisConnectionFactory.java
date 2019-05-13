@@ -13,7 +13,7 @@
  */
 package io.opentracing.contrib.redis.spring.data.connection;
 
-import io.opentracing.Tracer;
+import io.opentracing.contrib.redis.common.TracingConfiguration;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.connection.RedisClusterConnection;
 import org.springframework.data.redis.connection.RedisConnection;
@@ -31,25 +31,22 @@ import org.springframework.data.redis.connection.RedisSentinelConnection;
 public class TracingRedisConnectionFactory implements RedisConnectionFactory {
 
   private final RedisConnectionFactory delegate;
-  private final boolean withActiveSpanOnly;
-  private final Tracer tracer;
+  private final TracingConfiguration tracingConfiguration;
 
-  public TracingRedisConnectionFactory(RedisConnectionFactory delegate, boolean withActiveSpanOnly,
-      Tracer tracer) {
+  public TracingRedisConnectionFactory(RedisConnectionFactory delegate,
+      TracingConfiguration tracingConfiguration) {
     this.delegate = delegate;
-    this.withActiveSpanOnly = withActiveSpanOnly;
-    this.tracer = tracer;
+    this.tracingConfiguration = tracingConfiguration;
   }
 
   @Override
   public RedisConnection getConnection() {
-    return new TracingRedisConnection(delegate.getConnection(), withActiveSpanOnly, tracer);
+    return new TracingRedisConnection(delegate.getConnection(), tracingConfiguration);
   }
 
   @Override
   public RedisClusterConnection getClusterConnection() {
-    return new TracingRedisClusterConnection(delegate.getClusterConnection(), withActiveSpanOnly,
-        tracer);
+    return new TracingRedisClusterConnection(delegate.getClusterConnection(), tracingConfiguration);
   }
 
   @Override
@@ -59,8 +56,8 @@ public class TracingRedisConnectionFactory implements RedisConnectionFactory {
 
   @Override
   public RedisSentinelConnection getSentinelConnection() {
-    return new TracingRedisSentinelConnection(delegate.getSentinelConnection(), withActiveSpanOnly,
-        tracer);
+    return new TracingRedisSentinelConnection(delegate.getSentinelConnection(),
+        tracingConfiguration);
   }
 
   @Override

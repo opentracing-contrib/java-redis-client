@@ -13,8 +13,8 @@
  */
 package io.opentracing.contrib.redis.spring.data2.connection;
 
-import io.opentracing.Tracer;
 import io.opentracing.contrib.redis.common.RedisCommand;
+import io.opentracing.contrib.redis.common.TracingConfiguration;
 import io.opentracing.contrib.redis.common.TracingHelper;
 import org.springframework.data.redis.connection.ReactiveClusterGeoCommands;
 import org.springframework.data.redis.connection.ReactiveClusterHashCommands;
@@ -34,15 +34,13 @@ import reactor.core.publisher.Mono;
 
 public class TracingReactiveRedisClusterConnection implements ReactiveRedisClusterConnection {
   private final ReactiveRedisClusterConnection reactiveRedisClusterConnection;
-  private final boolean withActiveSpanOnly;
-  private final Tracer tracer;
+  private final TracingHelper helper;
 
   public TracingReactiveRedisClusterConnection(
-      ReactiveRedisClusterConnection reactiveRedisClusterConnection, boolean withActiveSpanOnly,
-      Tracer tracer) {
+      ReactiveRedisClusterConnection reactiveRedisClusterConnection,
+      TracingConfiguration tracingConfiguration) {
     this.reactiveRedisClusterConnection = reactiveRedisClusterConnection;
-    this.withActiveSpanOnly = withActiveSpanOnly;
-    this.tracer = tracer;
+    this.helper = new TracingHelper(tracingConfiguration);
   }
 
   @Override
@@ -102,9 +100,8 @@ public class TracingReactiveRedisClusterConnection implements ReactiveRedisClust
 
   @Override
   public Mono<String> ping(RedisClusterNode node) {
-    return TracingHelper.doInScope(RedisCommand.PING,
-        () -> reactiveRedisClusterConnection.ping(node),
-        withActiveSpanOnly, tracer);
+    return helper.doInScope(RedisCommand.PING,
+        () -> reactiveRedisClusterConnection.ping(node));
   }
 
   @Override
@@ -124,7 +121,6 @@ public class TracingReactiveRedisClusterConnection implements ReactiveRedisClust
 
   @Override
   public Mono<String> ping() {
-    return TracingHelper.doInScope(RedisCommand.PING, reactiveRedisClusterConnection::ping,
-        withActiveSpanOnly, tracer);
+    return helper.doInScope(RedisCommand.PING, () -> reactiveRedisClusterConnection.ping());
   }
 }

@@ -19,7 +19,7 @@ import io.opentracing.Tracer;
 import io.opentracing.Tracer.SpanBuilder;
 import io.opentracing.noop.NoopSpan;
 import io.opentracing.tag.Tags;
-import io.opentracing.util.GlobalTracer;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -36,7 +36,7 @@ public class TracingHelper {
 
   public static final String COMPONENT_NAME = "java-redis";
   public static final String DB_TYPE = "redis";
-  private final Tracer tracer;
+  protected final Tracer tracer;
   private final boolean traceWithActiveSpanOnly;
   private final Function<String, String> spanNameProvider;
   private final int maxKeysLength;
@@ -48,58 +48,58 @@ public class TracingHelper {
     this.maxKeysLength = tracingConfiguration.getKeysMaxLength();
   }
 
-  private static SpanBuilder builder(String operationName, Tracer tracer,
-      Function<String, String> spanNameProvider) {
-    return getNullSafeTracer(tracer).buildSpan(spanNameProvider.apply(operationName))
+  private SpanBuilder builder(String operationName) {
+    return tracer.buildSpan(spanNameProvider.apply(operationName))
         .withTag(Tags.COMPONENT.getKey(), COMPONENT_NAME)
         .withTag(Tags.SPAN_KIND.getKey(), Tags.SPAN_KIND_CLIENT)
         .withTag(Tags.DB_TYPE.getKey(), DB_TYPE);
   }
 
-  public static Span buildSpan(String operationName, boolean traceWithActiveSpanOnly,
-      Tracer tracer) {
-    if (traceWithActiveSpanOnly && getNullSafeTracer(tracer).activeSpan() == null) {
+  public Span buildSpan(String operationName, byte[][] keys) {
+    if (traceWithActiveSpanOnly && tracer.activeSpan() == null) {
       return NoopSpan.INSTANCE;
     } else {
-      return builder(operationName, tracer, RedisSpanNameProvider.OPERATION_NAME).start();
+      return builder(operationName)
+          .withTag("keys", toString(keys))
+          .start();
     }
   }
 
   public Span buildSpan(String operationName) {
-    if (traceWithActiveSpanOnly && getNullSafeTracer().activeSpan() == null) {
+    if (traceWithActiveSpanOnly && tracer.activeSpan() == null) {
       return NoopSpan.INSTANCE;
     } else {
-      return builder(operationName, tracer, spanNameProvider).start();
+      return builder(operationName).start();
     }
   }
 
   public Span buildSpan(String operationName, Object key) {
-    if (traceWithActiveSpanOnly && getNullSafeTracer().activeSpan() == null) {
+    if (traceWithActiveSpanOnly && tracer.activeSpan() == null) {
       return NoopSpan.INSTANCE;
     } else {
-      return builder(operationName, tracer, spanNameProvider).withTag("key", nullable(key)).start();
+      return builder(operationName).withTag("key", nullable(key)).start();
     }
   }
 
   public Span buildSpan(String operationName, byte[] key) {
-    if (traceWithActiveSpanOnly && getNullSafeTracer().activeSpan() == null) {
+    if (traceWithActiveSpanOnly && tracer.activeSpan() == null) {
       return NoopSpan.INSTANCE;
     } else {
-      return builder(operationName, tracer, spanNameProvider).withTag("key", Arrays.toString(key))
+      return builder(operationName).withTag("key", Arrays.toString(key))
           .start();
     }
   }
 
   public Span buildSpan(String operationName, Object[] keys) {
-    if (traceWithActiveSpanOnly && getNullSafeTracer().activeSpan() == null) {
+    if (traceWithActiveSpanOnly && tracer.activeSpan() == null) {
       return NoopSpan.INSTANCE;
     } else {
-      return builder(operationName, tracer, spanNameProvider).withTag("keys",
+      return builder(operationName).withTag("keys",
           Arrays.toString(limitKeys(keys))).start();
     }
   }
 
-  Object[] limitKeys(Object[] keys) {
+  <T> T[] limitKeys(T[] keys) {
     if (keys != null && keys.length > maxKeysLength) {
       return Arrays.copyOfRange(keys, 0, maxKeysLength);
     }
@@ -125,10 +125,6 @@ public class TracingHelper {
     if (object == null) {
       return "";
     }
-    if (object instanceof byte[]) {
-      // Spring Data in some cases converts string key/value to byte array
-      return Arrays.toString((byte[]) object);
-    }
     return object.toString();
   }
 
@@ -152,6 +148,20 @@ public class TracingHelper {
 
     for (byte[] bytes : array) {
       list.add(Arrays.toString(bytes));
+    }
+
+    return "[" + String.join(", ", list) + "]";
+  }
+
+  private static String toStringWithDeserialization(byte[][] array) {
+    if (array == null) {
+      return "null";
+    }
+
+    List<String> list = new ArrayList<>();
+
+    for (byte[] bytes : array) {
+      list.add(deserialize(bytes));
     }
 
     return "[" + String.join(", ", list) + "]";
@@ -220,7 +230,7 @@ public class TracingHelper {
   }
 
   public <T> T decorate(Span span, Supplier<T> supplier) {
-    try (Scope ignore = getNullSafeTracer().scopeManager().activate(span)) {
+    try (Scope ignore = tracer.scopeManager().activate(span)) {
       return supplier.get();
     } catch (Exception e) {
       onError(e, span);
@@ -230,19 +240,9 @@ public class TracingHelper {
     }
   }
 
-  public static Tracer getNullSafeTracer(final Tracer tracer) {
-    if (tracer == null) {
-      return GlobalTracer.get();
-    }
-    return tracer;
-  }
-
-  public Tracer getNullSafeTracer() {
-    return getNullSafeTracer(tracer);
-  }
 
   public void decorate(Span span, Action action) {
-    try (Scope ignore = getNullSafeTracer().scopeManager().activate(span)) {
+    try (Scope ignore = tracer.scopeManager().activate(span)) {
       action.execute();
     } catch (Exception e) {
       onError(e, span);
@@ -253,7 +253,7 @@ public class TracingHelper {
   }
 
   public <T extends Exception> void decorateThrowing(Span span, ThrowingAction<T> action) throws T {
-    try (Scope ignore = getNullSafeTracer().scopeManager().activate(span)) {
+    try (Scope ignore = tracer.scopeManager().activate(span)) {
       action.execute();
     } catch (Exception e) {
       onError(e, span);
@@ -265,7 +265,7 @@ public class TracingHelper {
 
   public <T extends Exception, V> V decorateThrowing(Span span, ThrowingSupplier<T, V> supplier)
       throws T {
-    try (Scope ignore = getNullSafeTracer().scopeManager().activate(span)) {
+    try (Scope ignore = tracer.scopeManager().activate(span)) {
       return supplier.get();
     } catch (Exception e) {
       onError(e, span);
@@ -275,11 +275,50 @@ public class TracingHelper {
     }
   }
 
-  public static <T> T doInScope(String command, Supplier<T> supplier, boolean withActiveSpanOnly,
-      Tracer tracer) {
-    Span span = buildSpan(command, withActiveSpanOnly, tracer);
-    try (Scope ignored = getNullSafeTracer(tracer).activateSpan(span)) {
+  private static String deserialize(byte[] bytes) {
+    return (bytes == null ? "" : new String(bytes, StandardCharsets.UTF_8));
+  }
+
+  public <T> T doInScope(String command, byte[] key, Supplier<T> supplier) {
+    Span span = buildSpan(command, deserialize(key));
+    return activateAndCloseSpan(span, supplier);
+  }
+
+  public <T> T doInScope(String command, Supplier<T> supplier) {
+    Span span = buildSpan(command);
+    return activateAndCloseSpan(span, supplier);
+  }
+
+  public void doInScope(String command, byte[] key, Runnable runnable) {
+    Span span = buildSpan(command, deserialize(key));
+    activateAndCloseSpan(span, runnable);
+  }
+
+  public void doInScope(String command, Runnable runnable) {
+    Span span = buildSpan(command);
+    activateAndCloseSpan(span, runnable);
+  }
+
+  public <T> T doInScope(String command, byte[][] keys, Supplier<T> supplier) {
+    Span span = buildSpan(command);
+    span.setTag("keys", toStringWithDeserialization(limitKeys(keys)));
+    return activateAndCloseSpan(span, supplier);
+  }
+
+  private <T> T activateAndCloseSpan(Span span, Supplier<T> supplier) {
+    try (Scope ignored = tracer.activateSpan(span)) {
       return supplier.get();
+    } catch (Exception e) {
+      TracingHelper.onError(e, span);
+      throw e;
+    } finally {
+      span.finish();
+    }
+  }
+
+  private void activateAndCloseSpan(Span span, Runnable runnable) {
+    try (Scope ignored = tracer.activateSpan(span)) {
+      runnable.run();
     } catch (Exception e) {
       TracingHelper.onError(e, span);
       throw e;

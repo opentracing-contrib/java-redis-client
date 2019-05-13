@@ -84,9 +84,6 @@ pom.xml
 // Instantiate tracer
 Tracer tracer = ...
 
-// Optionally register tracer with GlobalTracer
-GlobalTracer.register(tracer);
-
 // Create TracingConfiguration
 TracingConfiguration tracingConfiguration = new TracingConfiguration.Builder(tracer).build(); 
 
@@ -185,9 +182,6 @@ RedisAsyncCommands<String, String> commandsAsync = connection.async();
 // Instantiate tracer
 Tracer tracer = ...
 
-// Optionally register tracer with GlobalTracer
-GlobalTracer.register(tracer);
-
 // Create Redisson config object
 Config = ...
 
@@ -207,10 +201,11 @@ RMap<MyKey, MyValue> map = tracingRedissonClient.getMap("myMap");
 
 // Create tracing connection factory bean
 @Bean
-public RedisConnectionFactory redisConnectionFactory(Tracer tracer) {
-    MyRedisConnectionFactoryImplementation factory = ...
-    return new TracingRedisConnectionFactory(factory, false, tacer);
-    
+public RedisConnectionFactory redisConnectionFactory() {
+    LettuceConnectionFactory lettuceConnectionFactory = new LettuceConnectionFactory();
+    lettuceConnectionFactory.afterPropertiesSet();
+    return new TracingRedisConnectionFactory(lettuceConnectionFactory,
+        new TracingConfiguration.Builder(tracer()).build());
 }
 ```
 
