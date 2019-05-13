@@ -207,10 +207,11 @@ RMap<MyKey, MyValue> map = tracingRedissonClient.getMap("myMap");
 
 // Create tracing connection factory bean
 @Bean
-public RedisConnectionFactory redisConnectionFactory(Tracer tracer) {
-    MyRedisConnectionFactoryImplementation factory = ...
-    return new TracingRedisConnectionFactory(factory, false, tacer);
-    
+public RedisConnectionFactory redisConnectionFactory() {
+    LettuceConnectionFactory lettuceConnectionFactory = new LettuceConnectionFactory();
+    lettuceConnectionFactory.afterPropertiesSet();
+    return new TracingRedisConnectionFactory(lettuceConnectionFactory,
+        new TracingConfiguration.Builder(tracer()).build());
 }
 ```
 

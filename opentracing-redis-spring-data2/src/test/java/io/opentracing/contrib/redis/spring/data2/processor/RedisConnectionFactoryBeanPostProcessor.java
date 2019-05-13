@@ -14,6 +14,7 @@
 package io.opentracing.contrib.redis.spring.data2.processor;
 
 import io.opentracing.Tracer;
+import io.opentracing.contrib.redis.common.TracingConfiguration;
 import io.opentracing.contrib.redis.spring.data2.connection.TracingRedisConnectionFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
@@ -32,7 +33,8 @@ public class RedisConnectionFactoryBeanPostProcessor implements BeanPostProcesso
   @Override
   public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
     if (bean instanceof RedisConnectionFactory) {
-      bean = new TracingRedisConnectionFactory((RedisConnectionFactory) bean, false, tracer);
+      bean = new TracingRedisConnectionFactory((RedisConnectionFactory) bean,
+          new TracingConfiguration.Builder(tracer).traceWithActiveSpanOnly(false).build());
     }
     return bean;
   }

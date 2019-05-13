@@ -16,6 +16,7 @@ package io.opentracing.contrib.redis.spring.data.connection;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import io.opentracing.contrib.redis.common.TracingConfiguration;
 import io.opentracing.mock.MockTracer;
 import io.opentracing.util.GlobalTracerTestUtil;
 import org.springframework.context.annotation.Bean;
@@ -50,9 +51,11 @@ public class MockConfiguration {
   public RedisConnectionFactory redisConnectionFactory() {
     RedisConnectionFactory factory = mock(RedisConnectionFactory.class);
     when(factory.getConnection())
-        .thenReturn(new TracingRedisConnection(mockRedisConnection(), false, mockTracer()));
+        .thenReturn(new TracingRedisConnection(mockRedisConnection(),
+            new TracingConfiguration.Builder(mockTracer()).traceWithActiveSpanOnly(false).build()));
     when(factory.getClusterConnection()).thenReturn(
-        new TracingRedisClusterConnection(mockRedisClusterConnection(), false, mockTracer()));
+        new TracingRedisClusterConnection(mockRedisClusterConnection(),
+            new TracingConfiguration.Builder(mockTracer()).traceWithActiveSpanOnly(false).build()));
     return factory;
   }
 

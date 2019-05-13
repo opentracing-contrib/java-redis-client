@@ -13,8 +13,8 @@
  */
 package io.opentracing.contrib.redis.spring.data2.connection;
 
-import io.opentracing.Tracer;
 import io.opentracing.contrib.redis.common.RedisCommand;
+import io.opentracing.contrib.redis.common.TracingConfiguration;
 import io.opentracing.contrib.redis.common.TracingHelper;
 import org.springframework.data.redis.connection.ReactiveGeoCommands;
 import org.springframework.data.redis.connection.ReactiveHashCommands;
@@ -33,15 +33,13 @@ import reactor.core.publisher.Mono;
 
 public class TracingReactiveRedisConnection implements ReactiveRedisConnection {
   private final ReactiveRedisConnection reactiveRedisConnection;
-  private final boolean withActiveSpanOnly;
-  private final Tracer tracer;
+  private final TracingHelper helper;
 
   public TracingReactiveRedisConnection(
-      ReactiveRedisConnection reactiveRedisConnection, boolean withActiveSpanOnly,
-      Tracer tracer) {
+      ReactiveRedisConnection reactiveRedisConnection,
+      TracingConfiguration tracingConfiguration) {
     this.reactiveRedisConnection = reactiveRedisConnection;
-    this.withActiveSpanOnly = withActiveSpanOnly;
-    this.tracer = tracer;
+    this.helper = new TracingHelper(tracingConfiguration);
   }
 
   @Override
@@ -115,9 +113,8 @@ public class TracingReactiveRedisConnection implements ReactiveRedisConnection {
   }
 
   @Override
-  public reactor.core.publisher.Mono<String> ping() {
-    return TracingHelper.doInScope(RedisCommand.PING, reactiveRedisConnection::ping,
-        withActiveSpanOnly, tracer);
+  public Mono<String> ping() {
+    return helper.doInScope(RedisCommand.PING, reactiveRedisConnection::ping);
   }
 
 }

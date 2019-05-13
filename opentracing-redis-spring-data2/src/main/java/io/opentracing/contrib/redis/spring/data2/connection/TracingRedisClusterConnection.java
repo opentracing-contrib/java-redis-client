@@ -48,7 +48,8 @@ import static io.opentracing.contrib.redis.common.RedisCommand.SCAN;
 import static io.opentracing.contrib.redis.common.RedisCommand.SHUTDOWN;
 import static io.opentracing.contrib.redis.common.RedisCommand.TIME;
 
-import io.opentracing.Tracer;
+import io.opentracing.contrib.redis.common.TracingConfiguration;
+import io.opentracing.contrib.redis.common.TracingHelper;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -73,11 +74,13 @@ public class TracingRedisClusterConnection extends TracingRedisConnection
     implements RedisClusterConnection {
 
   private final RedisClusterConnection connection;
+  private final TracingHelper helper;
 
   public TracingRedisClusterConnection(RedisClusterConnection connection,
-      boolean withActiveSpanOnly, Tracer tracer) {
-    super(connection, withActiveSpanOnly, tracer);
+      TracingConfiguration tracingConfiguration) {
+    super(connection, tracingConfiguration);
     this.connection = connection;
+    this.helper = new TracingHelper(tracingConfiguration);
   }
 
   @Override
@@ -87,187 +90,188 @@ public class TracingRedisClusterConnection extends TracingRedisConnection
 
   @Override
   public Iterable<RedisClusterNode> clusterGetNodes() {
-    return doInScope(CLUSTER_NODES, () -> connection.clusterGetNodes());
+    return helper.doInScope(CLUSTER_NODES, () -> connection.clusterGetNodes());
   }
 
   @Override
   public Collection<RedisClusterNode> clusterGetSlaves(RedisClusterNode master) {
-    return doInScope(CLUSTER_SLAVES, () -> connection.clusterGetSlaves(master));
+    return helper.doInScope(CLUSTER_SLAVES, () -> connection.clusterGetSlaves(master));
   }
 
   @Override
   public Map<RedisClusterNode, Collection<RedisClusterNode>> clusterGetMasterSlaveMap() {
-    return doInScope(CLUSTER_MASTER_SLAVE_MAP, () -> connection.clusterGetMasterSlaveMap());
+    return helper.doInScope(CLUSTER_MASTER_SLAVE_MAP, () -> connection.clusterGetMasterSlaveMap());
   }
 
   @Override
   public Integer clusterGetSlotForKey(byte[] key) {
-    return doInScope(CLUSTER_KEYSLOT, () -> connection.clusterGetSlotForKey(key));
+    return helper.doInScope(CLUSTER_KEYSLOT, () -> connection.clusterGetSlotForKey(key));
   }
 
   @Override
   public RedisClusterNode clusterGetNodeForSlot(int slot) {
-    return doInScope(CLUSTER_NODE_FOR_SLOT, () -> connection.clusterGetNodeForSlot(slot));
+    return helper.doInScope(CLUSTER_NODE_FOR_SLOT, () -> connection.clusterGetNodeForSlot(slot));
   }
 
   @Override
   public RedisClusterNode clusterGetNodeForKey(byte[] key) {
-    return doInScope(CLUSTER_NODE_FOR_KEY, () -> connection.clusterGetNodeForKey(key));
+    return helper.doInScope(CLUSTER_NODE_FOR_KEY, () -> connection.clusterGetNodeForKey(key));
   }
 
   @Override
   public ClusterInfo clusterGetClusterInfo() {
-    return doInScope(CLUSTER_INFO, () -> connection.clusterGetClusterInfo());
+    return helper.doInScope(CLUSTER_INFO, () -> connection.clusterGetClusterInfo());
   }
 
   @Override
   public void clusterAddSlots(RedisClusterNode node, int... slots) {
-    doInScope(CLUSTER_ADDSLOTS, () -> connection.clusterAddSlots(node, slots));
+    helper.doInScope(CLUSTER_ADDSLOTS, () -> connection.clusterAddSlots(node, slots));
   }
 
   @Override
   public void clusterAddSlots(RedisClusterNode node, SlotRange range) {
-    doInScope(CLUSTER_ADDSLOTS, () -> connection.clusterAddSlots(node, range));
+    helper.doInScope(CLUSTER_ADDSLOTS, () -> connection.clusterAddSlots(node, range));
   }
 
   @Override
   public Long clusterCountKeysInSlot(int slot) {
-    return doInScope(CLUSTER_COUNTKEYSINSLOT, () -> connection.clusterCountKeysInSlot(slot));
+    return helper.doInScope(CLUSTER_COUNTKEYSINSLOT, () -> connection.clusterCountKeysInSlot(slot));
   }
 
   @Override
   public void clusterDeleteSlots(RedisClusterNode node, int... slots) {
-    doInScope(CLUSTER_DELSLOTS, () -> connection.clusterDeleteSlots(node, slots));
+    helper.doInScope(CLUSTER_DELSLOTS, () -> connection.clusterDeleteSlots(node, slots));
   }
 
   @Override
   public void clusterDeleteSlotsInRange(RedisClusterNode node, SlotRange range) {
-    doInScope(CLUSTER_DELSLOTS, () -> connection.clusterDeleteSlotsInRange(node, range));
+    helper.doInScope(CLUSTER_DELSLOTS, () -> connection.clusterDeleteSlotsInRange(node, range));
   }
 
   @Override
   public void clusterForget(RedisClusterNode node) {
-    doInScope(CLUSTER_FORGET, () -> connection.clusterForget(node));
+    helper.doInScope(CLUSTER_FORGET, () -> connection.clusterForget(node));
   }
 
   @Override
   public void clusterMeet(RedisClusterNode node) {
-    doInScope(CLUSTER_MEET, () -> connection.clusterMeet(node));
+    helper.doInScope(CLUSTER_MEET, () -> connection.clusterMeet(node));
   }
 
   @Override
   public void clusterSetSlot(RedisClusterNode node, int slot, AddSlots mode) {
-    doInScope(CLUSTER_SETSLOT, () -> connection.clusterSetSlot(node, slot, mode));
+    helper.doInScope(CLUSTER_SETSLOT, () -> connection.clusterSetSlot(node, slot, mode));
   }
 
   @Override
   public List<byte[]> clusterGetKeysInSlot(int slot, Integer count) {
-    return doInScope(CLUSTER_GETKEYSINSLOT, () -> connection.clusterGetKeysInSlot(slot, count));
+    return helper
+        .doInScope(CLUSTER_GETKEYSINSLOT, () -> connection.clusterGetKeysInSlot(slot, count));
   }
 
   @Override
   public void clusterReplicate(RedisClusterNode master, RedisClusterNode slave) {
-    doInScope(CLUSTER_REPLICATE, () -> connection.clusterReplicate(master, slave));
+    helper.doInScope(CLUSTER_REPLICATE, () -> connection.clusterReplicate(master, slave));
   }
 
   @Override
   public String ping(RedisClusterNode node) {
-    return doInScope(PING, () -> connection.ping(node));
+    return helper.doInScope(PING, () -> connection.ping(node));
   }
 
   @Override
   public void bgReWriteAof(RedisClusterNode node) {
-    doInScope(BGREWRITEAOF, () -> connection.bgReWriteAof(node));
+    helper.doInScope(BGREWRITEAOF, () -> connection.bgReWriteAof(node));
   }
 
   @Override
   public void bgSave(RedisClusterNode node) {
-    doInScope(BGSAVE, () -> connection.bgSave(node));
+    helper.doInScope(BGSAVE, () -> connection.bgSave(node));
   }
 
   @Override
   public Long lastSave(RedisClusterNode node) {
-    return doInScope(LASTSAVE, () -> connection.lastSave(node));
+    return helper.doInScope(LASTSAVE, () -> connection.lastSave(node));
   }
 
   @Override
   public void save(RedisClusterNode node) {
-    doInScope(SAVE, () -> connection.save(node));
+    helper.doInScope(SAVE, () -> connection.save(node));
   }
 
   @Override
   public Long dbSize(RedisClusterNode node) {
-    return doInScope(DBSIZE, () -> connection.dbSize(node));
+    return helper.doInScope(DBSIZE, () -> connection.dbSize(node));
   }
 
   @Override
   public void flushDb(RedisClusterNode node) {
-    doInScope(FLUSHDB, () -> connection.flushDb(node));
+    helper.doInScope(FLUSHDB, () -> connection.flushDb(node));
   }
 
   @Override
   public void flushAll(RedisClusterNode node) {
-    doInScope(FLUSHALL, () -> connection.flushAll(node));
+    helper.doInScope(FLUSHALL, () -> connection.flushAll(node));
   }
 
   @Override
   public Properties info(RedisClusterNode node) {
-    return doInScope(INFO, () -> connection.info(node));
+    return helper.doInScope(INFO, () -> connection.info(node));
   }
 
   @Override
   public Properties info(RedisClusterNode node, String section) {
-    return doInScope(INFO, () -> connection.info(node, section));
+    return helper.doInScope(INFO, () -> connection.info(node, section));
   }
 
   @Override
   public Set<byte[]> keys(RedisClusterNode node, byte[] pattern) {
-    return doInScope(KEYS, () -> connection.keys(node, pattern));
+    return helper.doInScope(KEYS, () -> connection.keys(node, pattern));
   }
 
   @Override
   public Cursor<byte[]> scan(RedisClusterNode node, ScanOptions options) {
-    return doInScope(SCAN, () -> connection.scan(node, options));
+    return helper.doInScope(SCAN, () -> connection.scan(node, options));
   }
 
   @Override
   public byte[] randomKey(RedisClusterNode node) {
-    return doInScope(RANDOMKEY, () -> connection.randomKey(node));
+    return helper.doInScope(RANDOMKEY, () -> connection.randomKey(node));
   }
 
   @Override
   public <T> T execute(String command, byte[] key, Collection<byte[]> args) {
-    return doInScope(EXECUTE, () -> connection.execute(command, key, args));
+    return helper.doInScope(EXECUTE, () -> connection.execute(command, key, args));
   }
 
   @Override
   public void shutdown(RedisClusterNode node) {
-    doInScope(SHUTDOWN, () -> connection.shutdown(node));
+    helper.doInScope(SHUTDOWN, () -> connection.shutdown(node));
   }
 
   @Override
   public Properties getConfig(RedisClusterNode node, String pattern) {
-    return doInScope(CONFIG_GET, () -> connection.getConfig(node, pattern));
+    return helper.doInScope(CONFIG_GET, () -> connection.getConfig(node, pattern));
   }
 
   @Override
   public void setConfig(RedisClusterNode node, String param, String value) {
-    doInScope(CONFIG_SET, () -> connection.setConfig(node, param, value));
+    helper.doInScope(CONFIG_SET, () -> connection.setConfig(node, param, value));
   }
 
   @Override
   public void resetConfigStats(RedisClusterNode node) {
-    doInScope(CONFIG_RESETSTAT, () -> connection.resetConfigStats(node));
+    helper.doInScope(CONFIG_RESETSTAT, () -> connection.resetConfigStats(node));
   }
 
   @Override
   public Long time(RedisClusterNode node) {
-    return doInScope(TIME, () -> connection.time(node));
+    return helper.doInScope(TIME, () -> connection.time(node));
   }
 
   @Override
   public List<RedisClientInfo> getClientList(RedisClusterNode node) {
-    return doInScope(CLIENT_LIST, () -> connection.getClientList(node));
+    return helper.doInScope(CLIENT_LIST, () -> connection.getClientList(node));
   }
 
 }
