@@ -18,8 +18,9 @@ import static org.junit.Assert.assertEquals;
 import io.opentracing.mock.MockSpan;
 import io.opentracing.mock.MockTracer;
 import java.util.List;
-import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,26 +32,31 @@ import redis.embedded.RedisServer;
 @ContextConfiguration(classes = {SpringDataRedisTestConfiguration.class})
 @RunWith(SpringJUnit4ClassRunner.class)
 public class TracingSpringDataRedisTest {
-  private RedisServer redisServer;
-
-  @Before
-  public void before() {
-    redisServer = RedisServer.builder().setting("bind 127.0.0.1").build();
-    redisServer.start();
-  }
-
-  @After
-  public void after() {
-    if (redisServer != null) {
-      redisServer.stop();
-    }
-  }
+  private static RedisServer redisServer;
 
   @Autowired
   private StringRedisTemplate template;
 
   @Autowired
   private MockTracer tracer;
+
+  @Before
+  public void before() {
+    tracer.reset();
+  }
+
+  @BeforeClass
+  public static void beforeClass() {
+    redisServer = RedisServer.builder().setting("bind 127.0.0.1").build();
+    redisServer.start();
+  }
+
+  @AfterClass
+  public static void afterClass() {
+    if (redisServer != null) {
+      redisServer.stop();
+    }
+  }
 
   @Test
   public void test() {
