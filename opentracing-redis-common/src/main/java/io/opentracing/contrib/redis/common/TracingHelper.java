@@ -19,7 +19,6 @@ import io.opentracing.Tracer;
 import io.opentracing.Tracer.SpanBuilder;
 import io.opentracing.noop.NoopSpan;
 import io.opentracing.tag.Tags;
-import io.opentracing.util.GlobalTracer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -37,7 +36,7 @@ public class TracingHelper {
 
   public static final String COMPONENT_NAME = "java-redis";
   public static final String DB_TYPE = "redis";
-  private final Tracer tracer;
+  protected final Tracer tracer;
   private final boolean traceWithActiveSpanOnly;
   private final Function<String, String> spanNameProvider;
   private final int maxKeysLength;
@@ -49,65 +48,53 @@ public class TracingHelper {
     this.maxKeysLength = tracingConfiguration.getKeysMaxLength();
   }
 
-  private static SpanBuilder builder(String operationName, Tracer tracer,
-      Function<String, String> spanNameProvider) {
-    return getNullSafeTracer(tracer).buildSpan(spanNameProvider.apply(operationName))
+  private SpanBuilder builder(String operationName) {
+    return tracer.buildSpan(spanNameProvider.apply(operationName))
         .withTag(Tags.COMPONENT.getKey(), COMPONENT_NAME)
         .withTag(Tags.SPAN_KIND.getKey(), Tags.SPAN_KIND_CLIENT)
         .withTag(Tags.DB_TYPE.getKey(), DB_TYPE);
   }
 
-  public static Span buildSpan(String operationName, Object key, boolean traceWithActiveSpanOnly,
-      Tracer tracer) {
-    if (traceWithActiveSpanOnly && getNullSafeTracer(tracer).activeSpan() == null) {
+  public Span buildSpan(String operationName, byte[][] keys) {
+    if (traceWithActiveSpanOnly && tracer.activeSpan() == null) {
       return NoopSpan.INSTANCE;
     } else {
-      return builder(operationName, tracer, RedisSpanNameProvider.OPERATION_NAME)
-          .withTag("key", nullable(key))
-          .start();
-    }
-  }
-
-  public Span buildSpan(String operationName, byte[][] keys, boolean traceWithActiveSpanOnly) {
-    if (traceWithActiveSpanOnly && getNullSafeTracer(tracer).activeSpan() == null) {
-      return NoopSpan.INSTANCE;
-    } else {
-      return builder(operationName, tracer, RedisSpanNameProvider.OPERATION_NAME)
+      return builder(operationName)
           .withTag("keys", toString(keys))
           .start();
     }
   }
 
   public Span buildSpan(String operationName) {
-    if (traceWithActiveSpanOnly && getNullSafeTracer().activeSpan() == null) {
+    if (traceWithActiveSpanOnly && tracer.activeSpan() == null) {
       return NoopSpan.INSTANCE;
     } else {
-      return builder(operationName, tracer, spanNameProvider).start();
+      return builder(operationName).start();
     }
   }
 
   public Span buildSpan(String operationName, Object key) {
-    if (traceWithActiveSpanOnly && getNullSafeTracer().activeSpan() == null) {
+    if (traceWithActiveSpanOnly && tracer.activeSpan() == null) {
       return NoopSpan.INSTANCE;
     } else {
-      return builder(operationName, tracer, spanNameProvider).withTag("key", nullable(key)).start();
+      return builder(operationName).withTag("key", nullable(key)).start();
     }
   }
 
   public Span buildSpan(String operationName, byte[] key) {
-    if (traceWithActiveSpanOnly && getNullSafeTracer().activeSpan() == null) {
+    if (traceWithActiveSpanOnly && tracer.activeSpan() == null) {
       return NoopSpan.INSTANCE;
     } else {
-      return builder(operationName, tracer, spanNameProvider).withTag("key", Arrays.toString(key))
+      return builder(operationName).withTag("key", Arrays.toString(key))
           .start();
     }
   }
 
   public Span buildSpan(String operationName, Object[] keys) {
-    if (traceWithActiveSpanOnly && getNullSafeTracer().activeSpan() == null) {
+    if (traceWithActiveSpanOnly && tracer.activeSpan() == null) {
       return NoopSpan.INSTANCE;
     } else {
-      return builder(operationName, tracer, spanNameProvider).withTag("keys",
+      return builder(operationName).withTag("keys",
           Arrays.toString(limitKeys(keys))).start();
     }
   }
@@ -243,7 +230,7 @@ public class TracingHelper {
   }
 
   public <T> T decorate(Span span, Supplier<T> supplier) {
-    try (Scope ignore = getNullSafeTracer().scopeManager().activate(span)) {
+    try (Scope ignore = tracer.scopeManager().activate(span)) {
       return supplier.get();
     } catch (Exception e) {
       onError(e, span);
@@ -253,19 +240,9 @@ public class TracingHelper {
     }
   }
 
-  public static Tracer getNullSafeTracer(final Tracer tracer) {
-    if (tracer == null) {
-      return GlobalTracer.get();
-    }
-    return tracer;
-  }
-
-  public Tracer getNullSafeTracer() {
-    return getNullSafeTracer(tracer);
-  }
 
   public void decorate(Span span, Action action) {
-    try (Scope ignore = getNullSafeTracer().scopeManager().activate(span)) {
+    try (Scope ignore = tracer.scopeManager().activate(span)) {
       action.execute();
     } catch (Exception e) {
       onError(e, span);
@@ -276,7 +253,7 @@ public class TracingHelper {
   }
 
   public <T extends Exception> void decorateThrowing(Span span, ThrowingAction<T> action) throws T {
-    try (Scope ignore = getNullSafeTracer().scopeManager().activate(span)) {
+    try (Scope ignore = tracer.scopeManager().activate(span)) {
       action.execute();
     } catch (Exception e) {
       onError(e, span);
@@ -288,7 +265,7 @@ public class TracingHelper {
 
   public <T extends Exception, V> V decorateThrowing(Span span, ThrowingSupplier<T, V> supplier)
       throws T {
-    try (Scope ignore = getNullSafeTracer().scopeManager().activate(span)) {
+    try (Scope ignore = tracer.scopeManager().activate(span)) {
       return supplier.get();
     } catch (Exception e) {
       onError(e, span);
@@ -329,7 +306,7 @@ public class TracingHelper {
   }
 
   private <T> T activateAndCloseSpan(Span span, Supplier<T> supplier) {
-    try (Scope ignored = getNullSafeTracer(tracer).activateSpan(span)) {
+    try (Scope ignored = tracer.activateSpan(span)) {
       return supplier.get();
     } catch (Exception e) {
       TracingHelper.onError(e, span);
@@ -340,7 +317,7 @@ public class TracingHelper {
   }
 
   private void activateAndCloseSpan(Span span, Runnable runnable) {
-    try (Scope ignored = getNullSafeTracer(tracer).activateSpan(span)) {
+    try (Scope ignored = tracer.activateSpan(span)) {
       runnable.run();
     } catch (Exception e) {
       TracingHelper.onError(e, span);

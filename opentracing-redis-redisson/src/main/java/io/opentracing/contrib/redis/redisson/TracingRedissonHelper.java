@@ -15,7 +15,6 @@ package io.opentracing.contrib.redis.redisson;
 
 import io.opentracing.Scope;
 import io.opentracing.Span;
-import io.opentracing.Tracer;
 import io.opentracing.contrib.redis.common.TracingConfiguration;
 import io.opentracing.contrib.redis.common.TracingHelper;
 import java.util.function.Supplier;
@@ -34,7 +33,6 @@ class TracingRedissonHelper extends TracingHelper {
 
 
   private <T> RFuture<T> continueScopeSpan(RFuture<T> redisFuture) {
-    Tracer tracer = getNullSafeTracer();
     Span span = tracer.activeSpan();
     CompletableRFuture<T> customRedisFuture = new CompletableRFuture<>(redisFuture);
     redisFuture.whenComplete((v, throwable) -> {
