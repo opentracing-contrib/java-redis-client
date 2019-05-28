@@ -23,6 +23,7 @@ import static org.junit.Assert.assertTrue;
 
 import io.opentracing.Scope;
 import io.opentracing.Span;
+import io.opentracing.contrib.redis.common.TracingConfiguration;
 import io.opentracing.contrib.redis.common.TracingHelper;
 import io.opentracing.mock.MockSpan;
 import io.opentracing.mock.MockTracer;
@@ -186,6 +187,33 @@ public class TracingRedissonTest {
     assertEquals(2, spans.size());
 
     assertNull(tracer.activeSpan());
+  }
+
+  @Test
+  public void test_config_span_name() throws Exception {
+    Config config = new Config();
+    config.useSingleServer().setAddress("redis://127.0.0.1:6379");
+
+    RedissonClient customClient = new TracingRedissonClient(Redisson.create(config),
+            new TracingConfiguration.Builder(tracer)
+                    .traceWithActiveSpanOnly(true)
+                    .withSpanNameProvider(operation -> "Redis." + operation)
+                    .build());
+
+    try (Scope ignore = tracer.buildSpan("test").startActive(true)) {
+      RMap<String, String> map = customClient.getMap("map");
+      map.getAsync("key").get(15, TimeUnit.SECONDS);
+    }
+
+    await().atMost(15, TimeUnit.SECONDS).until(reportedSpansSize(), equalTo(2));
+
+    List<MockSpan> spans = tracer.finishedSpans();
+    assertEquals(2, spans.size());
+    MockSpan redisSpan = spans.get(0);
+    assertEquals("Redis.getAsync", redisSpan.operationName());
+
+    assertNull(tracer.activeSpan());
+    customClient.shutdown();
   }
 
   private void checkSpans(List<MockSpan> spans) {

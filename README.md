@@ -179,9 +179,6 @@ RedisAsyncCommands<String, String> commandsAsync = connection.async();
 ### Redisson
 
 ```java
-// Instantiate tracer
-Tracer tracer = ...
-
 // Create Redisson config object
 Config = ...
 
@@ -189,7 +186,7 @@ Config = ...
 RedissonClient redissonClient = Redisson.create(config);
 
 // Decorate RedissonClient with TracingRedissonClient
-RedissonClient tracingRedissonClient =  new TracingRedissonClient(redissonClient, tracer);
+RedissonClient tracingRedissonClient =  new TracingRedissonClient(redissonClient, tracingConfiguration);
 
 // Get object you need using TracingRedissonClient
 RMap<MyKey, MyValue> map = tracingRedissonClient.getMap("myMap");

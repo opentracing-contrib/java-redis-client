@@ -90,6 +90,11 @@ public class TracingRedissonClient implements RedissonClient {
             .build());
   }
 
+  public TracingRedissonClient(RedissonClient redissonClient, TracingConfiguration configuration) {
+    this.redissonClient = redissonClient;
+    this.tracingRedissonHelper = new TracingRedissonHelper(configuration);
+  }
+
   @Override
   public <K, V> RStream<K, V> getStream(String name) {
     return redissonClient.getStream(name);
