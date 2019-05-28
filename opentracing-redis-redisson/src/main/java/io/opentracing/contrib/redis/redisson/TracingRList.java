@@ -99,6 +99,21 @@ public class TracingRList<V> extends TracingRExpirable implements RList<V> {
   }
 
   @Override
+  public List<V> range(int toIndex) {
+    Span span = tracingRedissonHelper.buildSpan("range", list);
+    span.setTag("toIndex", toIndex);
+    return tracingRedissonHelper.decorate(span, () -> list.range(toIndex));
+  }
+
+  @Override
+  public List<V> range(int fromIndex, int toIndex) {
+    Span span = tracingRedissonHelper.buildSpan("range", list);
+    span.setTag("fromIndex", fromIndex);
+    span.setTag("toIndex", toIndex);
+    return tracingRedissonHelper.decorate(span, () -> list.range(fromIndex, toIndex));
+  }
+
+  @Override
   public void fastRemove(int index) {
     Span span = tracingRedissonHelper.buildSpan("fastRemove", list);
     span.setTag("index", index);
@@ -421,6 +436,21 @@ public class TracingRList<V> extends TracingRExpirable implements RList<V> {
     span.setTag("object", nullable(o));
     span.setTag("count", count);
     return tracingRedissonHelper.prepareRFuture(span, () -> list.removeAsync(o, count));
+  }
+
+  @Override
+  public RFuture<List<V>> rangeAsync(int toIndex) {
+    Span span = tracingRedissonHelper.buildSpan("rangeAsync", list);
+    span.setTag("toIndex", toIndex);
+    return tracingRedissonHelper.prepareRFuture(span, () -> list.rangeAsync(toIndex));
+  }
+
+  @Override
+  public RFuture<List<V>> rangeAsync(int fromIndex, int toIndex) {
+    Span span = tracingRedissonHelper.buildSpan("rangeAsync", list);
+    span.setTag("fromIndex", fromIndex);
+    span.setTag("toIndex", toIndex);
+    return tracingRedissonHelper.prepareRFuture(span, () -> list.rangeAsync(fromIndex, toIndex));
   }
 
   @Override

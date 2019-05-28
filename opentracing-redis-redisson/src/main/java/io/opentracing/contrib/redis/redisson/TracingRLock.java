@@ -92,6 +92,12 @@ public class TracingRLock implements RLock {
   }
 
   @Override
+  public long remainTimeToLive() {
+    Span span = tracingRedissonHelper.buildSpan("remainTimeToLive", lock);
+    return tracingRedissonHelper.decorate(span, lock::remainTimeToLive);
+  }
+
+  @Override
   public void lock() {
     Span span = tracingRedissonHelper.buildSpan("lock", lock);
     tracingRedissonHelper.decorate(span, () -> lock.lock());
@@ -227,5 +233,17 @@ public class TracingRLock implements RLock {
   public RFuture<Integer> getHoldCountAsync() {
     Span span = tracingRedissonHelper.buildSpan("getHoldCountAsync", lock);
     return tracingRedissonHelper.prepareRFuture(span, lock::getHoldCountAsync);
+  }
+
+  @Override
+  public RFuture<Boolean> isLockedAsync() {
+    Span span = tracingRedissonHelper.buildSpan("isLockedAsync", lock);
+    return tracingRedissonHelper.prepareRFuture(span, lock::isLockedAsync);
+  }
+
+  @Override
+  public RFuture<Long> remainTimeToLiveAsync() {
+    Span span = tracingRedissonHelper.buildSpan("remainTimeToLiveAsync", lock);
+    return tracingRedissonHelper.prepareRFuture(span, lock::remainTimeToLiveAsync);
   }
 }
