@@ -13,7 +13,6 @@
  */
 package io.opentracing.contrib.redis.redisson;
 
-import io.opentracing.Tracer;
 import io.opentracing.contrib.redis.common.TracingConfiguration;
 import java.util.concurrent.TimeUnit;
 import org.redisson.api.BatchOptions;
@@ -81,14 +80,6 @@ import org.redisson.config.Config;
 public class TracingRedissonClient implements RedissonClient {
   private final RedissonClient redissonClient;
   private final TracingRedissonHelper tracingRedissonHelper;
-
-  public TracingRedissonClient(RedissonClient redissonClient, Tracer tracer,
-      boolean traceWithActiveSpanOnly) {
-    this.redissonClient = redissonClient;
-    this.tracingRedissonHelper = new TracingRedissonHelper(
-        new TracingConfiguration.Builder(tracer).traceWithActiveSpanOnly(traceWithActiveSpanOnly)
-            .build());
-  }
 
   public TracingRedissonClient(RedissonClient redissonClient, TracingConfiguration configuration) {
     this.redissonClient = redissonClient;

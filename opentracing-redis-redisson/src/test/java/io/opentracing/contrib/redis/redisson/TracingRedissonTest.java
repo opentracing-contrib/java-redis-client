@@ -61,7 +61,8 @@ public class TracingRedissonTest {
     Config config = new Config();
     config.useSingleServer().setAddress("redis://127.0.0.1:6379");
 
-    client = new TracingRedissonClient(Redisson.create(config), tracer, false);
+    client = new TracingRedissonClient(Redisson.create(config),
+        new TracingConfiguration.Builder(tracer).build());
   }
 
   @After
@@ -195,10 +196,10 @@ public class TracingRedissonTest {
     config.useSingleServer().setAddress("redis://127.0.0.1:6379");
 
     RedissonClient customClient = new TracingRedissonClient(Redisson.create(config),
-            new TracingConfiguration.Builder(tracer)
-                    .traceWithActiveSpanOnly(true)
-                    .withSpanNameProvider(operation -> "Redis." + operation)
-                    .build());
+        new TracingConfiguration.Builder(tracer)
+            .traceWithActiveSpanOnly(true)
+            .withSpanNameProvider(operation -> "Redis." + operation)
+            .build());
 
     try (Scope ignore = tracer.buildSpan("test").startActive(true)) {
       RMap<String, String> map = customClient.getMap("map");
