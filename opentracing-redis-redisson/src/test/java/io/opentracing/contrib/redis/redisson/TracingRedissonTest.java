@@ -31,8 +31,9 @@ import io.opentracing.tag.Tags;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
-import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.redisson.Redisson;
 import org.redisson.api.RAtomicLong;
@@ -47,14 +48,12 @@ import org.redisson.config.Config;
 import redis.embedded.RedisServer;
 
 public class TracingRedissonTest {
-  private MockTracer tracer = new MockTracer();
-  private RedisServer redisServer;
-  private RedissonClient client;
+  private static final MockTracer tracer = new MockTracer();
+  private static RedisServer redisServer;
+  private static RedissonClient client;
 
-  @Before
-  public void before() {
-    tracer.reset();
-
+  @BeforeClass
+  public static void beforeClass() {
     redisServer = RedisServer.builder().setting("bind 127.0.0.1").build();
     redisServer.start();
 
@@ -65,14 +64,19 @@ public class TracingRedissonTest {
         new TracingConfiguration.Builder(tracer).build());
   }
 
-  @After
-  public void after() {
+  @AfterClass
+  public static void afterClass() {
     if (client != null) {
       client.shutdown();
     }
     if (redisServer != null) {
       redisServer.stop();
     }
+  }
+
+  @Before
+  public void before() {
+    tracer.reset();
   }
 
   @Test
@@ -129,7 +133,7 @@ public class TracingRedissonTest {
 
   @Test
   public void test_atomic_long() {
-    RAtomicLong atomicLong = client.getAtomicLong("long");
+    RAtomicLong atomicLong = client.getAtomicLong("atomic_long");
 
     atomicLong.set(10);
     assertEquals(10, atomicLong.get());
@@ -142,7 +146,7 @@ public class TracingRedissonTest {
 
   @Test
   public void test_list_multi_map() {
-    RListMultimap<String, String> map = client.getListMultimap("map");
+    RListMultimap<String, String> map = client.getListMultimap("list_multi_map");
 
     map.put("key", "value");
     assertEquals("value", map.get("key").get(0));
@@ -155,7 +159,7 @@ public class TracingRedissonTest {
 
   @Test
   public void test_set_multi_map() {
-    RSetMultimap<String, String> map = client.getSetMultimap("map");
+    RSetMultimap<String, String> map = client.getSetMultimap("set_multi_map");
 
     map.put("key", "value");
     assertEquals("value", map.get("key").iterator().next());
@@ -171,7 +175,7 @@ public class TracingRedissonTest {
     try (Scope ignore = tracer.buildSpan("test").startActive(true)) {
       Span activeSpan = tracer.activeSpan();
 
-      RMap<String, String> map = client.getMap("map");
+      RMap<String, String> map = client.getMap("map_async_continue_span");
 
       assertFalse(map.containsKeyAsync("key").toCompletableFuture().thenApply(s -> {
         System.out.println(
@@ -202,7 +206,7 @@ public class TracingRedissonTest {
             .build());
 
     try (Scope ignore = tracer.buildSpan("test").startActive(true)) {
-      RMap<String, String> map = customClient.getMap("map");
+      RMap<String, String> map = customClient.getMap("map_config_span_name");
       map.getAsync("key").get(15, TimeUnit.SECONDS);
     }
 
