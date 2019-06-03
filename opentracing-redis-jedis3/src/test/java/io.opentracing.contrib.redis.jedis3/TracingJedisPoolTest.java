@@ -84,7 +84,8 @@ public class TracingJedisPoolTest {
   @Test
   public void shouldReturnResourceToThePoolAndStayConnected() {
     //given
-    TracingJedisPool pool = new TracingJedisPool(new TracingConfiguration.Builder(mockTracer).build());
+    TracingJedisPool pool = new TracingJedisPool(
+        new TracingConfiguration.Builder(mockTracer).build());
     Jedis resource = pool.getResource();
     assertTrue(resource.isConnected());
 

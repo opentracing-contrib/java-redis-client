@@ -13,13 +13,12 @@
  */
 package io.opentracing.contrib.redis.jedis;
 
+import io.opentracing.contrib.redis.common.TracingConfiguration;
+import java.net.URI;
+import java.util.function.Function;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLParameters;
 import javax.net.ssl.SSLSocketFactory;
-import java.net.URI;
-import java.util.function.Function;
-
-import io.opentracing.contrib.redis.common.TracingConfiguration;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;

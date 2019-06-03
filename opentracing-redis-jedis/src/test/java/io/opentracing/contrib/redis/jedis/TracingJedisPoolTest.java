@@ -13,11 +13,13 @@
  */
 package io.opentracing.contrib.redis.jedis;
 
-import java.util.List;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import io.opentracing.contrib.redis.common.TracingConfiguration;
 import io.opentracing.mock.MockSpan;
 import io.opentracing.mock.MockTracer;
+import java.util.List;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -25,86 +27,84 @@ import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.embedded.RedisServer;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
 public class TracingJedisPoolTest {
 
-    private MockTracer mockTracer = new MockTracer();
+  private MockTracer mockTracer = new MockTracer();
 
-    private RedisServer redisServer;
+  private RedisServer redisServer;
 
-    @Before
-    public void before() {
-        mockTracer.reset();
+  @Before
+  public void before() {
+    mockTracer.reset();
 
-        redisServer = RedisServer.builder().setting("bind 127.0.0.1").build();
-        redisServer.start();
+    redisServer = RedisServer.builder().setting("bind 127.0.0.1").build();
+    redisServer.start();
+  }
+
+  @After
+  public void after() {
+    if (redisServer != null) {
+      redisServer.stop();
     }
+  }
 
-    @After
-    public void after() {
-        if (redisServer != null) {
-            redisServer.stop();
-        }
-    }
+  @Test
+  public void testPoolReturnsTracedJedis() {
+    JedisPool pool = new TracingJedisPool(new TracingConfiguration.Builder(mockTracer).build());
 
-    @Test
-    public void testPoolReturnsTracedJedis() {
-        JedisPool pool = new TracingJedisPool(new TracingConfiguration.Builder(mockTracer).build());
+    Jedis jedis = pool.getResource();
+    assertEquals("OK", jedis.set("key", "value"));
+    assertEquals("value", jedis.get("key"));
 
-        Jedis jedis = pool.getResource();
-        assertEquals("OK", jedis.set("key", "value"));
-        assertEquals("value", jedis.get("key"));
+    jedis.close();
 
-        jedis.close();
+    List<MockSpan> spans = mockTracer.finishedSpans();
+    assertEquals(2, spans.size());
+  }
 
-        List<MockSpan> spans = mockTracer.finishedSpans();
-        assertEquals(2, spans.size());
-    }
+  @Test
+  public void testClosingTracedJedisClosesUnderlyingJedis() {
+    JedisPool pool = new TracingJedisPool(new TracingConfiguration.Builder(mockTracer).build());
+    Jedis resource = pool.getResource();
+    assertEquals(1, pool.getNumActive());
 
-    @Test
-    public void testClosingTracedJedisClosesUnderlyingJedis() {
-        JedisPool pool = new TracingJedisPool(new TracingConfiguration.Builder(mockTracer).build());
-        Jedis resource = pool.getResource();
-        assertEquals(1, pool.getNumActive());
+    resource.close();
+    assertEquals(0, pool.getNumActive());
+    assertEquals(1, pool.getNumIdle());
 
-        resource.close();
-        assertEquals(0, pool.getNumActive());
-        assertEquals(1, pool.getNumIdle());
+    // ensure that resource is reused
+    Jedis nextResource = pool.getResource();
+    assertEquals(1, pool.getNumActive());
+    assertEquals(0, pool.getNumIdle());
+    nextResource.close();
+  }
 
-        // ensure that resource is reused
-        Jedis nextResource = pool.getResource();
-        assertEquals(1, pool.getNumActive());
-        assertEquals(0, pool.getNumIdle());
-        nextResource.close();
-    }
+  @Test
+  public void shouldReturnResourceToThePoolAndStayConnected() {
+    //given
+    TracingJedisPool pool = new TracingJedisPool(
+        new TracingConfiguration.Builder(mockTracer).build());
+    Jedis resource = pool.getResource();
+    assertTrue(resource.isConnected());
 
-    @Test
-    public void shouldReturnResourceToThePoolAndStayConnected() {
-        //given
-        TracingJedisPool pool = new TracingJedisPool(new TracingConfiguration.Builder(mockTracer).build());
-        Jedis resource = pool.getResource();
-        assertTrue(resource.isConnected());
+    //when
+    pool.returnResource(resource);
 
-        //when
-        pool.returnResource(resource);
+    //then
+    assertTrue(resource.isConnected());
+  }
 
-        //then
-        assertTrue(resource.isConnected());
-    }
+  @Test
+  public void shouldReturnResourceToThePoolOnCloseAndStayConnected() {
+    //given
+    JedisPool pool = new TracingJedisPool(new TracingConfiguration.Builder(mockTracer).build());
+    Jedis resource = pool.getResource();
+    assertTrue(resource.isConnected());
 
-    @Test
-    public void shouldReturnResourceToThePoolOnCloseAndStayConnected() {
-        //given
-        JedisPool pool = new TracingJedisPool(new TracingConfiguration.Builder(mockTracer).build());
-        Jedis resource = pool.getResource();
-        assertTrue(resource.isConnected());
+    //when
+    resource.close();
 
-        //when
-        resource.close();
-
-        //then - valid resource should not be destroyed but returned to pool & stay connected for at least {@link BaseGenericObjectPool#getMinEvictableIdleTimeMillis()}
-        assertTrue(resource.isConnected());
-    }
+    //then - valid resource should not be destroyed but returned to pool & stay connected for at least {@link BaseGenericObjectPool#getMinEvictableIdleTimeMillis()}
+    assertTrue(resource.isConnected());
+  }
 }

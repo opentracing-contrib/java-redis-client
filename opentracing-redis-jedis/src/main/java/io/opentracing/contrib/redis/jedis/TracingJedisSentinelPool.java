@@ -13,10 +13,9 @@
  */
 package io.opentracing.contrib.redis.jedis;
 
+import io.opentracing.contrib.redis.common.TracingConfiguration;
 import java.util.Set;
 import java.util.function.Function;
-
-import io.opentracing.contrib.redis.common.TracingConfiguration;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisSentinelPool;
