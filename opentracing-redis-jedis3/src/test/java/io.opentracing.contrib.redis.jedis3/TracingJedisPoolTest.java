@@ -14,6 +14,7 @@
 package io.opentracing.contrib.redis.jedis3;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import io.opentracing.contrib.redis.common.TracingConfiguration;
 import io.opentracing.mock.MockSpan;
@@ -78,5 +79,33 @@ public class TracingJedisPoolTest {
     assertEquals(1, pool.getNumActive());
     assertEquals(0, pool.getNumIdle());
     nextResource.close();
+  }
+
+  @Test
+  public void shouldReturnResourceToThePoolAndStayConnected() {
+    //given
+    TracingJedisPool pool = new TracingJedisPool(new TracingConfiguration.Builder(mockTracer).build());
+    Jedis resource = pool.getResource();
+    assertTrue(resource.isConnected());
+
+    //when
+    pool.returnResource(resource);
+
+    //then
+    assertTrue(resource.isConnected());
+  }
+
+  @Test
+  public void shouldReturnResourceToThePoolOnCloseAndStayConnected() {
+    //given
+    JedisPool pool = new TracingJedisPool(new TracingConfiguration.Builder(mockTracer).build());
+    Jedis resource = pool.getResource();
+    assertTrue(resource.isConnected());
+
+    //when
+    resource.close();
+
+    //then - valid resource should not be destroyed but returned to pool & stay connected for at least {@link BaseGenericObjectPool#getMinEvictableIdleTimeMillis()}
+    assertTrue(resource.isConnected());
   }
 }

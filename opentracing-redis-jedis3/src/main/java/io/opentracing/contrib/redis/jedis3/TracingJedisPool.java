@@ -22,6 +22,7 @@ import javax.net.ssl.SSLSocketFactory;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.TracingJedisWrapper;
 
 public class TracingJedisPool extends JedisPool {
   private final TracingConfiguration tracingConfiguration;
@@ -289,30 +290,5 @@ public class TracingJedisPool extends JedisPool {
     return (resource instanceof TracingJedisWrapper)
         ? ((TracingJedisWrapper) resource).getWrapped()
         : resource;
-  }
-
-  /**
-   * TracingJedisWrapper wraps Jedis object, usually at the moment of extraction from the Pool. Used
-   * to provide tracing capabilities to redis commands executed by the client provided by given
-   * Jedis object.
-   */
-  private class TracingJedisWrapper extends TracingJedis {
-    private final Jedis wrapped;
-
-    public TracingJedisWrapper(Jedis jedis, TracingConfiguration tracingConfiguration) {
-      super(tracingConfiguration);
-      this.client = jedis.getClient();
-      this.wrapped = jedis;
-    }
-
-    @Override
-    public void close() {
-      super.close();
-      wrapped.close();
-    }
-
-    public Jedis getWrapped() {
-      return wrapped;
-    }
   }
 }
