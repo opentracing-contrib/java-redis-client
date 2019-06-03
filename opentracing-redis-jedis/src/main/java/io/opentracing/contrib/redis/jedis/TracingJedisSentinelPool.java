@@ -13,13 +13,15 @@
  */
 package io.opentracing.contrib.redis.jedis;
 
-import io.opentracing.contrib.redis.common.TracingConfiguration;
 import java.util.Set;
 import java.util.function.Function;
+
+import io.opentracing.contrib.redis.common.TracingConfiguration;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisSentinelPool;
 import redis.clients.jedis.Protocol;
+import redis.clients.jedis.TracingJedisWrapper;
 
 public class TracingJedisSentinelPool extends JedisSentinelPool {
 
@@ -127,29 +129,8 @@ public class TracingJedisSentinelPool extends JedisSentinelPool {
   }
 
   private Jedis unwrapResource(Jedis resource) {
-    return (resource instanceof TracingJedisSentinelPool.TracingJedisWrapper)
-        ? ((TracingJedisSentinelPool.TracingJedisWrapper) resource).getWrapped()
+    return (resource instanceof TracingJedisWrapper)
+        ? ((TracingJedisWrapper) resource).getWrapped()
         : resource;
-  }
-
-
-  private class TracingJedisWrapper extends TracingJedis {
-    private final Jedis wrapped;
-
-    public TracingJedisWrapper(Jedis jedis, TracingConfiguration tracingConfiguration) {
-      super(tracingConfiguration);
-      this.client = jedis.getClient();
-      this.wrapped = jedis;
-    }
-
-    @Override
-    public void close() {
-      super.close();
-      wrapped.close();
-    }
-
-    public Jedis getWrapped() {
-      return wrapped;
-    }
   }
 }
