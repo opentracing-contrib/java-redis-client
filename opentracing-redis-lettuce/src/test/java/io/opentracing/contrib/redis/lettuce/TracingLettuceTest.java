@@ -13,6 +13,8 @@
  */
 package io.opentracing.contrib.redis.lettuce;
 
+import static org.awaitility.Awaitility.await;
+import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 
@@ -20,12 +22,16 @@ import io.lettuce.core.RedisClient;
 import io.lettuce.core.api.StatefulRedisConnection;
 import io.lettuce.core.api.async.RedisAsyncCommands;
 import io.lettuce.core.api.sync.RedisCommands;
+import io.lettuce.core.pubsub.RedisPubSubAdapter;
+import io.lettuce.core.pubsub.StatefulRedisPubSubConnection;
+import io.lettuce.core.pubsub.api.sync.RedisPubSubCommands;
 import io.opentracing.Scope;
 import io.opentracing.Span;
 import io.opentracing.contrib.redis.common.TracingConfiguration;
 import io.opentracing.mock.MockSpan;
 import io.opentracing.mock.MockTracer;
 import java.util.List;
+import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import org.junit.After;
 import org.junit.Before;
@@ -51,6 +57,29 @@ public class TracingLettuceTest {
     if (redisServer != null) {
       redisServer.stop();
     }
+  }
+
+  @Test
+  public void pubSub() {
+    RedisClient client = RedisClient.create("redis://localhost");
+    StatefulRedisPubSubConnection<String, String> connection =
+        new TracingStatefulRedisPubSubConnection<>(client.connectPubSub(),
+            new TracingConfiguration.Builder(mockTracer).build());
+
+    connection.addListener(new RedisPubSubAdapter<>());
+
+    RedisPubSubCommands<String, String> commands = connection.sync();
+    commands.subscribe("channel");
+
+    final RedisCommands<String, String> commands2 = client.connect().sync();
+    commands2.publish("channel", "msg");
+
+    client.shutdown();
+
+    await().atMost(15, TimeUnit.SECONDS).until(reportedSpansSize(), equalTo(3));
+
+    List<MockSpan> spans = mockTracer.finishedSpans();
+    assertEquals(3, spans.size());
   }
 
   @Test
@@ -120,5 +149,9 @@ public class TracingLettuceTest {
     }
     List<MockSpan> spans = mockTracer.finishedSpans();
     assertEquals(2, spans.size());
+  }
+
+  private Callable<Integer> reportedSpansSize() {
+    return () -> mockTracer.finishedSpans().size();
   }
 }

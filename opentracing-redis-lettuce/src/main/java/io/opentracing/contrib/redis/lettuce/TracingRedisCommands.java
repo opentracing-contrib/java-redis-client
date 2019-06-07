@@ -75,8 +75,8 @@ import java.util.concurrent.TimeUnit;
 public class TracingRedisCommands<K, V> implements RedisCommands<K, V> {
 
   private final RedisCommands<K, V> commands;
-  private final TracingHelper helper;
-  private final TracingConfiguration tracingConfiguration;
+  final TracingHelper helper;
+  final TracingConfiguration tracingConfiguration;
 
   public TracingRedisCommands(RedisCommands<K, V> commands,
       TracingConfiguration tracingConfiguration) {

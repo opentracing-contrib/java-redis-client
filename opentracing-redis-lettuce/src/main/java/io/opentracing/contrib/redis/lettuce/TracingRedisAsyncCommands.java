@@ -77,8 +77,8 @@ import java.util.concurrent.TimeUnit;
 public class TracingRedisAsyncCommands<K, V> implements RedisAsyncCommands<K, V> {
 
   private final RedisAsyncCommands<K, V> commands;
-  private final TracingHelper helper;
-  private final TracingConfiguration tracingConfiguration;
+  final TracingHelper helper;
+  final TracingConfiguration tracingConfiguration;
 
   /**
    * @param commands redis async commands
@@ -3094,7 +3094,7 @@ public class TracingRedisAsyncCommands<K, V> implements RedisAsyncCommands<K, V>
     return prepareRedisFuture(commands.unwatch(), span);
   }
 
-  private <V> RedisFuture<V> prepareRedisFuture(RedisFuture<V> future, Span span) {
+  <V> RedisFuture<V> prepareRedisFuture(RedisFuture<V> future, Span span) {
     return continueScopeSpan(setCompleteAction(future, span));
   }
 
