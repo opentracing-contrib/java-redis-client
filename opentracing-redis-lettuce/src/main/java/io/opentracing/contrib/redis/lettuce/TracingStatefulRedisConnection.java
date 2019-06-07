@@ -29,7 +29,7 @@ import java.util.concurrent.TimeUnit;
 public class TracingStatefulRedisConnection<K, V> implements StatefulRedisConnection<K, V> {
 
   private final StatefulRedisConnection<K, V> connection;
-  private final TracingConfiguration tracingConfiguration;
+  final TracingConfiguration tracingConfiguration;
 
   /**
    * @param connection redis connection
