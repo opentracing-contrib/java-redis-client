@@ -23,6 +23,7 @@
 
   <modules>
     <module>opentracing-redis-lettuce</module>
+    <module>opentracing-redis-lettuce5.0</module>
     <module>opentracing-redis-jedis</module>
     <module>opentracing-redis-jedis3</module>
     <module>opentracing-redis-common</module>
