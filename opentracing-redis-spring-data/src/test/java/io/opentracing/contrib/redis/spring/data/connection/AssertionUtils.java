@@ -41,10 +41,12 @@ final class AssertionUtils {
    * Make sure that a span is created when an active span exists joins the active
    */
   static void commandSpanJoinsActiveSpan(MockTracer tracer, Runnable command) {
-    try (Scope ignored = tracer.buildSpan("parent").startActive(true)) {
+    final MockSpan parent = tracer.buildSpan("parent").start();
+    try (Scope ignored = tracer.activateSpan(parent)) {
       command.run();
       assertEquals(1, tracer.finishedSpans().size());
     }
+    parent.finish();
 
     assertEquals(2, tracer.finishedSpans().size());
     Optional<MockSpan> redisSpan = tracer.finishedSpans().stream()

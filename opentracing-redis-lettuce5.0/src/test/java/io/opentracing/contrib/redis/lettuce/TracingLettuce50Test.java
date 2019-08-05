@@ -126,7 +126,8 @@ public class TracingLettuce50Test {
 
   @Test
   public void async_continue_span() throws Exception {
-    try (Scope ignored = mockTracer.buildSpan("test").startActive(true)) {
+    final MockSpan parent = mockTracer.buildSpan("test").start();
+    try (Scope ignored = mockTracer.activateSpan(parent)) {
       Span activeSpan = mockTracer.activeSpan();
 
       RedisClient client = RedisClient.create("redis://localhost");
@@ -147,6 +148,7 @@ public class TracingLettuce50Test {
 
       client.shutdown();
     }
+    parent.finish();
     List<MockSpan> spans = mockTracer.finishedSpans();
     assertEquals(2, spans.size());
   }

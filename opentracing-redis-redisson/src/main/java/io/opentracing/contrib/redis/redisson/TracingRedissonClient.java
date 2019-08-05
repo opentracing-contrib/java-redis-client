@@ -60,6 +60,7 @@ import org.redisson.api.RQueue;
 import org.redisson.api.RRateLimiter;
 import org.redisson.api.RReadWriteLock;
 import org.redisson.api.RRemoteService;
+import org.redisson.api.RRingBuffer;
 import org.redisson.api.RScheduledExecutorService;
 import org.redisson.api.RScoredSortedSet;
 import org.redisson.api.RScript;
@@ -382,6 +383,17 @@ public class TracingRedissonClient implements RedissonClient {
   @Override
   public <V> RQueue<V> getQueue(String name, Codec codec) {
     return new TracingRQueue<>(redissonClient.getQueue(name, codec), tracingRedissonHelper);
+  }
+
+  @Override
+  public <V> RRingBuffer<V> getRingBuffer(String name) {
+    return new TracingRRingBuffer<>(redissonClient.getRingBuffer(name), tracingRedissonHelper);
+  }
+
+  @Override
+  public <V> RRingBuffer<V> getRingBuffer(String name, Codec codec) {
+    return new TracingRRingBuffer<>(redissonClient.getRingBuffer(name, codec),
+        tracingRedissonHelper);
   }
 
   @Override

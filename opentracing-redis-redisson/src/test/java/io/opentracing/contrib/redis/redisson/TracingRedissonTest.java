@@ -172,7 +172,8 @@ public class TracingRedissonTest {
 
   @Test
   public void async_continue_span() throws Exception {
-    try (Scope ignore = tracer.buildSpan("test").startActive(true)) {
+    final MockSpan parent = tracer.buildSpan("test").start();
+    try (Scope ignore = tracer.activateSpan(parent)) {
       Span activeSpan = tracer.activeSpan();
 
       RMap<String, String> map = client.getMap("map_async_continue_span");
@@ -186,6 +187,7 @@ public class TracingRedissonTest {
       }).get(15, TimeUnit.SECONDS));
 
     }
+    parent.finish();
 
     await().atMost(15, TimeUnit.SECONDS).until(reportedSpansSize(), equalTo(2));
     List<MockSpan> spans = tracer.finishedSpans();
@@ -205,10 +207,12 @@ public class TracingRedissonTest {
             .withSpanNameProvider(operation -> "Redis." + operation)
             .build());
 
-    try (Scope ignore = tracer.buildSpan("test").startActive(true)) {
+    final MockSpan parent = tracer.buildSpan("test").start();
+    try (Scope ignore = tracer.activateSpan(parent)) {
       RMap<String, String> map = customClient.getMap("map_config_span_name");
       map.getAsync("key").get(15, TimeUnit.SECONDS);
     }
+    parent.finish();
 
     await().atMost(15, TimeUnit.SECONDS).until(reportedSpansSize(), equalTo(2));
 
