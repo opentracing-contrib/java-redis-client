@@ -72,7 +72,7 @@ public class TracingRedisConnectionFactory implements RedisConnectionFactory,
   @Override
   public ReactiveRedisConnection getReactiveConnection() {
     if (delegate instanceof ReactiveRedisConnectionFactory) {
-      return new TracingReactiveRedisConnection((ReactiveRedisConnection) delegate,
+      return new TracingReactiveRedisConnection(((ReactiveRedisConnectionFactory) delegate).getReactiveConnection(),
           tracingConfiguration);
     }
     // TODO: shouldn't we throw an exception?
