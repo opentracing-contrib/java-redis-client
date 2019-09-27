@@ -14,6 +14,9 @@
 package io.opentracing.contrib.redis.common;
 
 import io.opentracing.Tracer;
+
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
 public class TracingConfiguration {
@@ -22,13 +25,15 @@ public class TracingConfiguration {
   private final boolean traceWithActiveSpanOnly;
   private final int keysMaxLength;
   private final Function<String, String> spanNameProvider;
+  private final Map<String, String> extensionTags;
 
   private TracingConfiguration(Tracer tracer, boolean traceWithActiveSpanOnly, int keysMaxLength,
-      Function<String, String> spanNameProvider) {
+                               Function<String, String> spanNameProvider,Map<String, String> extensionTags) {
     this.tracer = tracer;
     this.traceWithActiveSpanOnly = traceWithActiveSpanOnly;
     this.keysMaxLength = keysMaxLength;
     this.spanNameProvider = spanNameProvider;
+    this.extensionTags = extensionTags;
   }
 
   public Tracer getTracer() {
@@ -47,11 +52,21 @@ public class TracingConfiguration {
     return spanNameProvider;
   }
 
+  public Map<String, String> getExtensionTags() {
+    return extensionTags;
+  }
+
+  public TracingConfiguration extensionTag(String key, String value) {
+    this.extensionTags.putIfAbsent(key, value);
+    return this;
+  }
+
   public static class Builder {
     private final Tracer tracer;
     private boolean traceWithActiveSpanOnly;
     private int keysMaxLength = DEFAULT_KEYS_MAX_LENGTH;
     private Function<String, String> spanNameProvider = RedisSpanNameProvider.OPERATION_NAME;
+    private Map<String, String> extensionTags = new ConcurrentHashMap<>();
 
     public Builder(Tracer tracer) {
       this.tracer = tracer;
@@ -63,6 +78,18 @@ public class TracingConfiguration {
      */
     public Builder traceWithActiveSpanOnly(boolean traceWithActiveSpanOnly) {
       this.traceWithActiveSpanOnly = traceWithActiveSpanOnly;
+      return this;
+    }
+
+    /**
+     * add tag
+     *
+     * @param key   key
+     * @param value value
+     * @return this
+     */
+    public Builder extensionTag(String key, String value) {
+      this.extensionTags.putIfAbsent(key, value);
       return this;
     }
 
@@ -94,7 +121,7 @@ public class TracingConfiguration {
         keysMaxLength = DEFAULT_KEYS_MAX_LENGTH;
       }
       return new TracingConfiguration(tracer, traceWithActiveSpanOnly, keysMaxLength,
-          spanNameProvider);
+          spanNameProvider,extensionTags);
     }
   }
 }
