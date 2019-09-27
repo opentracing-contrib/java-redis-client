@@ -14,7 +14,6 @@
 package io.opentracing.contrib.redis.common;
 
 import io.opentracing.Tracer;
-
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
@@ -28,7 +27,7 @@ public class TracingConfiguration {
   private final Map<String, String> extensionTags;
 
   private TracingConfiguration(Tracer tracer, boolean traceWithActiveSpanOnly, int keysMaxLength,
-                               Function<String, String> spanNameProvider,Map<String, String> extensionTags) {
+      Function<String, String> spanNameProvider, Map<String, String> extensionTags) {
     this.tracer = tracer;
     this.traceWithActiveSpanOnly = traceWithActiveSpanOnly;
     this.keysMaxLength = keysMaxLength;
@@ -84,7 +83,7 @@ public class TracingConfiguration {
     /**
      * add tag
      *
-     * @param key   key
+     * @param key key
      * @param value value
      * @return this
      */
@@ -121,7 +120,7 @@ public class TracingConfiguration {
         keysMaxLength = DEFAULT_KEYS_MAX_LENGTH;
       }
       return new TracingConfiguration(tracer, traceWithActiveSpanOnly, keysMaxLength,
-          spanNameProvider,extensionTags);
+          spanNameProvider, extensionTags);
     }
   }
 }
