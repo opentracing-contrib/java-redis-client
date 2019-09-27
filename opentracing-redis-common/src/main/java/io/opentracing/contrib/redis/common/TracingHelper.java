@@ -19,13 +19,9 @@ import io.opentracing.Tracer;
 import io.opentracing.Tracer.SpanBuilder;
 import io.opentracing.noop.NoopSpan;
 import io.opentracing.tag.Tags;
+
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -40,19 +36,23 @@ public class TracingHelper {
   private final boolean traceWithActiveSpanOnly;
   private final Function<String, String> spanNameProvider;
   private final int maxKeysLength;
+  private final Map<String, String> extensionTags;
 
   public TracingHelper(TracingConfiguration tracingConfiguration) {
     this.tracer = tracingConfiguration.getTracer();
     this.traceWithActiveSpanOnly = tracingConfiguration.isTraceWithActiveSpanOnly();
     this.spanNameProvider = tracingConfiguration.getSpanNameProvider();
     this.maxKeysLength = tracingConfiguration.getKeysMaxLength();
+    this.extensionTags = tracingConfiguration.getExtensionTags();
   }
 
   private SpanBuilder builder(String operationName) {
-    return tracer.buildSpan(spanNameProvider.apply(operationName))
+    SpanBuilder sb = tracer.buildSpan(spanNameProvider.apply(operationName))
         .withTag(Tags.COMPONENT.getKey(), COMPONENT_NAME)
         .withTag(Tags.SPAN_KIND.getKey(), Tags.SPAN_KIND_CLIENT)
         .withTag(Tags.DB_TYPE.getKey(), DB_TYPE);
+    extensionTags.forEach(sb::withTag);
+    return sb;
   }
 
   public Span buildSpan(String operationName, byte[][] keys) {
