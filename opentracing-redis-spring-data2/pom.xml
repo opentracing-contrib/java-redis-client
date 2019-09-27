@@ -44,14 +44,14 @@
       <groupId>org.springframework.data</groupId>
       <artifactId>spring-data-redis</artifactId>
       <version>${spring.data.redis.version}</version>
-      <optional>true</optional>
+      <scope>provided</scope>
     </dependency>
 
     <dependency>
       <groupId>io.projectreactor</groupId>
       <artifactId>reactor-core</artifactId>
       <version>3.1.9.RELEASE</version>
-      <optional>true</optional>
+      <scope>provided</scope>
     </dependency>
 
     <dependency>
