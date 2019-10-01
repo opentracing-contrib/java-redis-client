@@ -11,52 +11,50 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package io.opentracing.contrib.redis.lettuce;
+package io.opentracing.contrib.redis.lettuce50;
 
-import io.lettuce.core.RedisFuture;
 import io.lettuce.core.pubsub.StatefulRedisPubSubConnection;
-import io.lettuce.core.pubsub.api.async.RedisPubSubAsyncCommands;
+import io.lettuce.core.pubsub.api.sync.RedisPubSubCommands;
 import io.opentracing.Span;
 import io.opentracing.contrib.redis.common.TracingConfiguration;
 import java.util.Arrays;
 
-public class TracingRedisPubSubAsyncCommands<K, V> extends
-    TracingRedisAsyncCommands<K, V> implements RedisPubSubAsyncCommands<K, V> {
-  private final RedisPubSubAsyncCommands<K, V> commands;
+public class TracingRedisPubSubCommands<K, V> extends TracingRedisCommands<K, V> implements
+    RedisPubSubCommands<K, V> {
+  private final RedisPubSubCommands<K, V> commands;
 
-  public TracingRedisPubSubAsyncCommands(
-      RedisPubSubAsyncCommands<K, V> commands,
+  public TracingRedisPubSubCommands(RedisPubSubCommands<K, V> commands,
       TracingConfiguration tracingConfiguration) {
     super(commands, tracingConfiguration);
     this.commands = commands;
   }
 
   @Override
-  public RedisFuture<Void> psubscribe(K... patterns) {
+  public void psubscribe(K... patterns) {
     final Span span = helper.buildSpan("psubscribe");
     span.setTag("patterns", Arrays.toString(patterns));
-    return prepareRedisFuture(commands.psubscribe(patterns), span);
+    helper.decorate(span, () -> commands.psubscribe(patterns));
   }
 
   @Override
-  public RedisFuture<Void> punsubscribe(K... patterns) {
+  public void punsubscribe(K... patterns) {
     final Span span = helper.buildSpan("punsubscribe");
     span.setTag("patterns", Arrays.toString(patterns));
-    return prepareRedisFuture(commands.punsubscribe(patterns), span);
+    helper.decorate(span, () -> commands.punsubscribe(patterns));
   }
 
   @Override
-  public RedisFuture<Void> subscribe(K... channels) {
+  public void subscribe(K... channels) {
     final Span span = helper.buildSpan("subscribe");
     span.setTag("channels", Arrays.toString(channels));
-    return prepareRedisFuture(commands.subscribe(channels), span);
+    helper.decorate(span, () -> commands.subscribe(channels));
   }
 
   @Override
-  public RedisFuture<Void> unsubscribe(K... channels) {
+  public void unsubscribe(K... channels) {
     final Span span = helper.buildSpan("unsubscribe");
     span.setTag("channels", Arrays.toString(channels));
-    return prepareRedisFuture(commands.unsubscribe(channels), span);
+    helper.decorate(span, () -> commands.unsubscribe(channels));
   }
 
   @Override

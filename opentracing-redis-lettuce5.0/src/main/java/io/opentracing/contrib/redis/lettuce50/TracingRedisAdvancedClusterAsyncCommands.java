@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package io.opentracing.contrib.redis.lettuce;
+package io.opentracing.contrib.redis.lettuce50;
 
 import static io.opentracing.contrib.redis.common.TracingHelper.nullable;
 import static io.opentracing.contrib.redis.common.TracingHelper.onError;
@@ -38,13 +38,15 @@ import io.lettuce.core.ScriptOutputType;
 import io.lettuce.core.SetArgs;
 import io.lettuce.core.SortArgs;
 import io.lettuce.core.StreamScanCursor;
-import io.lettuce.core.TransactionResult;
 import io.lettuce.core.Value;
 import io.lettuce.core.ValueScanCursor;
 import io.lettuce.core.ZAddArgs;
 import io.lettuce.core.ZStoreArgs;
-import io.lettuce.core.api.StatefulRedisConnection;
-import io.lettuce.core.api.async.RedisAsyncCommands;
+import io.lettuce.core.cluster.api.StatefulRedisClusterConnection;
+import io.lettuce.core.cluster.api.async.AsyncNodeSelection;
+import io.lettuce.core.cluster.api.async.RedisAdvancedClusterAsyncCommands;
+import io.lettuce.core.cluster.api.async.RedisClusterAsyncCommands;
+import io.lettuce.core.cluster.models.partitions.RedisClusterNode;
 import io.lettuce.core.output.CommandOutput;
 import io.lettuce.core.output.KeyStreamingChannel;
 import io.lettuce.core.output.KeyValueStreamingChannel;
@@ -65,22 +67,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Predicate;
 
-public class TracingRedisAsyncCommands<K, V> implements RedisAsyncCommands<K, V> {
+public class TracingRedisAdvancedClusterAsyncCommands<K, V> implements
+    RedisAdvancedClusterAsyncCommands<K, V> {
 
-  private final RedisAsyncCommands<K, V> commands;
-  final TracingHelper helper;
-  final TracingConfiguration tracingConfiguration;
+  private final RedisAdvancedClusterAsyncCommands<K, V> commands;
+  private final TracingHelper helper;
+  private final TracingConfiguration tracingConfiguration;
 
-  /**
-   * @param commands redis async commands
-   * @param tracingConfiguration tracing configuration
-   */
-  public TracingRedisAsyncCommands(RedisAsyncCommands<K, V> commands,
+  public TracingRedisAdvancedClusterAsyncCommands(
+      RedisAdvancedClusterAsyncCommands<K, V> commands,
       TracingConfiguration tracingConfiguration) {
     this.commands = commands;
-    this.tracingConfiguration = tracingConfiguration;
     this.helper = new TracingHelper(tracingConfiguration);
+    this.tracingConfiguration = tracingConfiguration;
   }
 
   @Override
@@ -97,31 +98,36 @@ public class TracingRedisAsyncCommands<K, V> implements RedisAsyncCommands<K, V>
   }
 
   @Override
-  public String select(int db) {
-    Span span = helper.buildSpan("select");
-    span.setTag("db", db);
-    try {
-      return commands.select(db);
-    } catch (Exception e) {
-      onError(e, span);
-      throw e;
-    } finally {
-      span.finish();
-    }
+  public RedisClusterAsyncCommands<K, V> getConnection(String nodeId) {
+    return new TracingRedisAsyncCommands<>(commands.getStatefulConnection()
+        .getConnection(nodeId).async(), tracingConfiguration);
   }
 
   @Override
-  public RedisFuture<String> swapdb(int db1, int db2) {
-    Span span = helper.buildSpan("swapdb");
-    span.setTag("db1", db1);
-    span.setTag("db2", db2);
-    return prepareRedisFuture(commands.swapdb(db1, db2), span);
+  public RedisClusterAsyncCommands<K, V> getConnection(String host, int port) {
+    return new TracingRedisAsyncCommands<>(commands.getStatefulConnection()
+        .getConnection(host, port).async(), tracingConfiguration);
   }
 
   @Override
-  public StatefulRedisConnection<K, V> getStatefulConnection() {
-    return new TracingStatefulRedisConnection<>(commands.getStatefulConnection(),
+  public StatefulRedisClusterConnection<K, V> getStatefulConnection() {
+    return new TracingStatefulRedisClusterConnection<>(commands.getStatefulConnection(),
         tracingConfiguration);
+  }
+
+  @Override
+  public AsyncNodeSelection<K, V> readonly(Predicate<RedisClusterNode> predicate) {
+    return commands.readonly(predicate);
+  }
+
+  @Override
+  public AsyncNodeSelection<K, V> nodes(Predicate<RedisClusterNode> predicate) {
+    return commands.nodes(predicate);
+  }
+
+  @Override
+  public AsyncNodeSelection<K, V> nodes(Predicate<RedisClusterNode> predicate, boolean dynamic) {
+    return commands.nodes(predicate, dynamic);
   }
 
   @Override
@@ -1186,7 +1192,7 @@ public class TracingRedisAsyncCommands<K, V> implements RedisAsyncCommands<K, V>
   @Override
   public RedisFuture<Double> zincrby(K key, double amount, K member) {
     Span span = helper.buildSpan("zincrby", key);
-    span.setTag("amount", nullable(amount));
+    span.setTag("amount", amount);
     return prepareRedisFuture(commands.zincrby(key, amount, member), span);
   }
 
@@ -2800,37 +2806,7 @@ public class TracingRedisAsyncCommands<K, V> implements RedisAsyncCommands<K, V>
     return prepareRedisFuture(commands.geodist(key, from, to, unit), span);
   }
 
-  @Override
-  public RedisFuture<String> discard() {
-    Span span = helper.buildSpan("discard");
-    return prepareRedisFuture(commands.discard(), span);
-  }
-
-  @Override
-  public RedisFuture<TransactionResult> exec() {
-    Span span = helper.buildSpan("exec");
-    return prepareRedisFuture(commands.exec(), span);
-  }
-
-  @Override
-  public RedisFuture<String> multi() {
-    Span span = helper.buildSpan("multi");
-    return prepareRedisFuture(commands.multi(), span);
-  }
-
-  @Override
-  public RedisFuture<String> watch(K... keys) {
-    Span span = helper.buildSpan("watch", keys);
-    return prepareRedisFuture(commands.watch(keys), span);
-  }
-
-  @Override
-  public RedisFuture<String> unwatch() {
-    Span span = helper.buildSpan("unwatch");
-    return prepareRedisFuture(commands.unwatch(), span);
-  }
-
-  <V> RedisFuture<V> prepareRedisFuture(RedisFuture<V> future, Span span) {
+  private <V> RedisFuture<V> prepareRedisFuture(RedisFuture<V> future, Span span) {
     return continueScopeSpan(setCompleteAction(future, span));
   }
 
@@ -2860,5 +2836,4 @@ public class TracingRedisAsyncCommands<K, V> implements RedisAsyncCommands<K, V>
     });
     return customRedisFuture;
   }
-
 }
