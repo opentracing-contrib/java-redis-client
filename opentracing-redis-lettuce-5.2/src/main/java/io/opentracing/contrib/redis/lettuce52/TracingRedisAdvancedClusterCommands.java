@@ -45,6 +45,7 @@ import io.lettuce.core.Value;
 import io.lettuce.core.ValueScanCursor;
 import io.lettuce.core.XAddArgs;
 import io.lettuce.core.XClaimArgs;
+import io.lettuce.core.XGroupCreateArgs;
 import io.lettuce.core.XReadArgs;
 import io.lettuce.core.XReadArgs.StreamOffset;
 import io.lettuce.core.ZAddArgs;
@@ -3782,6 +3783,14 @@ public class TracingRedisAdvancedClusterCommands<K, V> implements
   }
 
   @Override
+  public String xgroupCreate(StreamOffset<K> streamOffset, K group, XGroupCreateArgs args) {
+    Span span = helper.buildSpan("xgroupCreate");
+    span.setTag("streamOffset", nullable(streamOffset));
+    span.setTag("group", nullable(group));
+    return helper.decorate(span, () -> commands.xgroupCreate(streamOffset, group, args));
+  }
+
+  @Override
   public Boolean xgroupDelconsumer(K key, Consumer<K> consumer) {
     Span span = helper.buildSpan("xgroupDelconsumer", key);
     span.setTag("consumer", nullable(consumer));
@@ -3801,6 +3810,25 @@ public class TracingRedisAdvancedClusterCommands<K, V> implements
     span.setTag("streamOffset", nullable(streamOffset));
     span.setTag("group", nullable(group));
     return helper.decorate(span, () -> commands.xgroupSetid(streamOffset, group));
+  }
+
+  @Override
+  public List<Object> xinfoStream(K key) {
+    Span span = helper.buildSpan("xinfoStream", key);
+    return helper.decorate(span, () -> commands.xinfoStream(key));
+  }
+
+  @Override
+  public List<Object> xinfoGroups(K key) {
+    Span span = helper.buildSpan("xinfoGroups", key);
+    return helper.decorate(span, () -> commands.xinfoGroups(key));
+  }
+
+  @Override
+  public List<Object> xinfoConsumers(K key, K group) {
+    Span span = helper.buildSpan("xinfoConsumers", key);
+    span.setTag("group", nullable(group));
+    return helper.decorate(span, () -> commands.xinfoConsumers(key, group));
   }
 
   @Override
@@ -4457,6 +4485,12 @@ public class TracingRedisAdvancedClusterCommands<K, V> implements
     } finally {
       span.finish();
     }
+  }
+
+  @Override
+  public Long memoryUsage(K key) {
+    Span span = helper.buildSpan("memoryUsage", key);
+    return helper.decorate(span, () -> commands.memoryUsage(key));
   }
 
   @Override

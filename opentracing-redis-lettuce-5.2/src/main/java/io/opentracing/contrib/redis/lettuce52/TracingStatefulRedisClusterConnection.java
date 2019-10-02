@@ -15,6 +15,7 @@ package io.opentracing.contrib.redis.lettuce52;
 
 import io.lettuce.core.ClientOptions;
 import io.lettuce.core.ReadFrom;
+import io.lettuce.core.RedisChannelWriter;
 import io.lettuce.core.api.StatefulRedisConnection;
 import io.lettuce.core.cluster.api.StatefulRedisClusterConnection;
 import io.lettuce.core.cluster.api.async.RedisAdvancedClusterAsyncCommands;
@@ -98,6 +99,11 @@ public class TracingStatefulRedisClusterConnection<K, V> implements
   @Override
   public Partitions getPartitions() {
     return connection.getPartitions();
+  }
+
+  @Override
+  public RedisChannelWriter getChannelWriter() {
+    return connection.getChannelWriter();
   }
 
   @Override

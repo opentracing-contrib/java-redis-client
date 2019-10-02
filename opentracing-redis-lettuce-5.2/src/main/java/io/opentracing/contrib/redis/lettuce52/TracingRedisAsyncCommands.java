@@ -47,6 +47,7 @@ import io.lettuce.core.Value;
 import io.lettuce.core.ValueScanCursor;
 import io.lettuce.core.XAddArgs;
 import io.lettuce.core.XClaimArgs;
+import io.lettuce.core.XGroupCreateArgs;
 import io.lettuce.core.XReadArgs;
 import io.lettuce.core.XReadArgs.StreamOffset;
 import io.lettuce.core.ZAddArgs;
@@ -2133,6 +2134,15 @@ public class TracingRedisAsyncCommands<K, V> implements RedisAsyncCommands<K, V>
   }
 
   @Override
+  public RedisFuture<String> xgroupCreate(StreamOffset<K> streamOffset, K group,
+      XGroupCreateArgs args) {
+    Span span = helper.buildSpan("xgroupCreate");
+    span.setTag("streamOffset", nullable(streamOffset));
+    span.setTag("group", nullable(group));
+    return prepareRedisFuture(commands.xgroupCreate(streamOffset, group, args), span);
+  }
+
+  @Override
   public RedisFuture<Boolean> xgroupDelconsumer(K key, Consumer<K> consumer) {
     Span span = helper.buildSpan("xgroupDelconsumer", key);
     span.setTag("consumer", nullable(consumer));
@@ -2152,6 +2162,25 @@ public class TracingRedisAsyncCommands<K, V> implements RedisAsyncCommands<K, V>
     span.setTag("streamOffset", nullable(streamOffset));
     span.setTag("group", nullable(group));
     return prepareRedisFuture(commands.xgroupSetid(streamOffset, group), span);
+  }
+
+  @Override
+  public RedisFuture<List<Object>> xinfoStream(K key) {
+    Span span = helper.buildSpan("xinfoStream", key);
+    return prepareRedisFuture(commands.xinfoStream(key), span);
+  }
+
+  @Override
+  public RedisFuture<List<Object>> xinfoGroups(K key) {
+    Span span = helper.buildSpan("xinfoGroups", key);
+    return prepareRedisFuture(commands.xinfoGroups(key), span);
+  }
+
+  @Override
+  public RedisFuture<List<Object>> xinfoConsumers(K key, K group) {
+    Span span = helper.buildSpan("xinfoConsumers", key);
+    span.setTag("group", nullable(group));
+    return prepareRedisFuture(commands.xinfoConsumers(key, group), span);
   }
 
   @Override
@@ -2543,6 +2572,12 @@ public class TracingRedisAsyncCommands<K, V> implements RedisAsyncCommands<K, V>
   public RedisFuture<Date> lastsave() {
     Span span = helper.buildSpan("lastsave");
     return prepareRedisFuture(commands.lastsave(), span);
+  }
+
+  @Override
+  public RedisFuture<Long> memoryUsage(K key) {
+    Span span = helper.buildSpan("memoryUsage", key);
+    return prepareRedisFuture(commands.memoryUsage(key), span);
   }
 
   @Override
