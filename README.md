@@ -40,7 +40,7 @@ pom.xml
 ```xml
 <dependency>
     <groupId>io.opentracing.contrib</groupId>
-    <artifactId>opentracing-redis-lettuce</artifactId>
+    <artifactId>opentracing-redis-lettuce-5.2</artifactId>
     <version>VERSION</version>
 </dependency>
 ```
