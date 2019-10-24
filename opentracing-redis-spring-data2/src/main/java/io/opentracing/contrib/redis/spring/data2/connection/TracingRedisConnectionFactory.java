@@ -47,8 +47,9 @@ public class TracingRedisConnectionFactory implements RedisConnectionFactory,
   public RedisConnection getConnection() {
     // support cluster connection
     RedisConnection connection = this.delegate.getConnection();
-    if ( connection instanceof RedisClusterConnection) {
-      return new TracingRedisClusterConnection((RedisClusterConnection)connection, tracingConfiguration);
+    if (connection instanceof RedisClusterConnection) {
+      return new TracingRedisClusterConnection((RedisClusterConnection) connection,
+          tracingConfiguration);
     }
     return new TracingRedisConnection(connection, tracingConfiguration);
   }
@@ -77,13 +78,15 @@ public class TracingRedisConnectionFactory implements RedisConnectionFactory,
   @Override
   public ReactiveRedisConnection getReactiveConnection() {
     if (this.delegate instanceof ReactiveRedisConnectionFactory) {
-      ReactiveRedisConnectionFactory connectionFactory = (ReactiveRedisConnectionFactory)this.delegate;
+      ReactiveRedisConnectionFactory connectionFactory = (ReactiveRedisConnectionFactory) this.delegate;
       ReactiveRedisConnection connection = connectionFactory.getReactiveConnection();
       // support cluster connection
-      if ( connection instanceof ReactiveRedisClusterConnection) {
-        return new TracingReactiveRedisClusterConnection((ReactiveRedisClusterConnection)connection, tracingConfiguration);
+      if (connection instanceof ReactiveRedisClusterConnection) {
+        return new TracingReactiveRedisClusterConnection(
+            (ReactiveRedisClusterConnection) connection, tracingConfiguration);
       }
-      return new TracingReactiveRedisConnection(connectionFactory.getReactiveConnection(), tracingConfiguration);
+      return new TracingReactiveRedisConnection(connectionFactory.getReactiveConnection(),
+          tracingConfiguration);
     }
     // TODO: shouldn't we throw an exception?
     return null;

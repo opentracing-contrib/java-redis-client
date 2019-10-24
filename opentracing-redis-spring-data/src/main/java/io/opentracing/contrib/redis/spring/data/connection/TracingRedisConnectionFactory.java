@@ -43,8 +43,9 @@ public class TracingRedisConnectionFactory implements RedisConnectionFactory {
   public RedisConnection getConnection() {
     // support cluster connection
     RedisConnection connection = this.delegate.getConnection();
-    if ( connection instanceof RedisClusterConnection) {
-      return new TracingRedisClusterConnection((RedisClusterConnection)connection, tracingConfiguration);
+    if (connection instanceof RedisClusterConnection) {
+      return new TracingRedisClusterConnection((RedisClusterConnection) connection,
+          tracingConfiguration);
     }
     return new TracingRedisConnection(connection, tracingConfiguration);
   }

@@ -14,7 +14,9 @@
 package io.opentracing.contrib.redis.spring.data2.connection;
 
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import io.opentracing.Tracer;
 import io.opentracing.contrib.redis.common.TracingConfiguration;
@@ -23,8 +25,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.data.redis.connection.ReactiveRedisConnection;
-import org.springframework.data.redis.connection.ReactiveRedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisClusterConnection;
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -87,8 +87,9 @@ public class TracingRedisConnectionFactoryTest {
   public void delegatesClusterConnectionIfCluster() {
     RedisConnectionFactory connectionFactory = mock(RedisConnectionFactory.class);
     when(connectionFactory.getConnection()).thenReturn(mock(RedisClusterConnection.class));
-    TracingRedisConnectionFactory tracingConnectionFactory = new TracingRedisConnectionFactory(connectionFactory,
-            new TracingConfiguration.Builder(tracer).traceWithActiveSpanOnly(false).build());
+    TracingRedisConnectionFactory tracingConnectionFactory = new TracingRedisConnectionFactory(
+        connectionFactory,
+        new TracingConfiguration.Builder(tracer).traceWithActiveSpanOnly(false).build());
     assertTrue(tracingConnectionFactory.getConnection() instanceof RedisClusterConnection);
   }
 
