@@ -41,7 +41,12 @@ public class TracingRedisConnectionFactory implements RedisConnectionFactory {
 
   @Override
   public RedisConnection getConnection() {
-    return new TracingRedisConnection(delegate.getConnection(), tracingConfiguration);
+    // support cluster connection
+    RedisConnection connection = this.delegate.getConnection();
+    if ( connection instanceof RedisClusterConnection) {
+      return new TracingRedisClusterConnection((RedisClusterConnection)connection, tracingConfiguration);
+    }
+    return new TracingRedisConnection(connection, tracingConfiguration);
   }
 
   @Override

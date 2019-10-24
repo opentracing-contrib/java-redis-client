@@ -14,8 +14,7 @@
 package io.opentracing.contrib.redis.spring.data.connection;
 
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 import io.opentracing.Tracer;
 import io.opentracing.contrib.redis.common.TracingConfiguration;
@@ -81,6 +80,15 @@ public class TracingRedisConnectionFactoryTest {
     RuntimeException e = mock(RuntimeException.class);
     delegate.translateExceptionIfPossible(e);
     verify(delegate).translateExceptionIfPossible(e);
+  }
+
+  @Test
+  public void delegatesClusterConnectionIfCluster() {
+    RedisConnectionFactory connectionFactory = mock(RedisConnectionFactory.class);
+    when(connectionFactory.getConnection()).thenReturn(mock(RedisClusterConnection.class));
+    TracingRedisConnectionFactory tracingConnectionFactory = new TracingRedisConnectionFactory(connectionFactory,
+            new TracingConfiguration.Builder(tracer).traceWithActiveSpanOnly(false).build());
+    assertTrue(tracingConnectionFactory.getConnection() instanceof RedisClusterConnection);
   }
 
 }
