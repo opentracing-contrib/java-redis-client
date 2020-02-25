@@ -82,6 +82,25 @@ public class TracingRScoredSortedSet<V> extends TracingRExpirable implements RSc
   }
 
   @Override
+  public int subscribeOnFirstElements(Consumer<V> consumer) {
+    Span span = tracingRedissonHelper.buildSpan("subscribeOnFirstElements", set);
+    return tracingRedissonHelper.decorate(span, () -> set.subscribeOnFirstElements(consumer));
+  }
+
+  @Override
+  public int subscribeOnLastElements(Consumer<V> consumer) {
+    Span span = tracingRedissonHelper.buildSpan("subscribeOnLastElements", set);
+    return tracingRedissonHelper.decorate(span, () -> set.subscribeOnLastElements(consumer));
+  }
+
+  @Override
+  public void unsubscribe(int listenerId) {
+    Span span = tracingRedissonHelper.buildSpan("unsubscribe", set);
+    span.setTag("listenerId", listenerId);
+    tracingRedissonHelper.decorate(span, () -> set.unsubscribe(listenerId));
+  }
+
+  @Override
   public V pollFirst(long timeout, TimeUnit unit) {
     Span span = tracingRedissonHelper.buildSpan("pollFirst", set);
     span.setTag("timeout", timeout);

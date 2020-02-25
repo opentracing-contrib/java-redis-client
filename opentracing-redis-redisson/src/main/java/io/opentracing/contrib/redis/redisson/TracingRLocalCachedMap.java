@@ -35,7 +35,14 @@ public class TracingRLocalCachedMap<K, V> extends TracingRMap<K, V> implements
   @Override
   public void preloadCache() {
     Span span = tracingRedissonHelper.buildSpan("preloadCache", map);
-    tracingRedissonHelper.decorate(span, map::preloadCache);
+    tracingRedissonHelper.decorate(span, () -> map.preloadCache());
+  }
+
+  @Override
+  public void preloadCache(int count) {
+    Span span = tracingRedissonHelper.buildSpan("preloadCache", map);
+    span.setTag("count", count);
+    tracingRedissonHelper.decorate(span, () -> map.preloadCache(count));
   }
 
   @Override

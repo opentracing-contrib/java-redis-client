@@ -18,6 +18,7 @@ import static io.opentracing.contrib.redis.common.TracingHelper.nullable;
 
 import io.opentracing.Span;
 import java.util.Iterator;
+import java.util.List;
 import org.redisson.api.RDeque;
 import org.redisson.api.RFuture;
 
@@ -74,13 +75,13 @@ public class TracingRDeque<V> extends TracingRQueue<V> implements RDeque<V> {
   @Override
   public V pollFirst() {
     Span span = tracingRedissonHelper.buildSpan("pollFirst", deque);
-    return tracingRedissonHelper.decorate(span, deque::pollFirst);
+    return tracingRedissonHelper.decorate(span, () -> deque.pollFirst());
   }
 
   @Override
   public V pollLast() {
     Span span = tracingRedissonHelper.buildSpan("pollLast", deque);
-    return tracingRedissonHelper.decorate(span, deque::pollLast);
+    return tracingRedissonHelper.decorate(span, () -> deque.pollLast());
   }
 
   @Override
@@ -144,7 +145,7 @@ public class TracingRDeque<V> extends TracingRQueue<V> implements RDeque<V> {
   @Override
   public V poll() {
     Span span = tracingRedissonHelper.buildSpan("poll", deque);
-    return tracingRedissonHelper.decorate(span, deque::poll);
+    return tracingRedissonHelper.decorate(span, () -> deque.poll());
   }
 
   @Override
@@ -299,4 +300,31 @@ public class TracingRDeque<V> extends TracingRQueue<V> implements RDeque<V> {
     return tracingRedissonHelper.prepareRFuture(span, () -> deque.offerFirstAsync(e));
   }
 
+  @Override
+  public RFuture<List<V>> pollFirstAsync(int limit) {
+    Span span = tracingRedissonHelper.buildSpan("pollFirstAsync", deque);
+    span.setTag("limit", limit);
+    return tracingRedissonHelper.prepareRFuture(span, () -> deque.pollFirstAsync(limit));
+  }
+
+  @Override
+  public RFuture<List<V>> pollLastAsync(int limit) {
+    Span span = tracingRedissonHelper.buildSpan("pollLastAsync", deque);
+    span.setTag("limit", limit);
+    return tracingRedissonHelper.prepareRFuture(span, () -> deque.pollLastAsync(limit));
+  }
+
+  @Override
+  public List<V> pollLast(int limit) {
+    Span span = tracingRedissonHelper.buildSpan("pollLast", deque);
+    span.setTag("limit", limit);
+    return tracingRedissonHelper.decorate(span, () -> deque.pollLast(limit));
+  }
+
+  @Override
+  public List<V> pollFirst(int limit) {
+    Span span = tracingRedissonHelper.buildSpan("pollFirst", deque);
+    span.setTag("limit", limit);
+    return tracingRedissonHelper.decorate(span, () -> deque.pollFirst(limit));
+  }
 }

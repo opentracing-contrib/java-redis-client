@@ -65,6 +65,20 @@ public class TracingRCountDownLatch extends TracingRObject implements RCountDown
   }
 
   @Override
+  public RFuture<Void> awaitAsync() {
+    Span span = tracingRedissonHelper.buildSpan("awaitAsync", latch);
+    return tracingRedissonHelper.prepareRFuture(span, latch::awaitAsync);
+  }
+
+  @Override
+  public RFuture<Boolean> awaitAsync(long waitTime, TimeUnit unit) {
+    Span span = tracingRedissonHelper.buildSpan("awaitAsync", latch);
+    span.setTag("waitTime", waitTime);
+    span.setTag("unit", nullable(unit));
+    return tracingRedissonHelper.prepareRFuture(span, () -> latch.awaitAsync(waitTime, unit));
+  }
+
+  @Override
   public RFuture<Void> countDownAsync() {
     Span span = tracingRedissonHelper.buildSpan("countDownAsync", latch);
     return tracingRedissonHelper.prepareRFuture(span, latch::countDownAsync);

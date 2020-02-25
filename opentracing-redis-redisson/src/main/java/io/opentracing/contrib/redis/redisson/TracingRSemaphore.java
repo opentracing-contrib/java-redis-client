@@ -114,6 +114,13 @@ public class TracingRSemaphore extends TracingRExpirable implements RSemaphore {
   }
 
   @Override
+  public void addPermits(int permits) {
+    Span span = tracingRedissonHelper.buildSpan("addPermits", semaphore);
+    span.setTag("permits", permits);
+    tracingRedissonHelper.decorate(span, () -> semaphore.addPermits(permits));
+  }
+
+  @Override
   public RFuture<Boolean> tryAcquireAsync() {
     Span span = tracingRedissonHelper.buildSpan("tryAcquireAsync", semaphore);
     return tracingRedissonHelper.prepareRFuture(span, semaphore::tryAcquireAsync);
@@ -183,6 +190,25 @@ public class TracingRSemaphore extends TracingRExpirable implements RSemaphore {
     Span span = tracingRedissonHelper.buildSpan("reducePermitsAsync", semaphore);
     span.setTag("permits", permits);
     return tracingRedissonHelper.prepareRFuture(span, () -> semaphore.reducePermitsAsync(permits));
+  }
+
+  @Override
+  public RFuture<Void> addPermitsAsync(int permits) {
+    Span span = tracingRedissonHelper.buildSpan("addPermitsAsync", semaphore);
+    span.setTag("permits", permits);
+    return tracingRedissonHelper.prepareRFuture(span, () -> semaphore.addPermitsAsync(permits));
+  }
+
+  @Override
+  public RFuture<Integer> availablePermitsAsync() {
+    Span span = tracingRedissonHelper.buildSpan("availablePermitsAsync", semaphore);
+    return tracingRedissonHelper.prepareRFuture(span, () -> semaphore.availablePermitsAsync());
+  }
+
+  @Override
+  public RFuture<Integer> drainPermitsAsync() {
+    Span span = tracingRedissonHelper.buildSpan("drainPermitsAsync", semaphore);
+    return tracingRedissonHelper.prepareRFuture(span, () -> semaphore.drainPermitsAsync());
   }
 
 }

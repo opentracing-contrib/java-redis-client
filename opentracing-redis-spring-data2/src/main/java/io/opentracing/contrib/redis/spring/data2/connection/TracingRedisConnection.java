@@ -50,6 +50,13 @@ import org.springframework.data.redis.connection.ReturnType;
 import org.springframework.data.redis.connection.SortParameters;
 import org.springframework.data.redis.connection.Subscription;
 import org.springframework.data.redis.connection.ValueEncoding;
+import org.springframework.data.redis.connection.stream.ByteRecord;
+import org.springframework.data.redis.connection.stream.Consumer;
+import org.springframework.data.redis.connection.stream.MapRecord;
+import org.springframework.data.redis.connection.stream.ReadOffset;
+import org.springframework.data.redis.connection.stream.RecordId;
+import org.springframework.data.redis.connection.stream.StreamOffset;
+import org.springframework.data.redis.connection.stream.StreamReadOptions;
 import org.springframework.data.redis.core.Cursor;
 import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.data.redis.core.types.Expiration;
@@ -1288,4 +1295,70 @@ public class TracingRedisConnection implements RedisConnection {
         () -> connection.pfMerge(destinationKey, sourceKeys));
   }
 
+  @Override
+  public Long xAck(byte[] key, String group, RecordId... recordIds) {
+    return helper.doInScope(RedisCommand.XACK, () -> connection.xAck(key, group, recordIds));
+  }
+
+  @Override
+  public RecordId xAdd(MapRecord<byte[], byte[], byte[]> record) {
+    return helper.doInScope(RedisCommand.XADD, () -> connection.xAdd(record));
+  }
+
+  @Override
+  public Long xDel(byte[] key, RecordId... recordIds) {
+    return helper.doInScope(RedisCommand.XDEL, () -> connection.xDel(key, recordIds));
+  }
+
+  @Override
+  public String xGroupCreate(byte[] key, String groupName, ReadOffset readOffset) {
+    return helper.doInScope(RedisCommand.XGROUPCREATE,
+        () -> connection.xGroupCreate(key, groupName, readOffset));
+  }
+
+  @Override
+  public Boolean xGroupDelConsumer(byte[] key, Consumer consumer) {
+    return helper.doInScope(RedisCommand.XGROUPDELCONSUMER,
+        () -> connection.xGroupDelConsumer(key, consumer));
+  }
+
+  @Override
+  public Boolean xGroupDestroy(byte[] key, String groupName) {
+    return helper
+        .doInScope(RedisCommand.XGROUPDESTROY, () -> connection.xGroupDestroy(key, groupName));
+  }
+
+  @Override
+  public Long xLen(byte[] key) {
+    return helper.doInScope(RedisCommand.XLEN, () -> connection.xLen(key));
+  }
+
+  @Override
+  public List<ByteRecord> xRange(byte[] key, org.springframework.data.domain.Range<String> range,
+      Limit limit) {
+    return helper.doInScope(RedisCommand.XRANGE, () -> connection.xRange(key, range, limit));
+  }
+
+  @Override
+  public List<ByteRecord> xRead(StreamReadOptions readOptions, StreamOffset<byte[]>... streams) {
+    return helper.doInScope(RedisCommand.XREAD, () -> connection.xRead(readOptions, streams));
+  }
+
+  @Override
+  public List<ByteRecord> xReadGroup(Consumer consumer, StreamReadOptions readOptions,
+      StreamOffset<byte[]>... streams) {
+    return helper.doInScope(RedisCommand.XREADGROUP,
+        () -> connection.xReadGroup(consumer, readOptions, streams));
+  }
+
+  @Override
+  public List<ByteRecord> xRevRange(byte[] key, org.springframework.data.domain.Range<String> range,
+      Limit limit) {
+    return helper.doInScope(RedisCommand.XREVRANGE, () -> connection.xRevRange(key, range, limit));
+  }
+
+  @Override
+  public Long xTrim(byte[] key, long count) {
+    return helper.doInScope(RedisCommand.XTRIM, () -> connection.xTrim(key, count));
+  }
 }

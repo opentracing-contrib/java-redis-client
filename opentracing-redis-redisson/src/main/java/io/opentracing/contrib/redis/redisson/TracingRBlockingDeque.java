@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 import org.redisson.api.RBlockingDeque;
 import org.redisson.api.RFuture;
 
@@ -55,6 +56,18 @@ public class TracingRBlockingDeque<V> extends TracingRDeque<V> implements RBlock
     span.setTag("queueNames", Arrays.toString(queueNames));
     return tracingRedissonHelper
         .decorateThrowing(span, () -> deque.pollLastFromAny(timeout, unit, queueNames));
+  }
+
+  @Override
+  public int subscribeOnFirstElements(Consumer<V> consumer) {
+    Span span = tracingRedissonHelper.buildSpan("subscribeOnFirstElements", deque);
+    return tracingRedissonHelper.decorate(span, () -> deque.subscribeOnFirstElements(consumer));
+  }
+
+  @Override
+  public int subscribeOnLastElements(Consumer<V> consumer) {
+    Span span = tracingRedissonHelper.buildSpan("subscribeOnLastElements", deque);
+    return tracingRedissonHelper.decorate(span, () -> deque.subscribeOnLastElements(consumer));
   }
 
   @Override
@@ -306,6 +319,19 @@ public class TracingRBlockingDeque<V> extends TracingRDeque<V> implements RBlock
     span.setTag("queueName", nullable(queueName));
     return tracingRedissonHelper
         .decorateThrowing(span, () -> deque.takeLastAndOfferFirstTo(queueName));
+  }
+
+  @Override
+  public int subscribeOnElements(Consumer<V> consumer) {
+    Span span = tracingRedissonHelper.buildSpan("subscribeOnElements", deque);
+    return tracingRedissonHelper.decorate(span, () -> deque.subscribeOnElements(consumer));
+  }
+
+  @Override
+  public void unsubscribe(int listenerId) {
+    Span span = tracingRedissonHelper.buildSpan("unsubscribe", deque);
+    span.setTag("listenerId", listenerId);
+    tracingRedissonHelper.decorate(span, () -> deque.unsubscribe(listenerId));
   }
 
   @Override

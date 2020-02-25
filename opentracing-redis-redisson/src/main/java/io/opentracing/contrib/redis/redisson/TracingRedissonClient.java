@@ -73,6 +73,7 @@ import org.redisson.api.RSortedSet;
 import org.redisson.api.RStream;
 import org.redisson.api.RTopic;
 import org.redisson.api.RTransaction;
+import org.redisson.api.RTransferQueue;
 import org.redisson.api.RedissonClient;
 import org.redisson.api.TransactionOptions;
 import org.redisson.client.codec.Codec;
@@ -375,6 +376,18 @@ public class TracingRedissonClient implements RedissonClient {
   }
 
   @Override
+  public <V> RTransferQueue<V> getTransferQueue(String name) {
+    return new TracingRTransferQueue<>(redissonClient.getTransferQueue(name),
+        tracingRedissonHelper);
+  }
+
+  @Override
+  public <V> RTransferQueue<V> getTransferQueue(String name, Codec codec) {
+    return new TracingRTransferQueue<>(redissonClient.getTransferQueue(name, codec),
+        tracingRedissonHelper);
+  }
+
+  @Override
   public <V> RDelayedQueue<V> getDelayedQueue(RQueue<V> destinationQueue) {
     return new TracingRDelayedQueue<>(redissonClient.getDelayedQueue(destinationQueue),
         tracingRedissonHelper);
@@ -657,5 +670,10 @@ public class TracingRedissonClient implements RedissonClient {
   @Override
   public boolean isShuttingDown() {
     return redissonClient.isShuttingDown();
+  }
+
+  @Override
+  public String getId() {
+    return redissonClient.getId();
   }
 }

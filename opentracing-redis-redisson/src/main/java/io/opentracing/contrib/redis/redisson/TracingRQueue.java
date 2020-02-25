@@ -50,6 +50,13 @@ public class TracingRQueue<V> extends TracingRExpirable implements RQueue<V> {
   }
 
   @Override
+  public List<V> poll(int limit) {
+    Span span = tracingRedissonHelper.buildSpan("poll", queue);
+    span.setTag("limit", limit);
+    return tracingRedissonHelper.decorate(span, () -> queue.poll(limit));
+  }
+
+  @Override
   public boolean add(V v) {
     Span span = tracingRedissonHelper.buildSpan("add", queue);
     span.setTag("element", nullable(v));
@@ -72,7 +79,7 @@ public class TracingRQueue<V> extends TracingRExpirable implements RQueue<V> {
   @Override
   public V poll() {
     Span span = tracingRedissonHelper.buildSpan("poll", queue);
-    return tracingRedissonHelper.decorate(span, queue::poll);
+    return tracingRedissonHelper.decorate(span, () -> queue.poll());
   }
 
   @Override
@@ -220,6 +227,13 @@ public class TracingRQueue<V> extends TracingRExpirable implements RQueue<V> {
   public RFuture<List<V>> readAllAsync() {
     Span span = tracingRedissonHelper.buildSpan("readAllAsync", queue);
     return tracingRedissonHelper.prepareRFuture(span, queue::readAllAsync);
+  }
+
+  @Override
+  public RFuture<List<V>> pollAsync(int limit) {
+    Span span = tracingRedissonHelper.buildSpan("pollAsync", queue);
+    span.setTag("limit", limit);
+    return tracingRedissonHelper.prepareRFuture(span, () -> queue.pollAsync(limit));
   }
 
   @Override

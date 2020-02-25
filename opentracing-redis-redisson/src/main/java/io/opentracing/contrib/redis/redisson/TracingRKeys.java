@@ -17,7 +17,6 @@ import static io.opentracing.contrib.redis.common.TracingHelper.nullable;
 
 import io.opentracing.Span;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 import org.redisson.api.RFuture;
@@ -202,14 +201,6 @@ public class TracingRKeys implements RKeys {
   }
 
   @Override
-  @Deprecated
-  public Collection<String> findKeysByPattern(String pattern) {
-    Span span = tracingRedissonHelper.buildSpan("findKeysByPattern");
-    span.setTag("pattern", nullable(pattern));
-    return tracingRedissonHelper.decorate(span, () -> keys.findKeysByPattern(pattern));
-  }
-
-  @Override
   public long deleteByPattern(String pattern) {
     Span span = tracingRedissonHelper.buildSpan("deleteByPattern");
     span.setTag("pattern", nullable(pattern));
@@ -380,14 +371,6 @@ public class TracingRKeys implements RKeys {
   public RFuture<String> randomKeyAsync() {
     Span span = tracingRedissonHelper.buildSpan("randomKeyAsync");
     return tracingRedissonHelper.prepareRFuture(span, keys::randomKeyAsync);
-  }
-
-  @Override
-  @Deprecated
-  public RFuture<Collection<String>> findKeysByPatternAsync(String pattern) {
-    Span span = tracingRedissonHelper.buildSpan("findKeysByPatternAsync");
-    span.setTag("pattern", nullable(pattern));
-    return tracingRedissonHelper.prepareRFuture(span, () -> keys.findKeysByPatternAsync(pattern));
   }
 
   @Override

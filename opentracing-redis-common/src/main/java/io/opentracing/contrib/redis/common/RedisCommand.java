@@ -257,6 +257,12 @@ public final class RedisCommand {
   public static final String IDLETIME = "IDLETIME";
   public static final String REFCOUNT = "REFCOUNT";
   public static final String EXECUTE = "EXECUTE";
+  public static final String XACK = "XACK";
+  public static final String XDEL = "XDEL";
+  public static final String XGROUPCREATE = "XGROUPCREATE";
+  public static final String XGROUPDELCONSUMER = "XGROUPDELCONSUMER";
+  public static final String XGROUPDESTROY = "XGROUPDESTROY";
+  public static final String XTRIM = "XTRIM";
 
   private RedisCommand() {
   }

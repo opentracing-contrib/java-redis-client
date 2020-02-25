@@ -24,6 +24,7 @@ import org.springframework.data.redis.connection.ReactiveClusterListCommands;
 import org.springframework.data.redis.connection.ReactiveClusterNumberCommands;
 import org.springframework.data.redis.connection.ReactiveClusterServerCommands;
 import org.springframework.data.redis.connection.ReactiveClusterSetCommands;
+import org.springframework.data.redis.connection.ReactiveClusterStreamCommands;
 import org.springframework.data.redis.connection.ReactiveClusterStringCommands;
 import org.springframework.data.redis.connection.ReactiveClusterZSetCommands;
 import org.springframework.data.redis.connection.ReactivePubSubCommands;
@@ -96,6 +97,11 @@ public class TracingReactiveRedisClusterConnection implements ReactiveRedisClust
   @Override
   public ReactiveClusterServerCommands serverCommands() {
     return reactiveRedisClusterConnection.serverCommands();
+  }
+
+  @Override
+  public ReactiveClusterStreamCommands streamCommands() {
+    return reactiveRedisClusterConnection.streamCommands();
   }
 
   @Override

@@ -19,6 +19,7 @@ import io.opentracing.Span;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 import org.redisson.api.RBlockingQueue;
 import org.redisson.api.RFuture;
 
@@ -61,6 +62,19 @@ public class TracingRBlockingQueue<V> extends TracingRQueue<V> implements RBlock
     span.setTag("queueName", nullable(queueName));
     return tracingRedissonHelper
         .decorateThrowing(span, () -> queue.takeLastAndOfferFirstTo(queueName));
+  }
+
+  @Override
+  public int subscribeOnElements(Consumer<V> consumer) {
+    Span span = tracingRedissonHelper.buildSpan("subscribeOnElements", queue);
+    return tracingRedissonHelper.decorate(span, () -> queue.subscribeOnElements(consumer));
+  }
+
+  @Override
+  public void unsubscribe(int listenerId) {
+    Span span = tracingRedissonHelper.buildSpan("unsubscribe", queue);
+    span.setTag("listenerId", listenerId);
+    tracingRedissonHelper.decorate(span, () -> queue.unsubscribe(listenerId));
   }
 
   @Override
