@@ -27,6 +27,7 @@ import java.util.Set;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLParameters;
 import javax.net.ssl.SSLSocketFactory;
+import redis.clients.jedis.commands.ProtocolCommand;
 import redis.clients.jedis.params.ClientKillParams;
 import redis.clients.jedis.params.GeoRadiusParam;
 import redis.clients.jedis.params.MigrateParams;
@@ -167,6 +168,418 @@ public class TracingJedisWrapper extends Jedis {
   public TracingJedisWrapper(Jedis jedis, TracingConfiguration tracingConfiguration) {
     this.wrapped = jedis;
     this.helper = new TracingHelper(tracingConfiguration);
+  }
+
+  @Override
+  public Tuple zpopmax(String key) {
+    Span span = helper.buildSpan("zpopmax");
+    span.setTag("key", key);
+    return helper.decorate(span, () -> wrapped.zpopmax(key));
+  }
+
+  @Override
+  public Set<Tuple> zpopmax(String key, int count) {
+    Span span = helper.buildSpan("zpopmax");
+    span.setTag("key", key);
+    span.setTag("count", count);
+    return helper.decorate(span, () -> wrapped.zpopmax(key, count));
+  }
+
+  @Override
+  public Tuple zpopmin(String key) {
+    Span span = helper.buildSpan("zpopmin");
+    span.setTag("key", key);
+    return helper.decorate(span, () -> wrapped.zpopmin(key));
+  }
+
+  @Override
+  public Set<Tuple> zpopmin(String key, int count) {
+    Span span = helper.buildSpan("zpopmin");
+    span.setTag("key", key);
+    span.setTag("count", count);
+    return helper.decorate(span, () -> wrapped.zpopmin(key, count));
+  }
+
+  @Override
+  public String memoryDoctor() {
+    Span span = helper.buildSpan("memoryDoctor");
+    return helper.decorate(span, () -> wrapped.memoryDoctor());
+  }
+
+  @Override
+  public StreamEntryID xadd(String key, StreamEntryID id,
+      Map<String, String> hash) {
+    Span span = helper.buildSpan("xadd");
+    span.setTag("key", key);
+    span.setTag("id", nullable(id));
+    return helper.decorate(span, () -> wrapped.xadd(key, id, hash));
+  }
+
+  @Override
+  public StreamEntryID xadd(String key, StreamEntryID id,
+      Map<String, String> hash, long maxLen, boolean approximateLength) {
+    Span span = helper.buildSpan("xadd");
+    span.setTag("key", key);
+    span.setTag("id", nullable(id));
+    span.setTag("maxLen", maxLen);
+    span.setTag("approximateLength", approximateLength);
+    return helper.decorate(span, () -> wrapped.xadd(key, id, hash, maxLen, approximateLength));
+  }
+
+  @Override
+  public Long xlen(String key) {
+    Span span = helper.buildSpan("xlen");
+    span.setTag("key", key);
+    return helper.decorate(span, () -> wrapped.xlen(key));
+  }
+
+  @Override
+  public List<StreamEntry> xrange(String key, StreamEntryID start,
+      StreamEntryID end, int count) {
+    Span span = helper.buildSpan("xrange");
+    span.setTag("key", key);
+    span.setTag("start", nullable(start));
+    span.setTag("end", nullable(end));
+    span.setTag("count", count);
+    return helper.decorate(span, () -> wrapped.xrange(key, start, end, count));
+  }
+
+  @Override
+  public List<StreamEntry> xrevrange(String key, StreamEntryID end,
+      StreamEntryID start, int count) {
+    Span span = helper.buildSpan("xrevrange");
+    span.setTag("key", key);
+    span.setTag("start", nullable(start));
+    span.setTag("end", nullable(end));
+    span.setTag("count", count);
+    return helper.decorate(span, () -> wrapped.xrevrange(key, start, end, count));
+  }
+
+  @Override
+  public List<Entry<String, List<StreamEntry>>> xread(int count, long block,
+      Entry<String, StreamEntryID>... streams) {
+    Span span = helper.buildSpan("xread");
+    span.setTag("count", count);
+    span.setTag("block", block);
+    return helper.decorate(span, () -> wrapped.xread(count, block, streams));
+  }
+
+  @Override
+  public long xack(String key, String group, StreamEntryID... ids) {
+    Span span = helper.buildSpan("xack");
+    span.setTag("key", key);
+    span.setTag("group", group);
+    span.setTag("ids", Arrays.toString(ids));
+    return helper.decorate(span, () -> wrapped.xack(key, group, ids));
+  }
+
+  @Override
+  public String xgroupCreate(String key, String groupname, StreamEntryID id, boolean makeStream) {
+    Span span = helper.buildSpan("xgroupCreate");
+    span.setTag("key", key);
+    span.setTag("groupname", groupname);
+    span.setTag("id", nullable(id));
+    span.setTag("makeStream", makeStream);
+    return helper.decorate(span, () -> wrapped.xgroupCreate(key, groupname, id, makeStream));
+  }
+
+  @Override
+  public String xgroupSetID(String key, String groupname, StreamEntryID id) {
+    Span span = helper.buildSpan("xgroupSetID");
+    span.setTag("key", key);
+    span.setTag("groupname", groupname);
+    span.setTag("id", nullable(id));
+    return helper.decorate(span, () -> wrapped.xgroupSetID(key, groupname, id));
+  }
+
+  @Override
+  public long xgroupDestroy(String key, String groupname) {
+    Span span = helper.buildSpan("xgroupDestroy");
+    span.setTag("key", key);
+    span.setTag("groupname", groupname);
+    return helper.decorate(span, () -> wrapped.xgroupDestroy(key, groupname));
+  }
+
+  @Override
+  public String xgroupDelConsumer(String key, String groupname, String consumerName) {
+    Span span = helper.buildSpan("xgroupDelConsumer");
+    span.setTag("key", key);
+    span.setTag("groupname", groupname);
+    span.setTag("consumerName", consumerName);
+    return helper.decorate(span, () -> wrapped.xgroupDelConsumer(key, groupname, consumerName));
+  }
+
+  @Override
+  public long xdel(String key, StreamEntryID... ids) {
+    Span span = helper.buildSpan("xdel");
+    span.setTag("key", key);
+    span.setTag("ids", Arrays.toString(ids));
+    return helper.decorate(span, () -> wrapped.xdel(key, ids));
+  }
+
+  @Override
+  public long xtrim(String key, long maxLen, boolean approximateLength) {
+    Span span = helper.buildSpan("xtrim");
+    span.setTag("key", key);
+    span.setTag("maxLen", maxLen);
+    span.setTag("approximateLength", approximateLength);
+    return helper.decorate(span, () -> wrapped.xtrim(key, maxLen, approximateLength));
+  }
+
+  @Override
+  public List<Entry<String, List<StreamEntry>>> xreadGroup(String groupname, String consumer,
+      int count, long block, boolean noAck,
+      Entry<String, StreamEntryID>... streams) {
+    Span span = helper.buildSpan("xreadGroup");
+    span.setTag("groupname", groupname);
+    span.setTag("consumer", consumer);
+    span.setTag("count", count);
+    span.setTag("block", block);
+    span.setTag("noAck", noAck);
+    return helper
+        .decorate(span, () -> wrapped.xreadGroup(groupname, consumer, count, block, noAck));
+  }
+
+  @Override
+  public List<StreamPendingEntry> xpending(String key, String groupname,
+      StreamEntryID start, StreamEntryID end, int count, String consumername) {
+    Span span = helper.buildSpan("xpending");
+    span.setTag("key", key);
+    span.setTag("groupname", groupname);
+    span.setTag("start", nullable(start));
+    span.setTag("end", nullable(end));
+    span.setTag("count", count);
+    span.setTag("consumername", consumername);
+    return helper
+        .decorate(span, () -> wrapped.xpending(key, groupname, start, end, count, consumername));
+  }
+
+  @Override
+  public List<StreamEntry> xclaim(String key, String group, String consumername, long minIdleTime,
+      long newIdleTime, int retries, boolean force, StreamEntryID... ids) {
+    Span span = helper.buildSpan("xclaim");
+    span.setTag("key", key);
+    span.setTag("group", group);
+    span.setTag("consumername", consumername);
+    span.setTag("minIdleTime", minIdleTime);
+    span.setTag("retries", retries);
+    span.setTag("force", force);
+    span.setTag("ids", Arrays.toString(ids));
+    return helper
+        .decorate(span, () -> wrapped
+            .xclaim(key, group, consumername, minIdleTime, newIdleTime, retries, force, ids));
+  }
+
+  @Override
+  public Object sendCommand(ProtocolCommand cmd,
+      String... args) {
+    Span span = helper.buildSpan("sendCommand");
+    span.setTag("cmd", nullable(cmd));
+    span.setTag("args", Arrays.toString(args));
+    return helper.decorate(span, () -> wrapped.sendCommand(cmd, args));
+  }
+
+  @Override
+  public Tuple zpopmax(byte[] key) {
+    Span span = helper.buildSpan("zpopmax");
+    span.setTag("key", Arrays.toString(key));
+    return helper.decorate(span, () -> wrapped.zpopmax(key));
+  }
+
+  @Override
+  public Set<Tuple> zpopmax(byte[] key, int count) {
+    Span span = helper.buildSpan("zpopmax");
+    span.setTag("key", Arrays.toString(key));
+    span.setTag("count", count);
+    return helper.decorate(span, () -> wrapped.zpopmax(key, count));
+  }
+
+  @Override
+  public Tuple zpopmin(byte[] key) {
+    Span span = helper.buildSpan("zpopmin");
+    span.setTag("key", Arrays.toString(key));
+    return helper.decorate(span, () -> wrapped.zpopmin(key));
+  }
+
+  @Override
+  public Set<Tuple> zpopmin(byte[] key, int count) {
+    Span span = helper.buildSpan("zpopmin");
+    span.setTag("key", Arrays.toString(key));
+    span.setTag("count", count);
+    return helper.decorate(span, () -> wrapped.zpopmin(key, count));
+  }
+
+  @Override
+  public byte[] memoryDoctorBinary() {
+    Span span = helper.buildSpan("memoryDoctorBinary");
+    return helper.decorate(span, () -> wrapped.memoryDoctorBinary());
+  }
+
+  @Override
+  public List<byte[]> xread(int count, long block, Map<byte[], byte[]> streams) {
+    Span span = helper.buildSpan("xread");
+    span.setTag("count", count);
+    span.setTag("block", block);
+    return helper.decorate(span, () -> wrapped.xread(count, block, streams));
+  }
+
+  @Override
+  public List<byte[]> xreadGroup(byte[] groupname, byte[] consumer, int count, long block,
+      boolean noAck, Map<byte[], byte[]> streams) {
+    Span span = helper.buildSpan("xreadGroup");
+    span.setTag("groupname", Arrays.toString(groupname));
+    span.setTag("consumer", Arrays.toString(consumer));
+    span.setTag("count", count);
+    span.setTag("block", block);
+    span.setTag("noAck", noAck);
+    return helper.decorate(span,
+        () -> wrapped.xreadGroup(groupname, consumer, count, block, noAck, streams));
+  }
+
+  @Override
+  public byte[] xadd(byte[] key, byte[] id, Map<byte[], byte[]> hash, long maxLen,
+      boolean approximateLength) {
+    Span span = helper.buildSpan("xadd");
+    span.setTag("key", Arrays.toString(key));
+    span.setTag("id", Arrays.toString(id));
+    span.setTag("maxLen", maxLen);
+    span.setTag("approximateLength", approximateLength);
+    return helper.decorate(span, () -> wrapped.xadd(key, id, hash, maxLen, approximateLength));
+  }
+
+  @Override
+  public Long xlen(byte[] key) {
+    Span span = helper.buildSpan("xlen");
+    span.setTag("key", Arrays.toString(key));
+    return helper.decorate(span, () -> wrapped.xlen(key));
+  }
+
+  @Override
+  public List<byte[]> xrange(byte[] key, byte[] start, byte[] end, long count) {
+    Span span = helper.buildSpan("xrange");
+    span.setTag("key", Arrays.toString(key));
+    span.setTag("start", Arrays.toString(start));
+    span.setTag("end", Arrays.toString(end));
+    span.setTag("count", count);
+    return helper.decorate(span, () -> wrapped.xrange(key, start, end, count));
+  }
+
+  @Override
+  public List<byte[]> xrevrange(byte[] key, byte[] end, byte[] start, int count) {
+    Span span = helper.buildSpan("xrevrange");
+    span.setTag("key", Arrays.toString(key));
+    span.setTag("end", Arrays.toString(end));
+    span.setTag("start", Arrays.toString(start));
+    span.setTag("count", count);
+    return helper.decorate(span, () -> wrapped.xrevrange(key, end, start, count));
+  }
+
+  @Override
+  public Long xack(byte[] key, byte[] group, byte[]... ids) {
+    Span span = helper.buildSpan("xack");
+    span.setTag("key", Arrays.toString(key));
+    span.setTag("group", Arrays.toString(group));
+    span.setTag("ids", TracingHelper.toString(ids));
+    return helper.decorate(span, () -> wrapped.xack(key, group, ids));
+  }
+
+  @Override
+  public String xgroupCreate(byte[] key, byte[] consumer, byte[] id, boolean makeStream) {
+    Span span = helper.buildSpan("xgroupCreate");
+    span.setTag("key", Arrays.toString(key));
+    span.setTag("consumer", Arrays.toString(consumer));
+    span.setTag("id", Arrays.toString(id));
+    span.setTag("makeStream", makeStream);
+    return helper.decorate(span, () -> wrapped.xgroupCreate(key, consumer, id, makeStream));
+  }
+
+  @Override
+  public String xgroupSetID(byte[] key, byte[] consumer, byte[] id) {
+    Span span = helper.buildSpan("xgroupSetID");
+    span.setTag("key", Arrays.toString(key));
+    span.setTag("consumer", Arrays.toString(consumer));
+    span.setTag("id", Arrays.toString(id));
+    return helper.decorate(span, () -> wrapped.xgroupSetID(key, consumer, id));
+  }
+
+  @Override
+  public Long xgroupDestroy(byte[] key, byte[] consumer) {
+    Span span = helper.buildSpan("xgroupDestroy");
+    span.setTag("key", Arrays.toString(key));
+    span.setTag("consumer", Arrays.toString(consumer));
+    return helper.decorate(span, () -> wrapped.xgroupDestroy(key, consumer));
+  }
+
+  @Override
+  public String xgroupDelConsumer(byte[] key, byte[] consumer, byte[] consumerName) {
+    Span span = helper.buildSpan("xgroupDelConsumer");
+    span.setTag("key", Arrays.toString(key));
+    span.setTag("consumer", Arrays.toString(consumer));
+    span.setTag("consumerName", Arrays.toString(consumerName));
+    return helper.decorate(span, () -> wrapped.xgroupDelConsumer(key, consumer, consumerName));
+  }
+
+  @Override
+  public Long xdel(byte[] key, byte[]... ids) {
+    Span span = helper.buildSpan("xdel");
+    span.setTag("key", Arrays.toString(key));
+    span.setTag("ids", TracingHelper.toString(ids));
+    return helper.decorate(span, () -> wrapped.xdel(key, ids));
+  }
+
+  @Override
+  public Long xtrim(byte[] key, long maxLen, boolean approximateLength) {
+    Span span = helper.buildSpan("xtrim");
+    span.setTag("key", Arrays.toString(key));
+    span.setTag("maxLen", maxLen);
+    span.setTag("approximateLength", approximateLength);
+    return helper.decorate(span, () -> wrapped.xtrim(key, maxLen, approximateLength));
+  }
+
+  @Override
+  public List<byte[]> xpending(byte[] key, byte[] groupname, byte[] start, byte[] end, int count,
+      byte[] consumername) {
+    Span span = helper.buildSpan("xpending");
+    span.setTag("key", Arrays.toString(key));
+    span.setTag("groupname", Arrays.toString(groupname));
+    span.setTag("start", Arrays.toString(start));
+    span.setTag("end", Arrays.toString(end));
+    span.setTag("count", count);
+    span.setTag("consumername", Arrays.toString(consumername));
+    return helper
+        .decorate(span, () -> wrapped.xpending(key, groupname, start, end, count, consumername));
+  }
+
+  @Override
+  public List<byte[]> xclaim(byte[] key, byte[] groupname, byte[] consumername, long minIdleTime,
+      long newIdleTime, int retries, boolean force, byte[][] ids) {
+    Span span = helper.buildSpan("xclaim");
+    span.setTag("key", Arrays.toString(key));
+    span.setTag("groupname", Arrays.toString(groupname));
+    span.setTag("consumername", Arrays.toString(consumername));
+    span.setTag("minIdleTime", minIdleTime);
+    span.setTag("newIdleTime", newIdleTime);
+    span.setTag("retries", retries);
+    span.setTag("force", force);
+    span.setTag("ids", TracingHelper.toString(ids));
+    return helper
+        .decorate(span, () -> wrapped
+            .xclaim(key, groupname, consumername, minIdleTime, newIdleTime, retries, force, ids));
+  }
+
+  @Override
+  public Object sendCommand(ProtocolCommand cmd, byte[]... args) {
+    Span span = helper.buildSpan("sendCommand");
+    span.setTag("cmd", nullable(cmd));
+    span.setTag("args", TracingHelper.toString(args));
+    return helper.decorate(span, () -> wrapped.sendCommand(cmd, args));
+  }
+
+  @Override
+  public Object sendCommand(ProtocolCommand cmd) {
+    Span span = helper.buildSpan("sendCommand");
+    span.setTag("cmd", nullable(cmd));
+    return helper.decorate(span, () -> wrapped.sendCommand(cmd));
   }
 
   @Override
