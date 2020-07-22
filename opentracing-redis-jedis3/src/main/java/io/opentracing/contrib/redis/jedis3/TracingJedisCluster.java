@@ -20,7 +20,6 @@ import io.opentracing.Span;
 import io.opentracing.contrib.redis.common.TracingConfiguration;
 import io.opentracing.contrib.redis.common.TracingHelper;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -2854,7 +2853,7 @@ public class TracingJedisCluster extends JedisCluster {
   }
 
   @Override
-  public Collection<byte[]> hvals(byte[] key) {
+  public List<byte[]> hvals(byte[] key) {
     Span span = helper.buildSpan("hvals", key);
     try {
       return super.hvals(key);
