@@ -301,7 +301,7 @@ public class TracingJedisWrapper extends Jedis {
   }
 
   @Override
-  public String xgroupDelConsumer(String key, String groupname, String consumerName) {
+  public Long xgroupDelConsumer(String key, String groupname, String consumerName) {
     Span span = helper.buildSpan("xgroupDelConsumer");
     span.setTag("key", key);
     span.setTag("groupname", groupname);
@@ -368,6 +368,92 @@ public class TracingJedisWrapper extends Jedis {
     return helper
         .decorate(span, () -> wrapped
             .xclaim(key, group, consumername, minIdleTime, newIdleTime, retries, force, ids));
+  }
+
+  @Override
+  public StreamInfo xinfoStream(String key) {
+    Span span = helper.buildSpan("xinfoStream");
+    span.setTag("key", key);
+    return helper.decorate(span, () -> wrapped.xinfoStream(key));
+  }
+
+  @Override
+  public StreamInfo xinfoStream(byte[] key) {
+    Span span = helper.buildSpan("xinfoStream");
+    span.setTag("key", Arrays.toString(key));
+    return helper.decorate(span, () -> wrapped.xinfoStream(key));
+  }
+
+  @Override
+  public List<StreamGroupInfo> xinfoGroup(String key) {
+    Span span = helper.buildSpan("xinfoGroup");
+    span.setTag("key", key);
+    return helper.decorate(span, () -> wrapped.xinfoGroup(key));
+  }
+
+  @Override
+  public List<StreamGroupInfo> xinfoGroup(byte[] key) {
+    Span span = helper.buildSpan("xinfoGroup");
+    span.setTag("key", Arrays.toString(key));
+    return helper.decorate(span, () -> wrapped.xinfoGroup(key));
+  }
+
+  @Override
+  public List<StreamConsumersInfo> xinfoConsumers(String key, String group) {
+    Span span = helper.buildSpan("xinfoConsumers");
+    span.setTag("key", key);
+    span.setTag("group", group);
+    return helper.decorate(span, () -> wrapped.xinfoConsumers(key, group));
+  }
+
+  @Override
+  public List<StreamConsumersInfo> xinfoConsumers(byte[] key, byte[] group) {
+    Span span = helper.buildSpan("xinfoConsumers");
+    span.setTag("key", Arrays.toString(key));
+    span.setTag("group", Arrays.toString(group));
+    return helper.decorate(span, () -> wrapped.xinfoConsumers(key, group));
+  }
+
+  @Override
+  public List<Long> bitfieldReadonly(String key, String... arguments) {
+    Span span = helper.buildSpan("bitfieldReadonly");
+    span.setTag("key", key);
+    span.setTag("arguments", Arrays.toString(arguments));
+    return helper.decorate(span, () -> wrapped.bitfieldReadonly(key, arguments));
+  }
+
+  @Override
+  public List<Long> bitfieldReadonly(byte[] key, byte[]... arguments) {
+    Span span = helper.buildSpan("bitfieldReadonly");
+    span.setTag("key", Arrays.toString(key));
+    span.setTag("arguments", Arrays.toString(arguments));
+    return helper.decorate(span, () -> wrapped.bitfieldReadonly(key, arguments));
+  }
+
+  @Override
+  public List<String> objectHelp() {
+    Span span = helper.buildSpan("objectHelp");
+    return helper.decorate(span, () -> wrapped.objectHelp());
+  }
+
+  @Override
+  public List<byte[]> objectHelpBinary() {
+    Span span = helper.buildSpan("objectHelpBinary");
+    return helper.decorate(span, () -> wrapped.objectHelpBinary());
+  }
+
+  @Override
+  public Long objectFreq(String key) {
+    Span span = helper.buildSpan("objectFreq");
+    span.setTag("key", key);
+    return helper.decorate(span, () -> wrapped.objectFreq(key));
+  }
+
+  @Override
+  public Long objectFreq(byte[] key) {
+    Span span = helper.buildSpan("objectFreq");
+    span.setTag("key", Arrays.toString(key));
+    return helper.decorate(span, () -> wrapped.objectFreq(key));
   }
 
   @Override
@@ -511,7 +597,7 @@ public class TracingJedisWrapper extends Jedis {
   }
 
   @Override
-  public String xgroupDelConsumer(byte[] key, byte[] consumer, byte[] consumerName) {
+  public Long xgroupDelConsumer(byte[] key, byte[] consumer, byte[] consumerName) {
     Span span = helper.buildSpan("xgroupDelConsumer");
     span.setTag("key", Arrays.toString(key));
     span.setTag("consumer", Arrays.toString(consumer));
