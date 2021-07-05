@@ -481,6 +481,14 @@ public class TracingJedisWrapper extends Jedis {
   }
 
   @Override
+  public Object sendBlockingCommand(ProtocolCommand cmd, String... args) {
+    Span span = helper.buildSpan("sendBlockingCommand");
+    span.setTag("cmd", nullable(cmd));
+    span.setTag("args", Arrays.toString(args));
+    return helper.decorate(span, () -> wrapped.sendBlockingCommand(cmd, args));
+  }
+
+  @Override
   public Tuple zpopmax(byte[] key) {
     Span span = helper.buildSpan("zpopmax");
     span.setTag("key", Arrays.toString(key));
@@ -687,6 +695,14 @@ public class TracingJedisWrapper extends Jedis {
     span.setTag("cmd", nullable(cmd));
     span.setTag("args", TracingHelper.toString(args));
     return helper.decorate(span, () -> wrapped.sendCommand(cmd, args));
+  }
+
+  @Override
+  public Object sendBlockingCommand(ProtocolCommand cmd, byte[]... args) {
+    Span span = helper.buildSpan("sendBlockingCommand");
+    span.setTag("cmd", nullable(cmd));
+    span.setTag("args", TracingHelper.toString(args));
+    return helper.decorate(span, () -> wrapped.sendBlockingCommand(cmd, args));
   }
 
   @Override
@@ -1088,6 +1104,13 @@ public class TracingJedisWrapper extends Jedis {
   }
 
   @Override
+  public List<String> lpop(String key, int count) {
+    Span span = helper.buildSpan("lpop", key);
+    span.setTag("count", count);
+    return helper.decorate(span, () -> wrapped.lpop(key, count));
+  }
+
+  @Override
   public Long lpos(String key, String element) {
     Span span = helper.buildSpan("lpos", key);
     span.setTag("element", element);
@@ -1115,6 +1138,13 @@ public class TracingJedisWrapper extends Jedis {
   public String rpop(String key) {
     Span span = helper.buildSpan("rpop", key);
     return helper.decorate(span, () -> wrapped.rpop(key));
+  }
+
+  @Override
+  public List<String> rpop(String key, int count) {
+    Span span = helper.buildSpan("rpop", key);
+    span.setTag("count", count);
+    return helper.decorate(span, () -> wrapped.rpop(key, count));
   }
 
   @Override
@@ -3138,6 +3168,13 @@ public class TracingJedisWrapper extends Jedis {
   }
 
   @Override
+  public List<byte[]> lpop(byte[] key, int count) {
+    Span span = helper.buildSpan("lpop", key);
+    span.setTag("count", count);
+    return helper.decorate(span, () -> wrapped.lpop(key, count));
+  }
+
+  @Override
   public Long lpos(byte[] key, byte[] element) {
     Span span = helper.buildSpan("lpos", key);
     span.setTag("element", Arrays.toString(element));
@@ -3165,6 +3202,13 @@ public class TracingJedisWrapper extends Jedis {
   public byte[] rpop(byte[] key) {
     Span span = helper.buildSpan("rpop", key);
     return helper.decorate(span, () -> wrapped.rpop(key));
+  }
+
+  @Override
+  public List<byte[]> rpop(byte[] key, int count) {
+    Span span = helper.buildSpan("rpop", key);
+    span.setTag("count", count);
+    return helper.decorate(span, () -> wrapped.rpop(key, count));
   }
 
   @Override
