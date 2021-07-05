@@ -2500,6 +2500,72 @@ public class TracingJedisWrapper extends Jedis {
   }
 
   @Override
+  public String aclSetUser(String name) {
+    Span span = helper.buildSpan("aclSetUser");
+    span.setTag("name", name);
+    return helper.decorate(span, () -> wrapped.aclSetUser(name));
+  }
+
+  @Override
+  public String aclSetUser(String name, String... params) {
+    Span span = helper.buildSpan("aclSetUser");
+    span.setTag("name", name);
+    span.setTag("params", Arrays.toString(params));
+    return helper.decorate(span, () -> wrapped.aclSetUser(name, params));
+  }
+
+  @Override
+  public Long aclDelUser(String name) {
+    Span span = helper.buildSpan("aclDelUser");
+    span.setTag("name", name);
+    return helper.decorate(span, () -> wrapped.aclDelUser(name));
+  }
+
+  @Override
+  public AccessControlUser aclGetUser(String name) {
+    Span span = helper.buildSpan("aclGetUser");
+    span.setTag("name", name);
+    return helper.decorate(span, () -> wrapped.aclGetUser(name));
+  }
+
+  @Override
+  public List<String> aclUsers() {
+    Span span = helper.buildSpan("aclUsers");
+    return helper.decorate(span, wrapped::aclUsers);
+  }
+
+  @Override
+  public List<String> aclList() {
+    Span span = helper.buildSpan("aclList");
+    return helper.decorate(span, wrapped::aclList);
+  }
+
+  @Override
+  public String aclWhoAmI() {
+    Span span = helper.buildSpan("aclWhoAmI");
+    return helper.decorate(span, wrapped::aclWhoAmI);
+  }
+
+  @Override
+  public List<String> aclCat() {
+    Span span = helper.buildSpan("aclCat");
+    return helper.decorate(span, () -> wrapped.aclCat());
+  }
+
+  @Override
+  public List<String> aclCat(String category) {
+    Span span = helper.buildSpan("aclCat");
+    span.setTag("category", category);
+    return helper.decorate(span, () -> wrapped.aclCat(category));
+  }
+
+  @Override
+  public String aclGenPass() {
+    Span span = helper.buildSpan("aclGenPass");
+    return helper.decorate(span, wrapped::aclGenPass);
+  }
+
+  @Override
   public List<Long> bitfield(String key, String... arguments) {
     Span span = helper.buildSpan("bitfield", key);
     span.setTag("arguments", Arrays.toString(arguments));
@@ -3302,6 +3368,13 @@ public class TracingJedisWrapper extends Jedis {
   }
 
   @Override
+  public String auth(String user, String password) {
+    Span span = helper.buildSpan("auth");
+    span.setTag("user", user);
+    return helper.decorate(span, () -> wrapped.auth(user, password));
+  }
+
+  @Override
   public Pipeline pipelined() {
     Span span = helper.buildSpan("pipelined");
     return helper.decorate(span, () -> wrapped.pipelined());
@@ -4043,6 +4116,71 @@ public class TracingJedisWrapper extends Jedis {
     span.setTag("milliseconds", milliseconds);
     span.setTag("value", Arrays.toString(value));
     return helper.decorate(span, () -> wrapped.psetex(key, milliseconds, value));
+  }
+
+  @Override
+  public byte[] aclWhoAmIBinary() {
+    Span span = helper.buildSpan("aclWhoAmIBinary");
+    return helper.decorate(span, wrapped::aclWhoAmIBinary);
+  }
+
+  @Override
+  public byte[] aclGenPassBinary() {
+    Span span = helper.buildSpan("aclGenPassBinary");
+    return helper.decorate(span, wrapped::aclGenPassBinary);
+  }
+
+  @Override
+  public List<byte[]> aclListBinary() {
+    Span span = helper.buildSpan("aclListBinary");
+    return helper.decorate(span, wrapped::aclListBinary);
+  }
+
+  @Override
+  public List<byte[]> aclUsersBinary() {
+    Span span = helper.buildSpan("aclUsersBinary");
+    return helper.decorate(span, wrapped::aclUsersBinary);
+  }
+
+  @Override
+  public AccessControlUser aclGetUser(byte[] name) {
+    Span span = helper.buildSpan("aclGetUser");
+    span.setTag("name", Arrays.toString(name));
+    return helper.decorate(span, () -> wrapped.aclGetUser(name));
+  }
+
+  @Override
+  public String aclSetUser(byte[] name) {
+    Span span = helper.buildSpan("aclSetUser");
+    span.setTag("name", Arrays.toString(name));
+    return helper.decorate(span, () -> wrapped.aclSetUser(name));
+  }
+
+  @Override
+  public String aclSetUser(byte[] name, byte[]... keys) {
+    Span span = helper.buildSpan("aclSetUser", keys);
+    span.setTag("name", Arrays.toString(name));
+    return helper.decorate(span, () -> wrapped.aclSetUser(name, keys));
+  }
+
+  @Override
+  public Long aclDelUser(byte[] name) {
+    Span span = helper.buildSpan("aclDelUser");
+    span.setTag("name", Arrays.toString(name));
+    return helper.decorate(span, () -> wrapped.aclDelUser(name));
+  }
+
+  @Override
+  public List<byte[]> aclCatBinary() {
+    Span span = helper.buildSpan("aclCatBinary");
+    return helper.decorate(span, wrapped::aclCatBinary);
+  }
+
+  @Override
+  public List<byte[]> aclCat(byte[] category) {
+    Span span = helper.buildSpan("aclCat");
+    span.setTag("category", Arrays.toString(category));
+    return helper.decorate(span, () -> wrapped.aclCat(category));
   }
 
   @Override
