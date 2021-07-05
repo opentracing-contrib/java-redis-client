@@ -30,6 +30,8 @@ import javax.net.ssl.SSLSocketFactory;
 import redis.clients.jedis.commands.ProtocolCommand;
 import redis.clients.jedis.params.ClientKillParams;
 import redis.clients.jedis.params.GeoRadiusParam;
+import redis.clients.jedis.params.GeoRadiusStoreParam;
+import redis.clients.jedis.params.LPosParams;
 import redis.clients.jedis.params.MigrateParams;
 import redis.clients.jedis.params.SetParams;
 import redis.clients.jedis.params.ZAddParams;
@@ -204,6 +206,19 @@ public class TracingJedisWrapper extends Jedis {
   public String memoryDoctor() {
     Span span = helper.buildSpan("memoryDoctor");
     return helper.decorate(span, () -> wrapped.memoryDoctor());
+  }
+
+  @Override
+  public Long memoryUsage(String key) {
+    Span span = helper.buildSpan("memoryUsage", key);
+    return helper.decorate(span, () -> wrapped.memoryUsage(key));
+  }
+
+  @Override
+  public Long memoryUsage(String key, int samples) {
+    Span span = helper.buildSpan("memoryUsage", key);
+    span.setTag("samples", samples);
+    return helper.decorate(span, () -> wrapped.memoryUsage(key, samples));
   }
 
   @Override
@@ -499,6 +514,19 @@ public class TracingJedisWrapper extends Jedis {
   public byte[] memoryDoctorBinary() {
     Span span = helper.buildSpan("memoryDoctorBinary");
     return helper.decorate(span, () -> wrapped.memoryDoctorBinary());
+  }
+
+  @Override
+  public Long memoryUsage(byte[] key) {
+    Span span = helper.buildSpan("memoryUsage", key);
+    return helper.decorate(span, () -> wrapped.memoryUsage(key));
+  }
+
+  @Override
+  public Long memoryUsage(byte[] key, int samples) {
+    Span span = helper.buildSpan("memoryUsage", key);
+    span.setTag("samples", samples);
+    return helper.decorate(span, () -> wrapped.memoryUsage(key, samples));
   }
 
   @Override
@@ -1060,6 +1088,30 @@ public class TracingJedisWrapper extends Jedis {
   }
 
   @Override
+  public Long lpos(String key, String element) {
+    Span span = helper.buildSpan("lpos", key);
+    span.setTag("element", element);
+    return helper.decorate(span, () -> wrapped.lpos(key, element));
+  }
+
+  @Override
+  public Long lpos(String key, String element, LPosParams params) {
+    Span span = helper.buildSpan("lpos", key);
+    span.setTag("element", element);
+    span.setTag("params", TracingHelper.toString(params.getByteParams()));
+    return helper.decorate(span, () -> wrapped.lpos(key, element, params));
+  }
+
+  @Override
+  public List<Long> lpos(String key, String element, LPosParams params, long count) {
+    Span span = helper.buildSpan("lpos", key);
+    span.setTag("element", element);
+    span.setTag("params", TracingHelper.toString(params.getByteParams()));
+    span.setTag("count", count);
+    return helper.decorate(span, () -> wrapped.lpos(key, element, params, count));
+  }
+
+  @Override
   public String rpop(String key) {
     Span span = helper.buildSpan("rpop", key);
     return helper.decorate(span, () -> wrapped.rpop(key));
@@ -1126,6 +1178,13 @@ public class TracingJedisWrapper extends Jedis {
     Span span = helper.buildSpan("sismember", key);
     span.setTag("member", member);
     return helper.decorate(span, () -> wrapped.sismember(key, member));
+  }
+
+  @Override
+  public List<Boolean> smismember(String key, String... members) {
+    Span span = helper.buildSpan("smismember", key);
+    span.setTag("members", Arrays.toString(members));
+    return helper.decorate(span, () -> wrapped.smismember(key, members));
   }
 
   @Override
@@ -1293,6 +1352,13 @@ public class TracingJedisWrapper extends Jedis {
     Span span = helper.buildSpan("zscore", key);
     span.setTag("member", member);
     return helper.decorate(span, () -> wrapped.zscore(key, member));
+  }
+
+  @Override
+  public List<Double> zmscore(String key, String... members) {
+    Span span = helper.buildSpan("zmscore", key);
+    span.setTag("members", Arrays.toString(members));
+    return helper.decorate(span, () -> wrapped.zmscore(key, members));
   }
 
   @Override
@@ -2035,6 +2101,12 @@ public class TracingJedisWrapper extends Jedis {
   }
 
   @Override
+  public Long clientId() {
+    Span span = helper.buildSpan("clientId");
+    return helper.decorate(span, wrapped::clientId);
+  }
+
+  @Override
   public String migrate(String host, int port, String key, int destinationDb, int timeout) {
     Span span = helper.buildSpan("migrate", key);
     span.setTag("host", host);
@@ -2423,6 +2495,20 @@ public class TracingJedisWrapper extends Jedis {
   }
 
   @Override
+  public Long georadiusStore(String key, double longitude, double latitude, double radius,
+      GeoUnit unit, GeoRadiusParam param, GeoRadiusStoreParam storeParam) {
+    Span span = helper.buildSpan("georadiusStore", key);
+    span.setTag("longitude", longitude);
+    span.setTag("latitude", latitude);
+    span.setTag("radius", radius);
+    span.setTag("unit", unit.name());
+    span.setTag("param", TracingHelper.toString(param.getByteParams()));
+    span.setTag("storeParam", TracingHelper.toString(storeParam.getByteParams()));
+    return helper.decorate(span, () ->
+            wrapped.georadiusStore(key, longitude, latitude, radius, unit, param, storeParam));
+  }
+
+  @Override
   public List<GeoRadiusResponse> georadiusReadonly(String key, double longitude, double latitude,
       double radius, GeoUnit unit, GeoRadiusParam param) {
     Span span = helper.buildSpan("georadiusReadonly", key);
@@ -2465,6 +2551,19 @@ public class TracingJedisWrapper extends Jedis {
     span.setTag("unit", unit.name());
     span.setTag("param", TracingHelper.toString(param.getByteParams()));
     return helper.decorate(span, () -> wrapped.georadiusByMember(key, member, radius, unit, param));
+  }
+
+  @Override
+  public Long georadiusByMemberStore(String key, String member, double radius, GeoUnit unit,
+      GeoRadiusParam param, GeoRadiusStoreParam storeParam) {
+    Span span = helper.buildSpan("georadiusByMemberStore", key);
+    span.setTag("member", member);
+    span.setTag("radius", radius);
+    span.setTag("unit", unit.name());
+    span.setTag("param", TracingHelper.toString(param.getByteParams()));
+    span.setTag("storeParam", TracingHelper.toString(storeParam.getByteParams()));
+    return helper.decorate(span, () ->
+            wrapped.georadiusByMemberStore(key, member, radius, unit, param, storeParam));
   }
 
   @Override
@@ -2557,6 +2656,26 @@ public class TracingJedisWrapper extends Jedis {
     Span span = helper.buildSpan("aclCat");
     span.setTag("category", category);
     return helper.decorate(span, () -> wrapped.aclCat(category));
+  }
+
+  @Override
+  public List<AccessControlLogEntry> aclLog() {
+    Span span = helper.buildSpan("aclLog");
+    return helper.decorate(span, () -> wrapped.aclLog());
+  }
+
+  @Override
+  public List<AccessControlLogEntry> aclLog(int limit) {
+    Span span = helper.buildSpan("aclLog");
+    span.setTag("limit", limit);
+    return helper.decorate(span, () -> wrapped.aclLog(limit));
+  }
+
+  @Override
+  public String aclLog(String options) {
+    Span span = helper.buildSpan("aclLog");
+    span.setTag("options", options);
+    return helper.decorate(span, () -> wrapped.aclLog(options));
   }
 
   @Override
@@ -3019,6 +3138,30 @@ public class TracingJedisWrapper extends Jedis {
   }
 
   @Override
+  public Long lpos(byte[] key, byte[] element) {
+    Span span = helper.buildSpan("lpos", key);
+    span.setTag("element", Arrays.toString(element));
+    return helper.decorate(span, () -> wrapped.lpos(key, element));
+  }
+
+  @Override
+  public Long lpos(byte[] key, byte[] element, LPosParams params) {
+    Span span = helper.buildSpan("lpos", key);
+    span.setTag("element", Arrays.toString(element));
+    span.setTag("params", Arrays.toString(params.getByteParams()));
+    return helper.decorate(span, () -> wrapped.lpos(key, element, params));
+  }
+
+  @Override
+  public List<Long> lpos(byte[] key, byte[] element, LPosParams params, long count) {
+    Span span = helper.buildSpan("lpos", key);
+    span.setTag("element", Arrays.toString(element));
+    span.setTag("params", Arrays.toString(params.getByteParams()));
+    span.setTag("count", count);
+    return helper.decorate(span, () -> wrapped.lpos(key, element, params, count));
+  }
+
+  @Override
   public byte[] rpop(byte[] key) {
     Span span = helper.buildSpan("rpop", key);
     return helper.decorate(span, () -> wrapped.rpop(key));
@@ -3085,6 +3228,13 @@ public class TracingJedisWrapper extends Jedis {
     Span span = helper.buildSpan("sismember", key);
     span.setTag("member", Arrays.toString(member));
     return helper.decorate(span, () -> wrapped.sismember(key, member));
+  }
+
+  @Override
+  public List<Boolean> smismember(byte[] key, byte[]... members) {
+    Span span = helper.buildSpan("smismember", key);
+    span.setTag("members", TracingHelper.toString(members));
+    return helper.decorate(span, () -> wrapped.smismember(key, members));
   }
 
   @Override
@@ -3258,6 +3408,13 @@ public class TracingJedisWrapper extends Jedis {
     Span span = helper.buildSpan("zscore", key);
     span.setTag("member", Arrays.toString(member));
     return helper.decorate(span, () -> wrapped.zscore(key, member));
+  }
+
+  @Override
+  public List<Double> zmscore(byte[] key, byte[]... members) {
+    Span span = helper.buildSpan("zmscore", key);
+    span.setTag("members", TracingHelper.toString(members));
+    return helper.decorate(span, () -> wrapped.zmscore(key, members));
   }
 
   @Override
@@ -4016,13 +4173,13 @@ public class TracingJedisWrapper extends Jedis {
   }
 
   @Override
-  public List<byte[]> slowlogGetBinary() {
+  public List<Object> slowlogGetBinary() {
     Span span = helper.buildSpan("slowlogGetBinary");
     return helper.decorate(span, () -> wrapped.slowlogGetBinary());
   }
 
   @Override
-  public List<byte[]> slowlogGetBinary(long entries) {
+  public List<Object> slowlogGetBinary(long entries) {
     Span span = helper.buildSpan("slowlogGetBinary");
     span.setTag("entries", entries);
     return helper.decorate(span, () -> wrapped.slowlogGetBinary(entries));
@@ -4181,6 +4338,26 @@ public class TracingJedisWrapper extends Jedis {
     Span span = helper.buildSpan("aclCat");
     span.setTag("category", Arrays.toString(category));
     return helper.decorate(span, () -> wrapped.aclCat(category));
+  }
+
+  @Override
+  public List<byte[]> aclLogBinary() {
+    Span span = helper.buildSpan("aclLogBinary");
+    return helper.decorate(span, () -> wrapped.aclLogBinary());
+  }
+
+  @Override
+  public List<byte[]> aclLogBinary(int limit) {
+    Span span = helper.buildSpan("aclLogBinary");
+    span.setTag("limit", limit);
+    return helper.decorate(span, () -> wrapped.aclLogBinary(limit));
+  }
+
+  @Override
+  public byte[] aclLog(byte[] options) {
+    Span span = helper.buildSpan("aclLog");
+    span.setTag("options", Arrays.toString(options));
+    return helper.decorate(span, () -> wrapped.aclLog(options));
   }
 
   @Override
@@ -4440,6 +4617,20 @@ public class TracingJedisWrapper extends Jedis {
   }
 
   @Override
+  public Long georadiusStore(byte[] key, double longitude, double latitude, double radius,
+      GeoUnit unit, GeoRadiusParam param, GeoRadiusStoreParam storeParam) {
+    Span span = helper.buildSpan("georadiusStore", key);
+    span.setTag("longitude", longitude);
+    span.setTag("latitude", latitude);
+    span.setTag("radius", radius);
+    span.setTag("unit", unit.name());
+    span.setTag("param", TracingHelper.toString(param.getByteParams()));
+    span.setTag("storeParam", TracingHelper.toString(storeParam.getByteParams()));
+    return helper.decorate(span, () ->
+            wrapped.georadiusStore(key, longitude, latitude, radius, unit, param, storeParam));
+  }
+
+  @Override
   public List<GeoRadiusResponse> georadiusReadonly(byte[] key, double longitude, double latitude,
       double radius, GeoUnit unit, GeoRadiusParam param) {
     Span span = helper.buildSpan("georadiusReadonly", key);
@@ -4484,6 +4675,19 @@ public class TracingJedisWrapper extends Jedis {
     span.setTag("param", TracingHelper.toString(param.getByteParams()));
     return helper
         .decorate(span, () -> wrapped.georadiusByMember(key, member, radius, unit, param));
+  }
+
+  @Override
+  public Long georadiusByMemberStore(byte[] key, byte[] member, double radius, GeoUnit unit,
+      GeoRadiusParam param, GeoRadiusStoreParam storeParam) {
+    Span span = helper.buildSpan("georadiusByMemberStore", key);
+    span.setTag("member", Arrays.toString(member));
+    span.setTag("radius", radius);
+    span.setTag("unit", unit.name());
+    span.setTag("param", TracingHelper.toString(param.getByteParams()));
+    span.setTag("storeParam", TracingHelper.toString(storeParam.getByteParams()));
+    return helper.decorate(span, () ->
+            wrapped.georadiusByMemberStore(key, member, radius, unit, param, storeParam));
   }
 
   @Override
