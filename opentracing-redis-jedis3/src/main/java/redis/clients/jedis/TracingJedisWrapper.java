@@ -305,7 +305,7 @@ public class TracingJedisWrapper extends Jedis {
     span.setTag("start", nullable(start));
     span.setTag("end", nullable(end));
     span.setTag("count", count);
-    return helper.decorate(span, () -> wrapped.xrevrange(key, start, end, count));
+    return helper.decorate(span, () -> wrapped.xrevrange(key, end, start, count));
   }
 
   @Override
@@ -404,8 +404,8 @@ public class TracingJedisWrapper extends Jedis {
     span.setTag("count", count);
     span.setTag("block", block);
     span.setTag("noAck", noAck);
-    return helper
-        .decorate(span, () -> wrapped.xreadGroup(groupname, consumer, count, block, noAck));
+    return helper.decorate(span, () ->
+            wrapped.xreadGroup(groupname, consumer, count, block, noAck, streams));
   }
 
   @Override
