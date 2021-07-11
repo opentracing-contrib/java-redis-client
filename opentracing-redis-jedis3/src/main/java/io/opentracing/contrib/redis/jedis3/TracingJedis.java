@@ -18,8 +18,11 @@ import java.net.URI;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLParameters;
 import javax.net.ssl.SSLSocketFactory;
+import redis.clients.jedis.HostAndPort;
 import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisClientConfig;
 import redis.clients.jedis.JedisShardInfo;
+import redis.clients.jedis.JedisSocketFactory;
 import redis.clients.jedis.TracingJedisWrapper;
 
 public class TracingJedis extends TracingJedisWrapper {
@@ -28,61 +31,81 @@ public class TracingJedis extends TracingJedisWrapper {
     super(new Jedis(), tracingConfiguration);
   }
 
-  public TracingJedis(final String host, TracingConfiguration tracingConfiguration) {
-    super(new Jedis(host), tracingConfiguration);
+  public TracingJedis(String uri, TracingConfiguration tracingConfiguration) {
+    super(new Jedis(uri), tracingConfiguration);
   }
 
-  public TracingJedis(final String host, final int port,
+  public TracingJedis(HostAndPort hp, TracingConfiguration tracingConfiguration) {
+    super(new Jedis(hp), tracingConfiguration);
+  }
+
+  public TracingJedis(HostAndPort hp, JedisClientConfig config,
       TracingConfiguration tracingConfiguration) {
+    super(new Jedis(hp, config), tracingConfiguration);
+  }
+
+  public TracingJedis(String host, int port, TracingConfiguration tracingConfiguration) {
     super(new Jedis(host, port), tracingConfiguration);
   }
 
-  public TracingJedis(final String host, final int port, final boolean ssl,
+  public TracingJedis(String host, int port, boolean ssl,
       TracingConfiguration tracingConfiguration) {
     super(new Jedis(host, port, ssl), tracingConfiguration);
   }
 
-  public TracingJedis(final String host, final int port, final boolean ssl,
-      final SSLSocketFactory sslSocketFactory, final SSLParameters sslParameters,
-      final HostnameVerifier hostnameVerifier, TracingConfiguration tracingConfiguration) {
+  public TracingJedis(String host, int port, boolean ssl, SSLSocketFactory sslSocketFactory,
+      SSLParameters sslParameters, HostnameVerifier hostnameVerifier,
+      TracingConfiguration tracingConfiguration) {
     super(new Jedis(host, port, ssl, sslSocketFactory, sslParameters, hostnameVerifier),
         tracingConfiguration);
   }
 
-  public TracingJedis(final String host, final int port, final int timeout,
+  public TracingJedis(String host, int port, int timeout,
       TracingConfiguration tracingConfiguration) {
     super(new Jedis(host, port, timeout), tracingConfiguration);
   }
 
-  public TracingJedis(final String host, final int port, final int timeout, final boolean ssl,
+  public TracingJedis(String host, int port, int timeout, boolean ssl,
       TracingConfiguration tracingConfiguration) {
     super(new Jedis(host, port, timeout, ssl), tracingConfiguration);
   }
 
-  public TracingJedis(final String host, final int port, final int timeout, final boolean ssl,
-      final SSLSocketFactory sslSocketFactory, final SSLParameters sslParameters,
-      final HostnameVerifier hostnameVerifier, TracingConfiguration tracingConfiguration) {
+  public TracingJedis(String host, int port, int timeout, boolean ssl,
+      SSLSocketFactory sslSocketFactory, SSLParameters sslParameters,
+      HostnameVerifier hostnameVerifier, TracingConfiguration tracingConfiguration) {
     super(new Jedis(host, port, timeout, ssl, sslSocketFactory, sslParameters, hostnameVerifier),
         tracingConfiguration);
   }
 
-  public TracingJedis(final String host, final int port, final int connectionTimeout,
-      final int soTimeout, TracingConfiguration tracingConfiguration) {
+  public TracingJedis(String host, int port, int connectionTimeout, int soTimeout,
+      TracingConfiguration tracingConfiguration) {
     super(new Jedis(host, port, connectionTimeout, soTimeout), tracingConfiguration);
   }
 
-  public TracingJedis(final String host, final int port, final int connectionTimeout,
-      final int soTimeout,
-      final boolean ssl, TracingConfiguration tracingConfiguration) {
+  public TracingJedis(String host, int port, int connectionTimeout, int soTimeout,
+      int infiniteSoTimeout, TracingConfiguration tracingConfiguration) {
+    super(new Jedis(host, port, connectionTimeout, soTimeout, infiniteSoTimeout),
+        tracingConfiguration);
+  }
+
+  public TracingJedis(String host, int port, int connectionTimeout, int soTimeout, boolean ssl,
+      TracingConfiguration tracingConfiguration) {
     super(new Jedis(host, port, connectionTimeout, soTimeout, ssl), tracingConfiguration);
   }
 
-  public TracingJedis(final String host, final int port, final int connectionTimeout,
-      final int soTimeout,
-      final boolean ssl, final SSLSocketFactory sslSocketFactory, final SSLParameters sslParameters,
-      final HostnameVerifier hostnameVerifier, TracingConfiguration tracingConfiguration) {
+  public TracingJedis(String host, int port, int connectionTimeout, int soTimeout, boolean ssl,
+      SSLSocketFactory sslSocketFactory, SSLParameters sslParameters,
+      HostnameVerifier hostnameVerifier, TracingConfiguration tracingConfiguration) {
     super(new Jedis(host, port, connectionTimeout, soTimeout, ssl, sslSocketFactory, sslParameters,
         hostnameVerifier), tracingConfiguration);
+  }
+
+  public TracingJedis(String host, int port, int connectionTimeout, int soTimeout,
+      int infiniteSoTimeout, boolean ssl, SSLSocketFactory sslSocketFactory,
+      SSLParameters sslParameters, HostnameVerifier hostnameVerifier,
+      TracingConfiguration tracingConfiguration) {
+    super(new Jedis(host, port, connectionTimeout, soTimeout, infiniteSoTimeout, ssl,
+        sslSocketFactory, sslParameters, hostnameVerifier), tracingConfiguration);
   }
 
   public TracingJedis(JedisShardInfo shardInfo, TracingConfiguration tracingConfiguration) {
@@ -93,33 +116,53 @@ public class TracingJedis extends TracingJedisWrapper {
     super(new Jedis(uri), tracingConfiguration);
   }
 
-  public TracingJedis(URI uri, final SSLSocketFactory sslSocketFactory,
-      final SSLParameters sslParameters,
-      final HostnameVerifier hostnameVerifier, TracingConfiguration tracingConfiguration) {
+  public TracingJedis(URI uri, SSLSocketFactory sslSocketFactory, SSLParameters sslParameters,
+      HostnameVerifier hostnameVerifier, TracingConfiguration tracingConfiguration) {
     super(new Jedis(uri, sslSocketFactory, sslParameters, hostnameVerifier), tracingConfiguration);
   }
 
-  public TracingJedis(final URI uri, final int timeout, TracingConfiguration tracingConfiguration) {
+  public TracingJedis(URI uri, int timeout, TracingConfiguration tracingConfiguration) {
     super(new Jedis(uri, timeout), tracingConfiguration);
   }
 
-  public TracingJedis(final URI uri, final int timeout, final SSLSocketFactory sslSocketFactory,
-      final SSLParameters sslParameters, final HostnameVerifier hostnameVerifier,
+  public TracingJedis(URI uri, int timeout, SSLSocketFactory sslSocketFactory,
+      SSLParameters sslParameters, HostnameVerifier hostnameVerifier,
       TracingConfiguration tracingConfiguration) {
     super(new Jedis(uri, timeout, sslSocketFactory, sslParameters, hostnameVerifier),
         tracingConfiguration);
   }
 
-  public TracingJedis(final URI uri, final int connectionTimeout, final int soTimeout,
+  public TracingJedis(URI uri, int connectionTimeout, int soTimeout,
       TracingConfiguration tracingConfiguration) {
     super(new Jedis(uri, connectionTimeout, soTimeout), tracingConfiguration);
   }
 
-  public TracingJedis(final URI uri, final int connectionTimeout, final int soTimeout,
-      final SSLSocketFactory sslSocketFactory, final SSLParameters sslParameters,
-      final HostnameVerifier hostnameVerifier, TracingConfiguration tracingConfiguration) {
+  public TracingJedis(URI uri, int connectionTimeout, int soTimeout,
+      SSLSocketFactory sslSocketFactory, SSLParameters sslParameters,
+      HostnameVerifier hostnameVerifier, TracingConfiguration tracingConfiguration) {
     super(new Jedis(uri, connectionTimeout, soTimeout, sslSocketFactory, sslParameters,
         hostnameVerifier), tracingConfiguration);
   }
 
+  public TracingJedis(URI uri, int connectionTimeout, int soTimeout, int infiniteSoTimeout,
+      SSLSocketFactory sslSocketFactory, SSLParameters sslParameters,
+      HostnameVerifier hostnameVerifier, TracingConfiguration tracingConfiguration) {
+    super(new Jedis(uri, connectionTimeout, soTimeout, infiniteSoTimeout, sslSocketFactory,
+        sslParameters, hostnameVerifier), tracingConfiguration);
+  }
+
+  public TracingJedis(URI uri, JedisClientConfig config,
+      TracingConfiguration tracingConfiguration) {
+    super(new Jedis(uri, config), tracingConfiguration);
+  }
+
+  public TracingJedis(JedisSocketFactory jedisSocketFactory,
+      TracingConfiguration tracingConfiguration) {
+    super(new Jedis(jedisSocketFactory), tracingConfiguration);
+  }
+
+  public TracingJedis(JedisSocketFactory jedisSocketFactory, JedisClientConfig clientConfig,
+      TracingConfiguration tracingConfiguration) {
+    super(new Jedis(jedisSocketFactory, clientConfig), tracingConfiguration);
+  }
 }

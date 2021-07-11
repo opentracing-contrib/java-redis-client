@@ -15,13 +15,16 @@ package io.opentracing.contrib.redis.jedis3;
 
 import io.opentracing.contrib.redis.common.TracingConfiguration;
 import java.net.URI;
-import java.util.function.Function;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLParameters;
 import javax.net.ssl.SSLSocketFactory;
+import org.apache.commons.pool2.PooledObjectFactory;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
+import redis.clients.jedis.HostAndPort;
 import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisClientConfig;
 import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.JedisSocketFactory;
 import redis.clients.jedis.TracingJedisWrapper;
 
 public class TracingJedisPool extends JedisPool {
@@ -32,236 +35,371 @@ public class TracingJedisPool extends JedisPool {
     this.tracingConfiguration = tracingConfiguration;
   }
 
-  public TracingJedisPool(TracingConfiguration tracingConfiguration,
-      Function<String, String> spanNameProvider) {
-    super();
-    this.tracingConfiguration = tracingConfiguration;
-  }
-
-  public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final String host,
+  public TracingJedisPool(GenericObjectPoolConfig<Jedis> poolConfig, String host,
       TracingConfiguration tracingConfiguration) {
     super(poolConfig, host);
     this.tracingConfiguration = tracingConfiguration;
   }
 
-  public TracingJedisPool(final String host, final int port,
-      TracingConfiguration tracingConfiguration) {
+  public TracingJedisPool(String host, int port, TracingConfiguration tracingConfiguration) {
     super(host, port);
     this.tracingConfiguration = tracingConfiguration;
   }
 
-  public TracingJedisPool(final String host, TracingConfiguration tracingConfiguration) {
-    super(host);
+  public TracingJedisPool(String url, TracingConfiguration tracingConfiguration) {
+    super(url);
     this.tracingConfiguration = tracingConfiguration;
   }
 
-  public TracingJedisPool(final String host, final SSLSocketFactory sslSocketFactory,
-      final SSLParameters sslParameters,
-      final HostnameVerifier hostnameVerifier, TracingConfiguration tracingConfiguration) {
-    super(host, sslSocketFactory, sslParameters, hostnameVerifier);
+  public TracingJedisPool(String url, SSLSocketFactory sslSocketFactory,
+      SSLParameters sslParameters, HostnameVerifier hostnameVerifier,
+      TracingConfiguration tracingConfiguration) {
+    super(url, sslSocketFactory, sslParameters, hostnameVerifier);
     this.tracingConfiguration = tracingConfiguration;
   }
 
-  public TracingJedisPool(final URI uri, TracingConfiguration tracingConfiguration) {
+  public TracingJedisPool(URI uri, TracingConfiguration tracingConfiguration) {
     super(uri);
     this.tracingConfiguration = tracingConfiguration;
   }
 
-  public TracingJedisPool(final URI uri, final SSLSocketFactory sslSocketFactory,
-      final SSLParameters sslParameters,
-      final HostnameVerifier hostnameVerifier, TracingConfiguration tracingConfiguration) {
+  public TracingJedisPool(URI uri, SSLSocketFactory sslSocketFactory, SSLParameters sslParameters,
+      HostnameVerifier hostnameVerifier, TracingConfiguration tracingConfiguration) {
     super(uri, sslSocketFactory, sslParameters, hostnameVerifier);
     this.tracingConfiguration = tracingConfiguration;
   }
 
-  public TracingJedisPool(final URI uri, final int timeout,
-      TracingConfiguration tracingConfiguration) {
+  public TracingJedisPool(URI uri, int timeout, TracingConfiguration tracingConfiguration) {
     super(uri, timeout);
     this.tracingConfiguration = tracingConfiguration;
   }
 
-  public TracingJedisPool(final URI uri, final int timeout, final SSLSocketFactory sslSocketFactory,
-      final SSLParameters sslParameters, final HostnameVerifier hostnameVerifier,
+  public TracingJedisPool(URI uri, int timeout, SSLSocketFactory sslSocketFactory,
+      SSLParameters sslParameters, HostnameVerifier hostnameVerifier,
       TracingConfiguration tracingConfiguration) {
     super(uri, timeout, sslSocketFactory, sslParameters, hostnameVerifier);
     this.tracingConfiguration = tracingConfiguration;
   }
 
-  public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final String host,
-      final int port,
-      final int timeout, final String password,
-      TracingConfiguration tracingConfiguration) {
+  public TracingJedisPool(GenericObjectPoolConfig<Jedis> poolConfig, String host, int port,
+      int timeout, String password, TracingConfiguration tracingConfiguration) {
     super(poolConfig, host, port, timeout, password);
     this.tracingConfiguration = tracingConfiguration;
   }
 
-  public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final String host,
-      final int port,
-      final int timeout, final String password, final boolean ssl,
+  public TracingJedisPool(String host, int port, String user, String password,
       TracingConfiguration tracingConfiguration) {
+    super(host, port, user, password);
+    this.tracingConfiguration = tracingConfiguration;
+  }
+
+  public TracingJedisPool(GenericObjectPoolConfig<Jedis> poolConfig, String host, int port,
+      String user, String password, TracingConfiguration tracingConfiguration) {
+    super(poolConfig, host, port, user, password);
+    this.tracingConfiguration = tracingConfiguration;
+  }
+
+  public TracingJedisPool(GenericObjectPoolConfig<Jedis> poolConfig, String host, int port,
+      int timeout, String user, String password, TracingConfiguration tracingConfiguration) {
+    super(poolConfig, host, port, timeout, user, password);
+    this.tracingConfiguration = tracingConfiguration;
+  }
+
+  public TracingJedisPool(GenericObjectPoolConfig<Jedis> poolConfig, String host, int port,
+      int timeout, String password, boolean ssl, TracingConfiguration tracingConfiguration) {
     super(poolConfig, host, port, timeout, password, ssl);
     this.tracingConfiguration = tracingConfiguration;
   }
 
-  public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final String host,
-      final int port,
-      final int timeout, final String password, final boolean ssl,
-      final SSLSocketFactory sslSocketFactory, final SSLParameters sslParameters,
-      final HostnameVerifier hostnameVerifier, TracingConfiguration tracingConfiguration) {
+  public TracingJedisPool(GenericObjectPoolConfig<Jedis> poolConfig, String host, int port,
+      int timeout, String user, String password, boolean ssl,
+      TracingConfiguration tracingConfiguration) {
+    super(poolConfig, host, port, timeout, user, password, ssl);
+    this.tracingConfiguration = tracingConfiguration;
+  }
+
+  public TracingJedisPool(GenericObjectPoolConfig<Jedis> poolConfig, String host, int port,
+      int timeout, String password, boolean ssl, SSLSocketFactory sslSocketFactory,
+      SSLParameters sslParameters, HostnameVerifier hostnameVerifier,
+      TracingConfiguration tracingConfiguration) {
     super(poolConfig, host, port, timeout, password, ssl, sslSocketFactory, sslParameters,
         hostnameVerifier);
     this.tracingConfiguration = tracingConfiguration;
   }
 
-  public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final String host,
-      final int port, TracingConfiguration tracingConfiguration) {
+  public TracingJedisPool(GenericObjectPoolConfig<Jedis> poolConfig, String host, int port,
+      TracingConfiguration tracingConfiguration) {
     super(poolConfig, host, port);
     this.tracingConfiguration = tracingConfiguration;
   }
 
-  public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final String host,
-      final int port, final boolean ssl,
-      TracingConfiguration tracingConfiguration) {
+  public TracingJedisPool(GenericObjectPoolConfig<Jedis> poolConfig, String host, int port,
+      boolean ssl, TracingConfiguration tracingConfiguration) {
     super(poolConfig, host, port, ssl);
     this.tracingConfiguration = tracingConfiguration;
   }
 
-  public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final String host,
-      final int port, final boolean ssl,
-      final SSLSocketFactory sslSocketFactory, final SSLParameters sslParameters,
-      final HostnameVerifier hostnameVerifier, TracingConfiguration tracingConfiguration) {
+  public TracingJedisPool(GenericObjectPoolConfig<Jedis> poolConfig, String host, int port,
+      boolean ssl, SSLSocketFactory sslSocketFactory, SSLParameters sslParameters,
+      HostnameVerifier hostnameVerifier, TracingConfiguration tracingConfiguration) {
     super(poolConfig, host, port, ssl, sslSocketFactory, sslParameters, hostnameVerifier);
     this.tracingConfiguration = tracingConfiguration;
   }
 
-  public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final String host,
-      final int port, final int timeout,
-      TracingConfiguration tracingConfiguration) {
+  public TracingJedisPool(GenericObjectPoolConfig<Jedis> poolConfig, String host, int port,
+      int timeout, TracingConfiguration tracingConfiguration) {
     super(poolConfig, host, port, timeout);
     this.tracingConfiguration = tracingConfiguration;
   }
 
-  public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final String host,
-      final int port, final int timeout,
-      final boolean ssl, TracingConfiguration tracingConfiguration) {
+  public TracingJedisPool(GenericObjectPoolConfig<Jedis> poolConfig, String host, int port,
+      int timeout, boolean ssl, TracingConfiguration tracingConfiguration) {
     super(poolConfig, host, port, timeout, ssl);
     this.tracingConfiguration = tracingConfiguration;
   }
 
-  public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final String host,
-      final int port, final int timeout,
-      final boolean ssl, final SSLSocketFactory sslSocketFactory, final SSLParameters sslParameters,
-      final HostnameVerifier hostnameVerifier, TracingConfiguration tracingConfiguration) {
+  public TracingJedisPool(GenericObjectPoolConfig<Jedis> poolConfig, String host, int port,
+      int timeout, boolean ssl, SSLSocketFactory sslSocketFactory, SSLParameters sslParameters,
+      HostnameVerifier hostnameVerifier, TracingConfiguration tracingConfiguration) {
     super(poolConfig, host, port, timeout, ssl, sslSocketFactory, sslParameters, hostnameVerifier);
     this.tracingConfiguration = tracingConfiguration;
   }
 
-  public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final String host,
-      final int port, final int timeout,
-      final String password, final int database, TracingConfiguration tracingConfiguration) {
+  public TracingJedisPool(GenericObjectPoolConfig<Jedis> poolConfig, String host, int port,
+      int timeout, String password, int database, TracingConfiguration tracingConfiguration) {
     super(poolConfig, host, port, timeout, password, database);
     this.tracingConfiguration = tracingConfiguration;
   }
 
-  public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final String host,
-      final int port, final int timeout,
-      final String password, final int database, final boolean ssl,
+  public TracingJedisPool(GenericObjectPoolConfig<Jedis> poolConfig, String host, int port,
+      int timeout, String user, String password, int database,
+      TracingConfiguration tracingConfiguration) {
+    super(poolConfig, host, port, timeout, user, password, database);
+    this.tracingConfiguration = tracingConfiguration;
+  }
+
+  public TracingJedisPool(GenericObjectPoolConfig<Jedis> poolConfig, String host, int port,
+      int timeout, String password, int database, boolean ssl,
       TracingConfiguration tracingConfiguration) {
     super(poolConfig, host, port, timeout, password, database, ssl);
     this.tracingConfiguration = tracingConfiguration;
   }
 
-  public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final String host,
-      final int port, final int timeout,
-      final String password, final int database, final boolean ssl,
-      final SSLSocketFactory sslSocketFactory, final SSLParameters sslParameters,
-      final HostnameVerifier hostnameVerifier, TracingConfiguration tracingConfiguration) {
+  public TracingJedisPool(GenericObjectPoolConfig<Jedis> poolConfig, String host, int port,
+      int timeout, String user, String password, int database, boolean ssl,
+      TracingConfiguration tracingConfiguration) {
+    super(poolConfig, host, port, timeout, user, password, database, ssl);
+    this.tracingConfiguration = tracingConfiguration;
+  }
+
+  public TracingJedisPool(GenericObjectPoolConfig<Jedis> poolConfig, String host, int port,
+      int timeout, String password, int database, boolean ssl, SSLSocketFactory sslSocketFactory,
+      SSLParameters sslParameters, HostnameVerifier hostnameVerifier,
+      TracingConfiguration tracingConfiguration) {
     super(poolConfig, host, port, timeout, password, database, ssl, sslSocketFactory, sslParameters,
         hostnameVerifier);
     this.tracingConfiguration = tracingConfiguration;
   }
 
-  public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final String host,
-      final int port, final int timeout,
-      final String password, final int database, final String clientName,
+  public TracingJedisPool(GenericObjectPoolConfig<Jedis> poolConfig, String host, int port,
+      int timeout, String password, int database, String clientName,
       TracingConfiguration tracingConfiguration) {
-    this(poolConfig, host, port, timeout, timeout, password, database, clientName, false,
-        null, null, null, tracingConfiguration);
+    super(poolConfig, host, port, timeout, password, database, clientName);
+    this.tracingConfiguration = tracingConfiguration;
   }
 
-  public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final String host,
-      final int port, final int timeout,
-      final String password, final int database, final String clientName, final boolean ssl,
+  public TracingJedisPool(GenericObjectPoolConfig<Jedis> poolConfig, String host, int port,
+      int timeout, String user, String password, int database, String clientName,
+      TracingConfiguration tracingConfiguration) {
+    super(poolConfig, host, port, timeout, user, password, database, clientName);
+    this.tracingConfiguration = tracingConfiguration;
+  }
+
+  public TracingJedisPool(GenericObjectPoolConfig<Jedis> poolConfig, String host, int port,
+      int timeout, String password, int database, String clientName, boolean ssl,
       TracingConfiguration tracingConfiguration) {
     super(poolConfig, host, port, timeout, password, database, clientName, ssl);
     this.tracingConfiguration = tracingConfiguration;
   }
 
-  public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final String host,
-      final int port, final int timeout,
-      final String password, final int database, final String clientName, final boolean ssl,
-      final SSLSocketFactory sslSocketFactory, final SSLParameters sslParameters,
-      final HostnameVerifier hostnameVerifier, TracingConfiguration tracingConfiguration) {
+  public TracingJedisPool(GenericObjectPoolConfig<Jedis> poolConfig, String host, int port,
+      int timeout, String user, String password, int database, String clientName, boolean ssl,
+      TracingConfiguration tracingConfiguration) {
+    super(poolConfig, host, port, timeout, user, password, database, clientName, ssl);
+    this.tracingConfiguration = tracingConfiguration;
+  }
+
+  public TracingJedisPool(GenericObjectPoolConfig<Jedis> poolConfig, String host, int port,
+      int timeout, String password, int database, String clientName, boolean ssl,
+      SSLSocketFactory sslSocketFactory, SSLParameters sslParameters,
+      HostnameVerifier hostnameVerifier, TracingConfiguration tracingConfiguration) {
     super(poolConfig, host, port, timeout, password, database, clientName, ssl, sslSocketFactory,
         sslParameters, hostnameVerifier);
     this.tracingConfiguration = tracingConfiguration;
   }
 
-  public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final String host,
-      final int port,
-      final int connectionTimeout, final int soTimeout, final String password, final int database,
-      final String clientName, final boolean ssl, final SSLSocketFactory sslSocketFactory,
-      final SSLParameters sslParameters, final HostnameVerifier hostnameVerifier,
-      TracingConfiguration tracingConfiguration) {
-
+  public TracingJedisPool(GenericObjectPoolConfig<Jedis> poolConfig, String host, int port,
+      int connectionTimeout, int soTimeout, String password, int database, String clientName,
+      boolean ssl, SSLSocketFactory sslSocketFactory, SSLParameters sslParameters,
+      HostnameVerifier hostnameVerifier, TracingConfiguration tracingConfiguration) {
     super(poolConfig, host, port, connectionTimeout, soTimeout, password, database, clientName, ssl,
         sslSocketFactory, sslParameters, hostnameVerifier);
     this.tracingConfiguration = tracingConfiguration;
   }
 
-  public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final URI uri,
+  public TracingJedisPool(GenericObjectPoolConfig<Jedis> poolConfig, String host, int port,
+      int connectionTimeout, int soTimeout, int infiniteSoTimeout, String password, int database,
+      String clientName, boolean ssl, SSLSocketFactory sslSocketFactory,
+      SSLParameters sslParameters, HostnameVerifier hostnameVerifier,
+      TracingConfiguration tracingConfiguration) {
+    super(poolConfig, host, port, connectionTimeout, soTimeout, infiniteSoTimeout, password,
+        database, clientName, ssl, sslSocketFactory, sslParameters, hostnameVerifier);
+    this.tracingConfiguration = tracingConfiguration;
+  }
+
+  public TracingJedisPool(GenericObjectPoolConfig<Jedis> poolConfig, String host, int port,
+      int connectionTimeout, int soTimeout, String user, String password, int database,
+      String clientName, boolean ssl, SSLSocketFactory sslSocketFactory,
+      SSLParameters sslParameters, HostnameVerifier hostnameVerifier,
+      TracingConfiguration tracingConfiguration) {
+    super(poolConfig, host, port, connectionTimeout, soTimeout, user, password, database,
+        clientName, ssl, sslSocketFactory, sslParameters, hostnameVerifier);
+    this.tracingConfiguration = tracingConfiguration;
+  }
+
+  public TracingJedisPool(GenericObjectPoolConfig<Jedis> poolConfig, String host, int port,
+      int connectionTimeout, int soTimeout, int infiniteSoTimeout, String user, String password,
+      int database, String clientName, boolean ssl, SSLSocketFactory sslSocketFactory,
+      SSLParameters sslParameters, HostnameVerifier hostnameVerifier,
+      TracingConfiguration tracingConfiguration) {
+    super(poolConfig, host, port, connectionTimeout, soTimeout, infiniteSoTimeout, user, password,
+        database, clientName, ssl, sslSocketFactory, sslParameters, hostnameVerifier);
+    this.tracingConfiguration = tracingConfiguration;
+  }
+
+  public TracingJedisPool(GenericObjectPoolConfig<Jedis> poolConfig, HostAndPort hostAndPort,
+      JedisClientConfig clientConfig, TracingConfiguration tracingConfiguration) {
+    super(poolConfig, hostAndPort, clientConfig);
+    this.tracingConfiguration = tracingConfiguration;
+  }
+
+  public TracingJedisPool(GenericObjectPoolConfig<Jedis> poolConfig,
+      JedisSocketFactory jedisSocketFactory, JedisClientConfig clientConfig,
+      TracingConfiguration tracingConfiguration) {
+    super(poolConfig, jedisSocketFactory, clientConfig);
+    this.tracingConfiguration = tracingConfiguration;
+  }
+
+  public TracingJedisPool(GenericObjectPoolConfig<Jedis> poolConfig,
+      TracingConfiguration tracingConfiguration) {
+    super(poolConfig);
+    this.tracingConfiguration = tracingConfiguration;
+  }
+
+  public TracingJedisPool(String host, int port, boolean ssl,
+      TracingConfiguration tracingConfiguration) {
+    super(host, port, ssl);
+    this.tracingConfiguration = tracingConfiguration;
+  }
+
+  public TracingJedisPool(GenericObjectPoolConfig<Jedis> poolConfig, String host, int port,
+      int connectionTimeout, int soTimeout, String password, int database, String clientName,
+      TracingConfiguration tracingConfiguration) {
+    super(poolConfig, host, port, connectionTimeout, soTimeout, password, database, clientName);
+    this.tracingConfiguration = tracingConfiguration;
+  }
+
+  public TracingJedisPool(GenericObjectPoolConfig<Jedis> poolConfig, String host, int port,
+      int connectionTimeout, int soTimeout, String user, String password, int database,
+      String clientName, TracingConfiguration tracingConfiguration) {
+    super(poolConfig, host, port, connectionTimeout, soTimeout, user, password, database,
+        clientName);
+    this.tracingConfiguration = tracingConfiguration;
+  }
+
+  public TracingJedisPool(GenericObjectPoolConfig<Jedis> poolConfig, String host, int port,
+      int connectionTimeout, int soTimeout, int infiniteSoTimeout, String user, String password,
+      int database, String clientName, TracingConfiguration tracingConfiguration) {
+    super(poolConfig, host, port, connectionTimeout, soTimeout, infiniteSoTimeout, user, password,
+        database, clientName);
+    this.tracingConfiguration = tracingConfiguration;
+  }
+
+  public TracingJedisPool(String host, int port, boolean ssl, SSLSocketFactory sslSocketFactory,
+      SSLParameters sslParameters, HostnameVerifier hostnameVerifier,
+      TracingConfiguration tracingConfiguration) {
+    super(host, port, ssl, sslSocketFactory, sslParameters, hostnameVerifier);
+    this.tracingConfiguration = tracingConfiguration;
+  }
+
+  public TracingJedisPool(GenericObjectPoolConfig<Jedis> poolConfig, String host, int port,
+      int connectionTimeout, int soTimeout, String password, int database, String clientName,
+      boolean ssl, TracingConfiguration tracingConfiguration) {
+    super(poolConfig, host, port, connectionTimeout, soTimeout, password, database, clientName,
+        ssl);
+    this.tracingConfiguration = tracingConfiguration;
+  }
+
+  public TracingJedisPool(GenericObjectPoolConfig<Jedis> poolConfig, String host, int port,
+      int connectionTimeout, int soTimeout, String user, String password, int database,
+      String clientName, boolean ssl, TracingConfiguration tracingConfiguration) {
+    super(poolConfig, host, port, connectionTimeout, soTimeout, user, password, database,
+        clientName, ssl);
+    this.tracingConfiguration = tracingConfiguration;
+  }
+
+  public TracingJedisPool(GenericObjectPoolConfig<Jedis> poolConfig, URI uri,
       TracingConfiguration tracingConfiguration) {
     super(poolConfig, uri);
     this.tracingConfiguration = tracingConfiguration;
   }
 
-  public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final URI uri,
-      final SSLSocketFactory sslSocketFactory,
-      final SSLParameters sslParameters, final HostnameVerifier hostnameVerifier,
-      TracingConfiguration tracingConfiguration) {
+  public TracingJedisPool(GenericObjectPoolConfig<Jedis> poolConfig, URI uri,
+      SSLSocketFactory sslSocketFactory, SSLParameters sslParameters,
+      HostnameVerifier hostnameVerifier, TracingConfiguration tracingConfiguration) {
     super(poolConfig, uri, sslSocketFactory, sslParameters, hostnameVerifier);
     this.tracingConfiguration = tracingConfiguration;
   }
 
-  public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final URI uri,
-      final int timeout,
+  public TracingJedisPool(GenericObjectPoolConfig<Jedis> poolConfig, URI uri, int timeout,
       TracingConfiguration tracingConfiguration) {
     super(poolConfig, uri, timeout);
     this.tracingConfiguration = tracingConfiguration;
   }
 
-  public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final URI uri,
-      final int timeout,
-      final SSLSocketFactory sslSocketFactory, final SSLParameters sslParameters,
-      final HostnameVerifier hostnameVerifier, TracingConfiguration tracingConfiguration) {
+  public TracingJedisPool(GenericObjectPoolConfig<Jedis> poolConfig, URI uri, int timeout,
+      SSLSocketFactory sslSocketFactory, SSLParameters sslParameters,
+      HostnameVerifier hostnameVerifier, TracingConfiguration tracingConfiguration) {
     super(poolConfig, uri, timeout, sslSocketFactory, sslParameters, hostnameVerifier);
     this.tracingConfiguration = tracingConfiguration;
   }
 
-  public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final URI uri,
-      final int connectionTimeout,
-      final int soTimeout, TracingConfiguration tracingConfiguration) {
+  public TracingJedisPool(GenericObjectPoolConfig<Jedis> poolConfig, URI uri, int connectionTimeout,
+      int soTimeout, TracingConfiguration tracingConfiguration) {
     super(poolConfig, uri, connectionTimeout, soTimeout);
     this.tracingConfiguration = tracingConfiguration;
   }
 
-  public TracingJedisPool(final GenericObjectPoolConfig poolConfig, final URI uri,
-      final int connectionTimeout,
-      final int soTimeout, final SSLSocketFactory sslSocketFactory,
-      final SSLParameters sslParameters,
-      final HostnameVerifier hostnameVerifier, TracingConfiguration tracingConfiguration) {
+  public TracingJedisPool(GenericObjectPoolConfig<Jedis> poolConfig, URI uri, int connectionTimeout,
+      int soTimeout, SSLSocketFactory sslSocketFactory, SSLParameters sslParameters,
+      HostnameVerifier hostnameVerifier, TracingConfiguration tracingConfiguration) {
     super(poolConfig, uri, connectionTimeout, soTimeout, sslSocketFactory, sslParameters,
         hostnameVerifier);
+    this.tracingConfiguration = tracingConfiguration;
+  }
+
+  public TracingJedisPool(GenericObjectPoolConfig<Jedis> poolConfig, URI uri, int connectionTimeout,
+      int soTimeout, int infiniteSoTimeout, SSLSocketFactory sslSocketFactory,
+      SSLParameters sslParameters, HostnameVerifier hostnameVerifier,
+      TracingConfiguration tracingConfiguration) {
+    super(poolConfig, uri, connectionTimeout, soTimeout, infiniteSoTimeout, sslSocketFactory,
+        sslParameters, hostnameVerifier);
+    this.tracingConfiguration = tracingConfiguration;
+  }
+
+  public TracingJedisPool(GenericObjectPoolConfig poolConfig, PooledObjectFactory<Jedis> factory,
+      TracingConfiguration tracingConfiguration) {
+    super(poolConfig, factory);
     this.tracingConfiguration = tracingConfiguration;
   }
 
