@@ -15,11 +15,12 @@ package io.opentracing.contrib.redis.jedis3;
 
 import io.opentracing.contrib.redis.common.TracingConfiguration;
 import java.util.Set;
-import java.util.function.Function;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
+import redis.clients.jedis.HostAndPort;
 import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisClientConfig;
+import redis.clients.jedis.JedisFactory;
 import redis.clients.jedis.JedisSentinelPool;
-import redis.clients.jedis.Protocol;
 import redis.clients.jedis.TracingJedisWrapper;
 
 public class TracingJedisSentinelPool extends JedisSentinelPool {
@@ -27,85 +28,166 @@ public class TracingJedisSentinelPool extends JedisSentinelPool {
   private final TracingConfiguration tracingConfiguration;
 
   public TracingJedisSentinelPool(TracingConfiguration tracingConfiguration, String masterName,
-      Set<String> sentinels,
-      final GenericObjectPoolConfig poolConfig) {
-    super(masterName, sentinels, poolConfig, Protocol.DEFAULT_TIMEOUT, null,
-        Protocol.DEFAULT_DATABASE);
+      Set<String> sentinels, GenericObjectPoolConfig<Jedis> poolConfig) {
+    super(masterName, sentinels, poolConfig);
     this.tracingConfiguration = tracingConfiguration;
   }
 
   public TracingJedisSentinelPool(TracingConfiguration tracingConfiguration, String masterName,
       Set<String> sentinels) {
-    super(masterName, sentinels, new GenericObjectPoolConfig(), Protocol.DEFAULT_TIMEOUT, null,
-        Protocol.DEFAULT_DATABASE);
+    super(masterName, sentinels);
     this.tracingConfiguration = tracingConfiguration;
   }
 
   public TracingJedisSentinelPool(TracingConfiguration tracingConfiguration, String masterName,
       Set<String> sentinels, String password) {
-    super(masterName, sentinels, new GenericObjectPoolConfig(), Protocol.DEFAULT_TIMEOUT, password);
+    super(masterName, sentinels, password);
     this.tracingConfiguration = tracingConfiguration;
   }
 
   public TracingJedisSentinelPool(TracingConfiguration tracingConfiguration, String masterName,
-      Set<String> sentinels,
-      final GenericObjectPoolConfig poolConfig, int timeout, final String password) {
-    super(masterName, sentinels, poolConfig, timeout, password, Protocol.DEFAULT_DATABASE);
+      Set<String> sentinels, String password, String sentinelPassword) {
+    super(masterName, sentinels, password, sentinelPassword);
     this.tracingConfiguration = tracingConfiguration;
   }
 
   public TracingJedisSentinelPool(TracingConfiguration tracingConfiguration, String masterName,
-      Set<String> sentinels,
-      final GenericObjectPoolConfig poolConfig, final int timeout) {
-    super(masterName, sentinels, poolConfig, timeout, null, Protocol.DEFAULT_DATABASE);
+      Set<String> sentinels, GenericObjectPoolConfig<Jedis> poolConfig, int timeout,
+      String password) {
+    super(masterName, sentinels, poolConfig, timeout, password);
     this.tracingConfiguration = tracingConfiguration;
   }
 
   public TracingJedisSentinelPool(TracingConfiguration tracingConfiguration, String masterName,
-      Set<String> sentinels,
-      final GenericObjectPoolConfig poolConfig, final String password) {
-    super(masterName, sentinels, poolConfig, Protocol.DEFAULT_TIMEOUT, password);
+      Set<String> sentinels, GenericObjectPoolConfig<Jedis> poolConfig, int timeout) {
+    super(masterName, sentinels, poolConfig, timeout);
     this.tracingConfiguration = tracingConfiguration;
   }
 
   public TracingJedisSentinelPool(TracingConfiguration tracingConfiguration, String masterName,
-      Set<String> sentinels,
-      final GenericObjectPoolConfig poolConfig, int timeout, final String password,
-      final int database) {
-    super(masterName, sentinels, poolConfig, timeout, timeout, password, database);
+      Set<String> sentinels, GenericObjectPoolConfig<Jedis> poolConfig, String password) {
+    super(masterName, sentinels, poolConfig, password);
     this.tracingConfiguration = tracingConfiguration;
   }
 
   public TracingJedisSentinelPool(TracingConfiguration tracingConfiguration, String masterName,
-      Set<String> sentinels,
-      final GenericObjectPoolConfig poolConfig, int timeout, final String password,
-      final int database, Function<String, String> customSpanName) {
-    super(masterName, sentinels, poolConfig, timeout, timeout, password, database);
+      Set<String> sentinels, GenericObjectPoolConfig<Jedis> poolConfig, int timeout,
+      String password, int database) {
+    super(masterName, sentinels, poolConfig, timeout, password, database);
     this.tracingConfiguration = tracingConfiguration;
   }
 
   public TracingJedisSentinelPool(TracingConfiguration tracingConfiguration, String masterName,
-      Set<String> sentinels,
-      final GenericObjectPoolConfig poolConfig, int timeout, final String password,
-      final int database, final String clientName) {
-    super(masterName, sentinels, poolConfig, timeout, timeout, password, database, clientName);
+      Set<String> sentinels, GenericObjectPoolConfig<Jedis> poolConfig, int timeout, String user,
+      String password, int database) {
+    super(masterName, sentinels, poolConfig, timeout, user, password, database);
     this.tracingConfiguration = tracingConfiguration;
   }
 
   public TracingJedisSentinelPool(TracingConfiguration tracingConfiguration, String masterName,
-      Set<String> sentinels,
-      final GenericObjectPoolConfig poolConfig, final int timeout, final int soTimeout,
-      final String password, final int database) {
-    super(masterName, sentinels, poolConfig, timeout, soTimeout, password, database, null);
+      Set<String> sentinels, GenericObjectPoolConfig<Jedis> poolConfig, int timeout,
+      String password, int database, String clientName) {
+    super(masterName, sentinels, poolConfig, timeout, password, database, clientName);
     this.tracingConfiguration = tracingConfiguration;
   }
 
   public TracingJedisSentinelPool(TracingConfiguration tracingConfiguration, String masterName,
-      Set<String> sentinels,
-      final GenericObjectPoolConfig poolConfig, final int connectionTimeout, final int soTimeout,
-      final String password, final int database, final String clientName) {
+      Set<String> sentinels, GenericObjectPoolConfig<Jedis> poolConfig, int timeout, String user,
+      String password, int database, String clientName) {
+    super(masterName, sentinels, poolConfig, timeout, user, password, database, clientName);
+    this.tracingConfiguration = tracingConfiguration;
+  }
+
+  public TracingJedisSentinelPool(TracingConfiguration tracingConfiguration, String masterName,
+      Set<String> sentinels, GenericObjectPoolConfig<Jedis> poolConfig, int connectionTimeout,
+      int soTimeout, String password, int database) {
+    super(masterName, sentinels, poolConfig, connectionTimeout, soTimeout, password, database);
+    this.tracingConfiguration = tracingConfiguration;
+  }
+
+  public TracingJedisSentinelPool(TracingConfiguration tracingConfiguration, String masterName,
+      Set<String> sentinels, GenericObjectPoolConfig<Jedis> poolConfig, int connectionTimeout,
+      int soTimeout, String user, String password, int database) {
+    super(masterName, sentinels, poolConfig, connectionTimeout, soTimeout, user, password,
+        database);
+    this.tracingConfiguration = tracingConfiguration;
+  }
+
+  public TracingJedisSentinelPool(TracingConfiguration tracingConfiguration, String masterName,
+      Set<String> sentinels, GenericObjectPoolConfig<Jedis> poolConfig, int connectionTimeout,
+      int soTimeout, String password, int database, String clientName) {
     super(masterName, sentinels, poolConfig, connectionTimeout, soTimeout, password, database,
         clientName);
+    this.tracingConfiguration = tracingConfiguration;
+  }
+
+  public TracingJedisSentinelPool(TracingConfiguration tracingConfiguration, String masterName,
+      Set<String> sentinels, GenericObjectPoolConfig<Jedis> poolConfig, int connectionTimeout,
+      int soTimeout, String user, String password, int database, String clientName) {
+    super(masterName, sentinels, poolConfig, connectionTimeout, soTimeout, user, password, database,
+        clientName);
+    this.tracingConfiguration = tracingConfiguration;
+  }
+
+  public TracingJedisSentinelPool(TracingConfiguration tracingConfiguration, String masterName,
+      Set<String> sentinels, GenericObjectPoolConfig<Jedis> poolConfig, int connectionTimeout,
+      int soTimeout, int infiniteSoTimeout, String user, String password, int database,
+      String clientName) {
+    super(masterName, sentinels, poolConfig, connectionTimeout, soTimeout, infiniteSoTimeout, user,
+        password, database, clientName);
+    this.tracingConfiguration = tracingConfiguration;
+  }
+
+  public TracingJedisSentinelPool(TracingConfiguration tracingConfiguration, String masterName,
+      Set<String> sentinels, GenericObjectPoolConfig<Jedis> poolConfig, int connectionTimeout,
+      int soTimeout, String password, int database, String clientName,
+      int sentinelConnectionTimeout, int sentinelSoTimeout, String sentinelPassword,
+      String sentinelClientName) {
+    super(masterName, sentinels, poolConfig, connectionTimeout, soTimeout, password, database,
+        clientName, sentinelConnectionTimeout, sentinelSoTimeout, sentinelPassword,
+        sentinelClientName);
+    this.tracingConfiguration = tracingConfiguration;
+  }
+
+  public TracingJedisSentinelPool(TracingConfiguration tracingConfiguration, String masterName,
+      Set<String> sentinels, GenericObjectPoolConfig<Jedis> poolConfig, int connectionTimeout,
+      int soTimeout, String user, String password, int database, String clientName,
+      int sentinelConnectionTimeout, int sentinelSoTimeout, String sentinelUser,
+      String sentinelPassword, String sentinelClientName) {
+    super(masterName, sentinels, poolConfig, connectionTimeout, soTimeout, user, password, database,
+        clientName, sentinelConnectionTimeout, sentinelSoTimeout, sentinelUser, sentinelPassword,
+        sentinelClientName);
+    this.tracingConfiguration = tracingConfiguration;
+  }
+
+  public TracingJedisSentinelPool(TracingConfiguration tracingConfiguration, String masterName,
+      Set<String> sentinels, GenericObjectPoolConfig<Jedis> poolConfig, int connectionTimeout,
+      int soTimeout, int infiniteSoTimeout, String user, String password, int database,
+      String clientName, int sentinelConnectionTimeout, int sentinelSoTimeout, String sentinelUser,
+      String sentinelPassword, String sentinelClientName) {
+    super(masterName, sentinels, poolConfig, connectionTimeout, soTimeout, infiniteSoTimeout, user,
+        password, database, clientName, sentinelConnectionTimeout, sentinelSoTimeout, sentinelUser,
+        sentinelPassword, sentinelClientName);
+    this.tracingConfiguration = tracingConfiguration;
+  }
+
+  public TracingJedisSentinelPool(TracingConfiguration tracingConfiguration, String masterName,
+      Set<String> sentinels, GenericObjectPoolConfig<Jedis> poolConfig, JedisFactory factory) {
+    super(masterName, sentinels, poolConfig, factory);
+    this.tracingConfiguration = tracingConfiguration;
+  }
+
+  public TracingJedisSentinelPool(TracingConfiguration tracingConfiguration, String masterName,
+      Set<HostAndPort> sentinels, GenericObjectPoolConfig<Jedis> poolConfig,
+      JedisClientConfig masteClientConfig, JedisClientConfig sentinelClientConfig) {
+    super(masterName, sentinels, poolConfig, masteClientConfig, sentinelClientConfig);
+    this.tracingConfiguration = tracingConfiguration;
+  }
+
+  public TracingJedisSentinelPool(TracingConfiguration tracingConfiguration, String masterName,
+      Set<HostAndPort> sentinels, GenericObjectPoolConfig<Jedis> poolConfig, JedisFactory factory,
+      JedisClientConfig sentinelClientConfig) {
+    super(masterName, sentinels, poolConfig, factory, sentinelClientConfig);
     this.tracingConfiguration = tracingConfiguration;
   }
 

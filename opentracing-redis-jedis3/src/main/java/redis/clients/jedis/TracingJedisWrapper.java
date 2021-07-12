@@ -68,72 +68,92 @@ public class TracingJedisWrapper extends Jedis {
     this.helper = new TracingHelper(tracingConfiguration);
   }
 
-  public TracingJedisWrapper(final String host, TracingConfiguration tracingConfiguration) {
-    this.wrapped = new Jedis(host);
+  public TracingJedisWrapper(String uri, TracingConfiguration tracingConfiguration) {
+    this.wrapped = new Jedis(uri);
     this.helper = new TracingHelper(tracingConfiguration);
   }
 
-  public TracingJedisWrapper(final String host, final int port,
+  public TracingJedisWrapper(HostAndPort hp, TracingConfiguration tracingConfiguration) {
+    this.wrapped = new Jedis(hp);
+    this.helper = new TracingHelper(tracingConfiguration);
+  }
+
+  public TracingJedisWrapper(HostAndPort hp, JedisClientConfig config,
       TracingConfiguration tracingConfiguration) {
+    this.wrapped = new Jedis(hp, config);
+    this.helper = new TracingHelper(tracingConfiguration);
+  }
+
+  public TracingJedisWrapper(String host, int port, TracingConfiguration tracingConfiguration) {
     this.wrapped = new Jedis(host, port);
     this.helper = new TracingHelper(tracingConfiguration);
   }
 
-  public TracingJedisWrapper(final String host, final int port, final boolean ssl,
+  public TracingJedisWrapper(String host, int port, boolean ssl,
       TracingConfiguration tracingConfiguration) {
     this.wrapped = new Jedis(host, port, ssl);
     this.helper = new TracingHelper(tracingConfiguration);
   }
 
-  public TracingJedisWrapper(final String host, final int port, final boolean ssl,
-      final SSLSocketFactory sslSocketFactory, final SSLParameters sslParameters,
-      final HostnameVerifier hostnameVerifier, TracingConfiguration tracingConfiguration) {
+  public TracingJedisWrapper(String host, int port, boolean ssl, SSLSocketFactory sslSocketFactory,
+      SSLParameters sslParameters, HostnameVerifier hostnameVerifier,
+      TracingConfiguration tracingConfiguration) {
     this.wrapped = new Jedis(host, port, ssl, sslSocketFactory, sslParameters, hostnameVerifier);
     this.helper = new TracingHelper(tracingConfiguration);
   }
 
-  public TracingJedisWrapper(final String host, final int port, final int timeout,
+  public TracingJedisWrapper(String host, int port, int timeout,
       TracingConfiguration tracingConfiguration) {
     this.wrapped = new Jedis(host, port, timeout);
     this.helper = new TracingHelper(tracingConfiguration);
   }
 
-  public TracingJedisWrapper(final String host, final int port, final int timeout,
-      final boolean ssl,
+  public TracingJedisWrapper(String host, int port, int timeout, boolean ssl,
       TracingConfiguration tracingConfiguration) {
     this.wrapped = new Jedis(host, port, timeout, ssl);
     this.helper = new TracingHelper(tracingConfiguration);
   }
 
-  public TracingJedisWrapper(final String host, final int port, final int timeout,
-      final boolean ssl,
-      final SSLSocketFactory sslSocketFactory, final SSLParameters sslParameters,
-      final HostnameVerifier hostnameVerifier, TracingConfiguration tracingConfiguration) {
+  public TracingJedisWrapper(String host, int port, int timeout, boolean ssl,
+      SSLSocketFactory sslSocketFactory, SSLParameters sslParameters,
+      HostnameVerifier hostnameVerifier, TracingConfiguration tracingConfiguration) {
     this.wrapped = new Jedis(host, port, timeout, ssl, sslSocketFactory, sslParameters,
         hostnameVerifier);
     this.helper = new TracingHelper(tracingConfiguration);
   }
 
-  public TracingJedisWrapper(final String host, final int port, final int connectionTimeout,
-      final int soTimeout, TracingConfiguration tracingConfiguration) {
+  public TracingJedisWrapper(String host, int port, int connectionTimeout, int soTimeout,
+      TracingConfiguration tracingConfiguration) {
     this.wrapped = new Jedis(host, port, connectionTimeout, soTimeout);
     this.helper = new TracingHelper(tracingConfiguration);
   }
 
-  public TracingJedisWrapper(final String host, final int port, final int connectionTimeout,
-      final int soTimeout,
-      final boolean ssl, TracingConfiguration tracingConfiguration) {
+  public TracingJedisWrapper(String host, int port, int connectionTimeout, int soTimeout,
+      int infiniteSoTimeout, TracingConfiguration tracingConfiguration) {
+    this.wrapped = new Jedis(host, port, connectionTimeout, soTimeout, infiniteSoTimeout);
+    this.helper = new TracingHelper(tracingConfiguration);
+  }
+
+  public TracingJedisWrapper(String host, int port, int connectionTimeout, int soTimeout,
+      boolean ssl, TracingConfiguration tracingConfiguration) {
     this.wrapped = new Jedis(host, port, connectionTimeout, soTimeout, ssl);
     this.helper = new TracingHelper(tracingConfiguration);
   }
 
-  public TracingJedisWrapper(final String host, final int port, final int connectionTimeout,
-      final int soTimeout,
-      final boolean ssl, final SSLSocketFactory sslSocketFactory, final SSLParameters sslParameters,
-      final HostnameVerifier hostnameVerifier, TracingConfiguration tracingConfiguration) {
-    this.wrapped = new TracingJedisWrapper(
-        new Jedis(host, port, connectionTimeout, soTimeout, ssl, sslSocketFactory, sslParameters,
-            hostnameVerifier), tracingConfiguration);
+  public TracingJedisWrapper(String host, int port, int connectionTimeout, int soTimeout,
+      boolean ssl, SSLSocketFactory sslSocketFactory, SSLParameters sslParameters,
+      HostnameVerifier hostnameVerifier, TracingConfiguration tracingConfiguration) {
+    this.wrapped = new Jedis(host, port, connectionTimeout, soTimeout, ssl, sslSocketFactory,
+        sslParameters, hostnameVerifier);
+    this.helper = new TracingHelper(tracingConfiguration);
+  }
+
+  public TracingJedisWrapper(String host, int port, int connectionTimeout, int soTimeout,
+      int infiniteSoTimeout, boolean ssl, SSLSocketFactory sslSocketFactory,
+      SSLParameters sslParameters, HostnameVerifier hostnameVerifier,
+      TracingConfiguration tracingConfiguration) {
+    this.wrapped = new Jedis(host, port, connectionTimeout, soTimeout, infiniteSoTimeout, ssl,
+        sslSocketFactory, sslParameters, hostnameVerifier);
     this.helper = new TracingHelper(tracingConfiguration);
   }
 
@@ -147,38 +167,62 @@ public class TracingJedisWrapper extends Jedis {
     this.helper = new TracingHelper(tracingConfiguration);
   }
 
-  public TracingJedisWrapper(URI uri, final SSLSocketFactory sslSocketFactory,
-      final SSLParameters sslParameters,
-      final HostnameVerifier hostnameVerifier, TracingConfiguration tracingConfiguration) {
+  public TracingJedisWrapper(URI uri, SSLSocketFactory sslSocketFactory,
+      SSLParameters sslParameters, HostnameVerifier hostnameVerifier,
+      TracingConfiguration tracingConfiguration) {
     this.wrapped = new Jedis(uri, sslSocketFactory, sslParameters, hostnameVerifier);
     this.helper = new TracingHelper(tracingConfiguration);
   }
 
-  public TracingJedisWrapper(final URI uri, final int timeout,
-      TracingConfiguration tracingConfiguration) {
+  public TracingJedisWrapper(URI uri, int timeout, TracingConfiguration tracingConfiguration) {
     this.wrapped = new Jedis(uri, timeout);
     this.helper = new TracingHelper(tracingConfiguration);
   }
 
-  public TracingJedisWrapper(final URI uri, final int timeout,
-      final SSLSocketFactory sslSocketFactory,
-      final SSLParameters sslParameters, final HostnameVerifier hostnameVerifier,
+  public TracingJedisWrapper(URI uri, int timeout, SSLSocketFactory sslSocketFactory,
+      SSLParameters sslParameters, HostnameVerifier hostnameVerifier,
       TracingConfiguration tracingConfiguration) {
     this.wrapped = new Jedis(uri, timeout, sslSocketFactory, sslParameters, hostnameVerifier);
     this.helper = new TracingHelper(tracingConfiguration);
   }
 
-  public TracingJedisWrapper(final URI uri, final int connectionTimeout, final int soTimeout,
+  public TracingJedisWrapper(URI uri, int connectionTimeout, int soTimeout,
       TracingConfiguration tracingConfiguration) {
     this.wrapped = new Jedis(uri, connectionTimeout, soTimeout);
     this.helper = new TracingHelper(tracingConfiguration);
   }
 
-  public TracingJedisWrapper(final URI uri, final int connectionTimeout, final int soTimeout,
-      final SSLSocketFactory sslSocketFactory, final SSLParameters sslParameters,
-      final HostnameVerifier hostnameVerifier, TracingConfiguration tracingConfiguration) {
+  public TracingJedisWrapper(URI uri, int connectionTimeout, int soTimeout,
+      SSLSocketFactory sslSocketFactory, SSLParameters sslParameters,
+      HostnameVerifier hostnameVerifier, TracingConfiguration tracingConfiguration) {
     this.wrapped = new Jedis(uri, connectionTimeout, soTimeout, sslSocketFactory, sslParameters,
         hostnameVerifier);
+    this.helper = new TracingHelper(tracingConfiguration);
+  }
+
+  public TracingJedisWrapper(URI uri, int connectionTimeout, int soTimeout, int infiniteSoTimeout,
+      SSLSocketFactory sslSocketFactory, SSLParameters sslParameters,
+      HostnameVerifier hostnameVerifier, TracingConfiguration tracingConfiguration) {
+    this.wrapped = new Jedis(uri, connectionTimeout, soTimeout, infiniteSoTimeout, sslSocketFactory,
+        sslParameters, hostnameVerifier);
+    this.helper = new TracingHelper(tracingConfiguration);
+  }
+
+  public TracingJedisWrapper(URI uri, JedisClientConfig config,
+      TracingConfiguration tracingConfiguration) {
+    this.wrapped = new Jedis(uri, config);
+    this.helper = new TracingHelper(tracingConfiguration);
+  }
+
+  public TracingJedisWrapper(JedisSocketFactory jedisSocketFactory,
+      TracingConfiguration tracingConfiguration) {
+    this.wrapped = new Jedis(jedisSocketFactory);
+    this.helper = new TracingHelper(tracingConfiguration);
+  }
+
+  public TracingJedisWrapper(JedisSocketFactory jedisSocketFactory, JedisClientConfig clientConfig,
+      TracingConfiguration tracingConfiguration) {
+    this.wrapped = new Jedis(jedisSocketFactory, clientConfig);
     this.helper = new TracingHelper(tracingConfiguration);
   }
 
@@ -305,7 +349,7 @@ public class TracingJedisWrapper extends Jedis {
     span.setTag("start", nullable(start));
     span.setTag("end", nullable(end));
     span.setTag("count", count);
-    return helper.decorate(span, () -> wrapped.xrevrange(key, start, end, count));
+    return helper.decorate(span, () -> wrapped.xrevrange(key, end, start, count));
   }
 
   @Override
@@ -404,8 +448,8 @@ public class TracingJedisWrapper extends Jedis {
     span.setTag("count", count);
     span.setTag("block", block);
     span.setTag("noAck", noAck);
-    return helper
-        .decorate(span, () -> wrapped.xreadGroup(groupname, consumer, count, block, noAck));
+    return helper.decorate(span, () ->
+            wrapped.xreadGroup(groupname, consumer, count, block, noAck, streams));
   }
 
   @Override
