@@ -33,6 +33,7 @@ import static io.opentracing.contrib.redis.common.RedisCommand.CLUSTER_SETSLOT;
 import static io.opentracing.contrib.redis.common.RedisCommand.CLUSTER_SLAVES;
 import static io.opentracing.contrib.redis.common.RedisCommand.CONFIG_GET;
 import static io.opentracing.contrib.redis.common.RedisCommand.CONFIG_RESETSTAT;
+import static io.opentracing.contrib.redis.common.RedisCommand.CONFIG_REWRITE;
 import static io.opentracing.contrib.redis.common.RedisCommand.CONFIG_SET;
 import static io.opentracing.contrib.redis.common.RedisCommand.DBSIZE;
 import static io.opentracing.contrib.redis.common.RedisCommand.EXECUTE;
@@ -55,6 +56,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import org.springframework.data.redis.connection.ClusterInfo;
 import org.springframework.data.redis.connection.RedisClusterConnection;
 import org.springframework.data.redis.connection.RedisClusterNode;
@@ -265,8 +267,18 @@ public class TracingRedisClusterConnection extends TracingRedisConnection
   }
 
   @Override
+  public void rewriteConfig(RedisClusterNode node) {
+    helper.doInScope(CONFIG_REWRITE, () -> connection.rewriteConfig(node));
+  }
+
+  @Override
   public Long time(RedisClusterNode node) {
     return helper.doInScope(TIME, () -> connection.time(node));
+  }
+
+  @Override
+  public Long time(RedisClusterNode node, TimeUnit timeUnit) {
+    return helper.doInScope(TIME, () -> connection.time(node, timeUnit));
   }
 
   @Override
