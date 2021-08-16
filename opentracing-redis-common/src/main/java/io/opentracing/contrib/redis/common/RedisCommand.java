@@ -125,6 +125,7 @@ public final class RedisCommand {
   public static final String LINSERT = "LINSERT";
   public static final String LLEN = "LLEN";
   public static final String LPOP = "LPOP";
+  public static final String LPOS = "LPOS";
   public static final String LPUSH = "LPUSH";
   public static final String LPUSHX = "LPUSHX";
   public static final String LRANGE = "LRANGE";
@@ -247,6 +248,8 @@ public final class RedisCommand {
   public static final String HSCAN = "HSCAN";
   public static final String ZSCAN = "ZSCAN";
   public static final String XADD = "XADD";
+  public static final String XCLAIM = "XCLAIM";
+  public static final String XINFO = "XINFO";
   public static final String XRANGE = "XRANGE";
   public static final String XREVRANGE = "XREVRANGE";
   public static final String XLEN = "XLEN";

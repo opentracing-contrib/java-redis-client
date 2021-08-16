@@ -53,8 +53,11 @@ import org.springframework.data.redis.connection.ValueEncoding;
 import org.springframework.data.redis.connection.stream.ByteRecord;
 import org.springframework.data.redis.connection.stream.Consumer;
 import org.springframework.data.redis.connection.stream.MapRecord;
+import org.springframework.data.redis.connection.stream.PendingMessages;
+import org.springframework.data.redis.connection.stream.PendingMessagesSummary;
 import org.springframework.data.redis.connection.stream.ReadOffset;
 import org.springframework.data.redis.connection.stream.RecordId;
+import org.springframework.data.redis.connection.stream.StreamInfo;
 import org.springframework.data.redis.connection.stream.StreamOffset;
 import org.springframework.data.redis.connection.stream.StreamReadOptions;
 import org.springframework.data.redis.core.Cursor;
@@ -474,6 +477,11 @@ public class TracingRedisConnection implements RedisConnection {
   }
 
   @Override
+  public List<Long> lPos(byte[] key, byte[] element, Integer rank, Integer count) {
+    return helper.doInScope(RedisCommand.LPOS, key, () -> connection.lPos(key, element, rank, count));
+  }
+
+  @Override
   public Long lPush(byte[] key, byte[]... values) {
     return helper.doInScope(RedisCommand.LPUSH, key, () -> connection.lPush(key, values));
   }
@@ -652,8 +660,18 @@ public class TracingRedisConnection implements RedisConnection {
   }
 
   @Override
+  public Boolean zAdd(byte[] key, double score, byte[] value, ZAddArgs args) {
+    return helper.doInScope(RedisCommand.ZADD, key, () -> connection.zAdd(key, score, value, args));
+  }
+
+  @Override
   public Long zAdd(byte[] key, Set<Tuple> tuples) {
     return helper.doInScope(RedisCommand.ZADD, key, () -> connection.zAdd(key, tuples));
+  }
+
+  @Override
+  public Long zAdd(byte[] key, Set<Tuple> tuples, ZAddArgs args) {
+    return helper.doInScope(RedisCommand.ZADD, key, () -> connection.zAdd(key, tuples, args));
   }
 
   @Override
@@ -821,6 +839,11 @@ public class TracingRedisConnection implements RedisConnection {
   }
 
   @Override
+  public Long zLexCount(byte[] key, Range range) {
+    return helper.doInScope(RedisCommand.ZLEXCOUNT, key, () -> connection.zLexCount(key, range));
+  }
+
+  @Override
   public Long zCard(byte[] key) {
     return helper.doInScope(RedisCommand.ZCARD, key, () -> connection.zCard(key));
   }
@@ -834,6 +857,12 @@ public class TracingRedisConnection implements RedisConnection {
   public Long zRemRange(byte[] key, long start, long end) {
     return helper
         .doInScope(RedisCommand.ZREMRANGE, key, () -> connection.zRemRange(key, start, end));
+  }
+
+  @Override
+  public Long zRemRangeByLex(byte[] key, Range range) {
+    return helper
+            .doInScope(RedisCommand.ZREMRANGEBYLEX, key, () -> connection.zRemRangeByLex(key, range));
   }
 
   @Override
@@ -903,6 +932,12 @@ public class TracingRedisConnection implements RedisConnection {
   public Set<byte[]> zRangeByLex(byte[] key, Range range, Limit limit) {
     return helper
         .doInScope(RedisCommand.ZRANGEBYLEX, key, () -> connection.zRangeByLex(key, range, limit));
+  }
+
+  @Override
+  public Set<byte[]> zRevRangeByLex(byte[] key, Range range, Limit limit) {
+    return helper.doInScope(RedisCommand.ZREVRANGEBYLEX, key,
+            () -> connection.zRevRangeByLex(key, range, limit));
   }
 
   @Override
@@ -1111,8 +1146,18 @@ public class TracingRedisConnection implements RedisConnection {
   }
 
   @Override
+  public void rewriteConfig() {
+    helper.doInScope(RedisCommand.CONFIG_REWRITE, () -> connection.rewriteConfig());
+  }
+
+  @Override
   public Long time() {
     return helper.doInScope(RedisCommand.TIME, () -> connection.time());
+  }
+
+  @Override
+  public Long time(TimeUnit timeUnit) {
+    return helper.doInScope(RedisCommand.TIME, () -> connection.time(timeUnit));
   }
 
   @Override
@@ -1306,6 +1351,23 @@ public class TracingRedisConnection implements RedisConnection {
   }
 
   @Override
+  public RecordId xAdd(MapRecord<byte[], byte[], byte[]> record, XAddOptions xAddOptions) {
+    return helper.doInScope(RedisCommand.XADD, () -> connection.xAdd(record, xAddOptions));
+  }
+
+  @Override
+  public List<RecordId> xClaimJustId(byte[] key, String group, String newOwner, XClaimOptions options) {
+    return helper.doInScope(RedisCommand.XCLAIM, key,
+            () -> connection.xClaimJustId(key, group, newOwner, options));
+  }
+
+  @Override
+  public List<ByteRecord> xClaim(byte[] key, String group, String newOwner, XClaimOptions options) {
+    return helper.doInScope(RedisCommand.XCLAIM, key,
+            () -> connection.xClaim(key, group, newOwner, options));
+  }
+
+  @Override
   public Long xDel(byte[] key, RecordId... recordIds) {
     return helper.doInScope(RedisCommand.XDEL, () -> connection.xDel(key, recordIds));
   }
@@ -1314,6 +1376,12 @@ public class TracingRedisConnection implements RedisConnection {
   public String xGroupCreate(byte[] key, String groupName, ReadOffset readOffset) {
     return helper.doInScope(RedisCommand.XGROUPCREATE,
         () -> connection.xGroupCreate(key, groupName, readOffset));
+  }
+
+  @Override
+  public String xGroupCreate(byte[] key, String groupName, ReadOffset readOffset, boolean mkStream) {
+    return helper.doInScope(RedisCommand.XGROUPCREATE,
+            () -> connection.xGroupCreate(key, groupName, readOffset));
   }
 
   @Override
@@ -1329,8 +1397,33 @@ public class TracingRedisConnection implements RedisConnection {
   }
 
   @Override
+  public StreamInfo.XInfoStream xInfo(byte[] key) {
+    return helper.doInScope(RedisCommand.XINFO, () -> connection.xInfo(key));
+  }
+
+  @Override
+  public StreamInfo.XInfoGroups xInfoGroups(byte[] key) {
+    return helper.doInScope(RedisCommand.XINFO, () -> connection.xInfoGroups(key));
+  }
+
+  @Override
+  public StreamInfo.XInfoConsumers xInfoConsumers(byte[] key, String groupName) {
+    return helper.doInScope(RedisCommand.XINFO, () -> connection.xInfoConsumers(key, groupName));
+  }
+
+  @Override
   public Long xLen(byte[] key) {
     return helper.doInScope(RedisCommand.XLEN, () -> connection.xLen(key));
+  }
+
+  @Override
+  public PendingMessagesSummary xPending(byte[] key, String groupName) {
+    return helper.doInScope(RedisCommand.XPENDING, () -> connection.xPending(key, groupName));
+  }
+
+  @Override
+  public PendingMessages xPending(byte[] key, String groupName, XPendingOptions options) {
+    return helper.doInScope(RedisCommand.XPENDING, () -> connection.xPending(key, groupName, options));
   }
 
   @Override
@@ -1361,4 +1454,10 @@ public class TracingRedisConnection implements RedisConnection {
   public Long xTrim(byte[] key, long count) {
     return helper.doInScope(RedisCommand.XTRIM, () -> connection.xTrim(key, count));
   }
+
+  @Override
+  public Long xTrim(byte[] key, long count, boolean approximateTrimming) {
+    return helper.doInScope(RedisCommand.XTRIM, () -> connection.xTrim(key, count, approximateTrimming));
+  }
+
 }

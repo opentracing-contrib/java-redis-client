@@ -19,6 +19,7 @@ import static org.mockito.Mockito.verify;
 
 import io.opentracing.contrib.redis.common.RedisCommand;
 import io.opentracing.mock.MockTracer;
+import java.util.concurrent.TimeUnit;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -304,9 +305,23 @@ public class TracingRedisClusterConnectionTest extends TracingRedisConnectionTes
   }
 
   @Test
+  public void invokingRewriteConfigStats() {
+    commandCreatesNewSpan(RedisCommand.CONFIG_REWRITE,
+        () -> getConnection().rewriteConfig(mockRedisClusterNode));
+    verify(mockRedisConnection()).rewriteConfig(mockRedisClusterNode);
+  }
+
+  @Test
   public void invokingTime() {
     commandCreatesNewSpan(RedisCommand.TIME, () -> getConnection().time(mockRedisClusterNode));
     verify(mockRedisConnection()).time(mockRedisClusterNode);
+  }
+
+  @Test
+  public void invokingTimeWithTimeUnit() {
+    TimeUnit timeUnit = TimeUnit.SECONDS;
+    commandCreatesNewSpan(RedisCommand.TIME, () -> getConnection().time(mockRedisClusterNode, timeUnit));
+    verify(mockRedisConnection()).time(mockRedisClusterNode, timeUnit);
   }
 
   @Test
