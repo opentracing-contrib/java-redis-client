@@ -18,7 +18,7 @@ import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import io.opentracing.Scope;
@@ -31,6 +31,8 @@ import io.opentracing.tag.Tags;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
+
+import org.hamcrest.Matchers;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -182,7 +184,10 @@ public class TracingRedissonTest {
         System.out.println(
             "active span: " + tracer.activeSpan() + " in thread: " + Thread.currentThread()
                 .getName());
-        assertSame(activeSpan, tracer.activeSpan());
+        final MockSpan actualSpan = (MockSpan)tracer.activeSpan();
+        assertEquals("containsKeyAsync", actualSpan.operationName());
+        assertEquals(Long.parseLong(activeSpan.context().toSpanId()), actualSpan.parentId());
+
         return s;
       }).get(15, TimeUnit.SECONDS));
 
@@ -218,8 +223,7 @@ public class TracingRedissonTest {
 
     List<MockSpan> spans = tracer.finishedSpans();
     assertEquals(2, spans.size());
-    MockSpan redisSpan = spans.get(0);
-    assertEquals("Redis.getAsync", redisSpan.operationName());
+    assertThat(spans, Matchers.hasItem(Matchers.hasToString(Matchers.containsString("Redis.getAsync"))));
 
     assertNull(tracer.activeSpan());
     customClient.shutdown();
