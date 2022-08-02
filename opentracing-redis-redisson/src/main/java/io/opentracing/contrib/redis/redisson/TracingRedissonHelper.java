@@ -32,8 +32,7 @@ class TracingRedissonHelper extends TracingHelper {
   }
 
 
-  private <T> RFuture<T> continueScopeSpan(RFuture<T> redisFuture) {
-    Span span = tracer.activeSpan();
+  private <T> RFuture<T> continueScopeSpan(RFuture<T> redisFuture, Span span) {
     CompletableRFuture<T> customRedisFuture = new CompletableRFuture<>(redisFuture);
     redisFuture.whenComplete((v, throwable) -> {
       try (Scope ignored = tracer.scopeManager().activate(span)) {
@@ -68,6 +67,6 @@ class TracingRedissonHelper extends TracingHelper {
       throw e;
     }
 
-    return continueScopeSpan(setCompleteAction(future, span));
+    return continueScopeSpan(setCompleteAction(future, span), span);
   }
 }
